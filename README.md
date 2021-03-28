@@ -56,6 +56,7 @@
 
 These additional references should also help you:
 
+* [Spring API 실습](https://kyhslam.tistory.com/entry/Spring-JPA-API-%EC%8B%A4%EC%8A%B5-01-%EC%A3%BC%EB%AC%B8%EB%AA%A9%EB%A1%9D-%EA%B2%80%EC%83%89?category=892835)
 * [RestController, RequestMapping](https://authentication.tistory.com/16?category=782988)
 * [JPA 연관관계 매핑](https://velog.io/@ljinsk3/JPA-%EB%8B%A4%EC%96%91%ED%95%9C-%EC%97%B0%EA%B4%80%EA%B4%80%EA%B3%84-%EB%A7%A4%ED%95%91)
 * [JPA 기본 어노테이션](https://www.icatpark.com/entry/JPA-%EA%B8%B0%EB%B3%B8-Annotation-%EC%A0%95%EB%A6%AC)
