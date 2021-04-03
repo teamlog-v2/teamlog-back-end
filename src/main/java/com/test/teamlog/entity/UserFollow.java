@@ -20,5 +20,5 @@ public class UserFollow {
 
     @ManyToOne
     @JoinColumn(name = "to_user_id", nullable = false)
-    private Post toUser;
+    private User toUser;
 }
