@@ -1,4 +1,4 @@
-package com.test.teamlog.payload.common;
+package com.test.teamlog.payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

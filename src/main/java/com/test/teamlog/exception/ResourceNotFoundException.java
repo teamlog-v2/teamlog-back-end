@@ -1,6 +1,6 @@
 package com.test.teamlog.exception;
 
-import com.test.teamlog.payload.common.ApiResponse;
+import com.test.teamlog.payload.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
