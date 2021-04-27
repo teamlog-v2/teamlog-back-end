@@ -1,8 +1,7 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.payload.common.ApiResponse;
-import com.test.teamlog.payload.user.UserRequest;
-import com.test.teamlog.payload.user.UserResponse;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,30 +12,30 @@ import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/teamlog-api/users")
+@RequestMapping("/api/users")
 public class UserController {
     private final UserService userService;
 
     // Read
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable("id") String id) {
-        UserResponse userResponse = userService.getUser(id);
+    public ResponseEntity<UserDTO.UserResponse> getUserById(@PathVariable("id") String id) {
+        UserDTO.UserResponse userResponse = userService.getUser(id);
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
     // Create
     @PostMapping("")
-    public ResponseEntity<UserResponse> signUp(@Valid @RequestBody UserRequest userRequest) {
+    public ResponseEntity<UserDTO.UserResponse> signUp(@Valid @RequestBody UserDTO.UserRequest userRequest) {
         userService.signUp(userRequest);
-        UserResponse userResponse = userService.getUser(userRequest.getId());
+        UserDTO.UserResponse userResponse = userService.getUser(userRequest.getId());
         return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
     }
 
     //Update
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable("id") String id, @Valid @RequestBody UserRequest userRequest) {
+    public ResponseEntity<UserDTO.UserResponse> updateUser(@PathVariable("id") String id, @Valid @RequestBody UserDTO.UserRequest userRequest) {
         userService.updateUser(id, userRequest);
-        UserResponse userResponse = userService.getUser(id);
+        UserDTO.UserResponse userResponse = userService.getUser(id);
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 

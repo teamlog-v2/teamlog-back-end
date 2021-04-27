@@ -2,9 +2,8 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.entity.User;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.common.ApiResponse;
-import com.test.teamlog.payload.user.UserRequest;
-import com.test.teamlog.payload.user.UserResponse;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,10 +16,10 @@ public class UserService {
     private final UserRepository userRepository;
 
     //회원 조회
-    public UserResponse getUser(String id){
+    public UserDTO.UserResponse getUser(String id){
         User user = userRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("USER","id",id));
-        UserResponse userResponse = UserResponse.builder()
+        UserDTO.UserResponse userResponse = UserDTO.UserResponse.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .introduction(user.getIntroduction())
@@ -31,15 +30,15 @@ public class UserService {
 
     // 회원 가입
     @Transactional
-    public void signUp(UserRequest userRequest){
+    public void signUp(UserDTO.UserRequest userRequest){
         validateDuplicateuId(userRequest.getId());
         User user = User.builder()
                 .id(userRequest.getId())
                 .password(userRequest.getPassword())
                 .name(userRequest.getName())
-                .introduction(userRequest.getIntroduction())
-                .profileImgPath(userRequest.getProfileImgPath())
-                .build();
+                    .introduction(userRequest.getIntroduction())
+                    .profileImgPath(userRequest.getProfileImgPath())
+                    .build();
         userRepository.save(user);
     }
 
@@ -51,9 +50,8 @@ public class UserService {
         }
     }
 
-    //회원 수정 dto를 더 만들어야할까...
     @Transactional
-    public void updateUser(String id, UserRequest userRequest) {
+    public void updateUser(String id, UserDTO.UserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("USER","ID",id));
         user.setName(userRequest.getName());
