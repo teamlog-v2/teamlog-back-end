@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "team_join",
         uniqueConstraints =@UniqueConstraint(columnNames = {"team_id", "user_id"}))
-@EntityListeners(AuditingEntityListener.class)
-public class TeamJoin {
+public class TeamJoin extends BaseTimeEntity {
     @Id @GeneratedValue
     private Long id;
 
@@ -30,8 +29,4 @@ public class TeamJoin {
 
     @Column(name = "is_invited",nullable = false)
     private boolean isInvited;
-
-    @CreatedDate
-    @Column(name = "create_time",nullable = false)
-    private LocalDateTime createTime;
 }

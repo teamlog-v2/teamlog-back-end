@@ -10,8 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter @Setter
 @Entity
-@EntityListeners(AuditingEntityListener.class)
-public class Team {
+public class Team extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -20,10 +19,6 @@ public class Team {
 
     @Column(nullable = false)
     private String introduction;
-
-    @CreatedDate
-    @Column(name = "create_time",nullable = false)
-    private LocalDateTime createTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "access_modifier",nullable = false)

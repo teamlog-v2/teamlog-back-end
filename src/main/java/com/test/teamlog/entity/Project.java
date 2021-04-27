@@ -1,17 +1,18 @@
 package com.test.teamlog.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Getter @Setter
 @Entity
-@EntityListeners(AuditingEntityListener.class)
-public class Project {
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Project extends BaseTimeEntity{
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -20,10 +21,6 @@ public class Project {
 
     @Column(nullable = false)
     private String introduction;
-
-    @CreatedDate
-    @Column(name = "create_time",nullable = false)
-    private LocalDateTime createTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "access_modifier",nullable = false)
@@ -34,6 +31,6 @@ public class Project {
     private User master;
 
     @ManyToOne
-    @JoinColumn(name = "team_id", nullable = false) // master_user_id 때문에 nullable 문제 생기는 거 아니가?
+    @JoinColumn(name = "team_id") // master_user_id 때문에 nullable 문제 생기는 거 아니가?
     private Team team;
 }

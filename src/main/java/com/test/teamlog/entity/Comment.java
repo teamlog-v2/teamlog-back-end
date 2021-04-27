@@ -11,8 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@EntityListeners(AuditingEntityListener.class)
-public class Comment {
+public class Comment extends BaseTimeEntity {
     @Id
     @GeneratedValue
     private Long id;
@@ -31,8 +30,4 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "writer_user_id", nullable = false)
     private User writer;
-
-    @CreatedDate
-    @Column(name = "write_time", nullable = false)
-    private LocalDateTime writeTime;
 }
