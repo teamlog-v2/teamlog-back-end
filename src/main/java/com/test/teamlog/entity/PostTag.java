@@ -20,4 +20,12 @@ public class PostTag {
     @ManyToOne
     @JoinColumn(name = "post_id",nullable = false)
     private Post post;
+
+    public void setPost(Post post) {
+        if(this.post != null) {
+            this.post.getHashtags().remove(this);
+        }
+        this.post = post;
+        post.getHashtags().add(this);
+    }
 }

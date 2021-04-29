@@ -20,4 +20,12 @@ public class PostLiker {
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
+
+    public void setPost(Post post) {
+        if(this.post != null) {
+            this.post.getPostLikers().remove(this);
+        }
+        this.post = post;
+        post.getPostLikers().add(this);
+    }
 }
