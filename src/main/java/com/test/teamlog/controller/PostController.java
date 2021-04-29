@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,27 +27,20 @@ public class PostController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-//    @ApiOperation(value = "유저 프로젝트 리스트 조회")
-//    @GetMapping("/{userId}")
-//    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByUser(@PathVariable("userId") String userId) {
-//        List<ProjectDTO.ProjectListResponse> response = projectService.getProjectsByUser(userId);
-//        return new ResponseEntity<>(response, HttpStatus.OK);
-//    }
-
     @ApiOperation(value = "포스트 생성")
     @PostMapping
-    public ResponseEntity<ApiResponse> createProject(@RequestBody PostDTO.PostRequest request) {
-        ApiResponse apiResponse = postService.createPost(request);
+    public ResponseEntity<ApiResponse> createProject(@RequestPart(value="key", required=true) PostDTO.PostRequest request,
+                                                     @RequestPart(value="files", required=false) MultipartFile[] files) {
+        ApiResponse apiResponse = postService.createPost(request,files);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "포스트 수정")
     @PutMapping("/{id}")
-    public ResponseEntity<PostDTO.PostResponse> updateProject(@PathVariable("id") long id,
+    public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
                                                               @RequestBody PostDTO.PostRequest request) {
-        postService.updatePost(id, request);
-        PostDTO.PostResponse projectResponse = postService.getPost(id);
-        return new ResponseEntity<>(projectResponse, HttpStatus.OK);
+        ApiResponse apiResponse = postService.updatePost(id, request);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @ApiOperation(value = "포스트 삭제")
