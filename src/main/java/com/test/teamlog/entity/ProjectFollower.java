@@ -21,4 +21,12 @@ public class ProjectFollower {
     @ManyToOne
     @JoinColumn(name = "project_id",nullable = false)
     private Project project;
+
+    public void setProject(Project project) {
+        if(this.project != null) {
+            this.project.getProjectFollowers().remove(this);
+        }
+        this.project = project;
+        project.getProjectFollowers().add(this);
+    }
 }

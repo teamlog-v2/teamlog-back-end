@@ -1,15 +1,18 @@
 package com.test.teamlog.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "project_member")
 public class ProjectMember {
     @Id
@@ -27,4 +30,12 @@ public class ProjectMember {
     @CreatedDate
     @Column(name = "join_time",nullable = false)
     private LocalDateTime joinTime;
+
+    public void setProject(Project project) {
+        if(this.project != null) {
+            this.project.getProjectMembers().remove(this);
+        }
+        this.project = project;
+        project.getProjectMembers().add(this);
+    }
 }

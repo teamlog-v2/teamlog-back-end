@@ -6,6 +6,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -13,13 +15,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Project extends BaseTimeEntity{
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id @GeneratedValue
     private Long id;
 
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String introduction;
 
     @Enumerated(EnumType.STRING)
@@ -27,10 +28,16 @@ public class Project extends BaseTimeEntity{
     private AccessModifier accessModifier;
 
     @ManyToOne
-    @JoinColumn(name = "master_user_id", nullable = false) // master_user_id 때문에 nullable 문제 생기는 거 아니가?
+    @JoinColumn(name = "master_user_id", nullable = false)
     private User master;
 
     @ManyToOne
-    @JoinColumn(name = "team_id") // master_user_id 때문에 nullable 문제 생기는 거 아니가?
+    @JoinColumn(name = "team_id")
     private Team team;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProjectMember> projectMembers = new ArrayList<ProjectMember>();
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProjectFollower> projectFollowers = new ArrayList<ProjectFollower>();
 }
