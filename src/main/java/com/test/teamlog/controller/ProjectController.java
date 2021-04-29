@@ -1,9 +1,7 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.entity.Project;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
-import com.test.teamlog.payload.TaskDTO;
 import com.test.teamlog.service.ProjectService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -35,18 +33,16 @@ public class ProjectController {
 
     @ApiOperation(value = "프로젝트 생성")
     @PostMapping
-    public ResponseEntity<ProjectDTO.ProjectResponse> createProject(@RequestBody ProjectDTO.ProjectRequest request) {
-        Long projectId = projectService.createProject(request);
-        ProjectDTO.ProjectResponse response = projectService.getProject(projectId);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse> createProject(@RequestBody ProjectDTO.ProjectRequest request) {
+        ApiResponse apiResponse = projectService.createProject(request);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "프로젝트 수정")
     @PutMapping("/{id}")
-    public ResponseEntity<ProjectDTO.ProjectResponse> updateProject(@PathVariable("id") long id, @RequestBody ProjectDTO.ProjectRequest request) {
-        projectService.updateProject(id, request);
-        ProjectDTO.ProjectResponse projectResponse = projectService.getProject(id);
-        return new ResponseEntity<>(projectResponse, HttpStatus.OK);
+    public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id, @RequestBody ProjectDTO.ProjectRequest request) {
+        ApiResponse apiResponse = projectService.updateProject(id, request);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @ApiOperation(value = "프로젝트 삭제")
