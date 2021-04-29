@@ -1,14 +1,8 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.entity.Post;
-import com.test.teamlog.entity.PostTag;
-import com.test.teamlog.entity.Project;
-import com.test.teamlog.entity.User;
+import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.PostDTO;
-import com.test.teamlog.payload.ProjectDTO;
-import com.test.teamlog.payload.UserDTO;
+import com.test.teamlog.payload.*;
 import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,10 +35,24 @@ public class PostService {
                 hashtags.add(tag.getName());
         }
 
+        List<FileDTO.FileInfo> media = new ArrayList<>();
+        if(post.getMedia() != null) {
+            for(PostMedia temp : post.getMedia()){
+                FileDTO.FileInfo fileInfo = FileDTO.FileInfo.builder()
+                        .contentType(temp.getContentType())
+                        .fileDownloadUri(temp.getFileDownloadUri())
+                        .fileName(temp.getFileName())
+                        .size(temp.getSize())
+                        .build();
+                media.add(fileInfo);
+            }
+        }
+
         PostDTO.PostResponse postResponse = PostDTO.PostResponse.builder()
                 .id(post.getId())
                 .contents(post.getContents())
                 .hashtags(hashtags)
+                .media(media)
                 .likeCount(post.getPostLikers().size())
                 .commentCount(post.getComments().size())
                 .writeTime(post.getCreateTime())

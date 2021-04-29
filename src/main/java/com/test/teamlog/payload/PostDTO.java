@@ -8,6 +8,7 @@ import org.springframework.data.geo.Point;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PostDTO {
@@ -27,9 +28,10 @@ public class PostDTO {
     public static class PostResponse {
         private Long id;
         private String contents;
-        private List<String> hashtags;
         private int likeCount;
         private int commentCount;
         private LocalDateTime writeTime;
+        private List<String> hashtags;
+        private List<FileDTO.FileInfo> media = new ArrayList<FileDTO.FileInfo>();
     }
 }
