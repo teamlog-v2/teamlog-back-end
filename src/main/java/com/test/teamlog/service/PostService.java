@@ -69,7 +69,7 @@ public class PostService {
 
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", request.getProjectId()));
-        System.out.println(files[0].getOriginalFilename());
+
         Post post = Post.builder()
                 .contents(request.getContents())
                 .accessModifier(request.getAccessModifier())

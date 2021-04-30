@@ -40,8 +40,6 @@ public class TaskController {
         TaskDTO.TaskResponse taskResponse = taskService.getTask(taskId);
         return new ResponseEntity<>(taskResponse, HttpStatus.CREATED);
     }
-//
-    //Update
 //    @PutMapping("/tasks/{id}")
 //    public ResponseEntity<TaskDTO.TaskResponse> updateTaskStatus(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO.TaskRequest request) {
 //        taskService.updateTaskStatus(id, request);
@@ -51,7 +49,7 @@ public class TaskController {
 
     //Update
     @PutMapping("/tasks/{id}")
-    public ResponseEntity<TaskDTO.TaskResponse> updateTaskStatus(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO.TaskRequest request) {
+    public ResponseEntity<TaskDTO.TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO.TaskRequest request) {
         taskService.updateTask(id, request);
         TaskDTO.TaskResponse taskResponse = taskService.getTask(id);
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
