@@ -20,13 +20,7 @@ public class UserService {
     public UserDTO.UserResponse getUser(String id){
         User user = userRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("USER","id",id));
-        UserDTO.UserResponse userResponse = UserDTO.UserResponse.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .introduction(user.getIntroduction())
-                .profileImgPath(user.getProfileImgPath())
-                .build();
-        return userResponse;
+        return new UserDTO.UserResponse(user);
     }
 
     // 회원 가입

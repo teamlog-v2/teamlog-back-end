@@ -21,12 +21,21 @@ public class UserDTO {
     }
 
     @Data
-    @Builder
     public static class UserResponse {
         private String id;
         private String name;
         private String introduction;
         private String profileImgPath;
+        public UserResponse(User user) {
+            this.id = user.getId();
+            this.name = user.getName();
+            this.introduction = user.getIntroduction();
+            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/api/downloadFile/")
+                    .path(user.getProfileImgPath())
+                    .toUriString();
+            this.profileImgPath = imgUri;
+        }
     }
 
     @Data
