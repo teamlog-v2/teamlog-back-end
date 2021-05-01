@@ -30,8 +30,9 @@ public class PostController {
     @ApiOperation(value = "포스트 생성")
     @PostMapping
     public ResponseEntity<ApiResponse> createProject(@RequestPart(value="key", required=true) PostDTO.PostRequest request,
+                                                     @RequestPart(value="media", required=false) MultipartFile[] media,
                                                      @RequestPart(value="files", required=false) MultipartFile[] files) {
-        ApiResponse apiResponse = postService.createPost(request,files);
+        ApiResponse apiResponse = postService.createPost(request,media,files);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 

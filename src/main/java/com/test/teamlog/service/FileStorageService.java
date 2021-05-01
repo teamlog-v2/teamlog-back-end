@@ -36,14 +36,12 @@ import java.util.UUID;
 public class FileStorageService {
     private final PostMediaRepository postMediaRepository;
     private final Path fileStorageLocation;
-    private final PostRepository postRepository;
 
     @Autowired
-    public FileStorageService(PostMediaRepository postMediaRepository, FileConfig fileStorageProperties, PostRepository postRepository) {
+    public FileStorageService(PostMediaRepository postMediaRepository, FileConfig fileStorageProperties) {
         this.postMediaRepository = postMediaRepository;
         this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir())
                 .toAbsolutePath().normalize();
-        this.postRepository = postRepository;
         try {
             Files.createDirectories(this.fileStorageLocation);
         } catch (Exception ex) {
@@ -52,7 +50,7 @@ public class FileStorageService {
     }
 
     @Transactional
-    public Boolean storeFile(MultipartFile file, Post post) {
+    public Boolean storeFile(MultipartFile file, Post post, Boolean isMedia) {
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
         UUID uuid = UUID.randomUUID();
         String storedFileName = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
@@ -70,18 +68,12 @@ public class FileStorageService {
             throw new FileStorageException("Could not store file " + originalFileName + ". Please try again!", ex);
         }
 
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/downloadFile/")
-                .path(storedFileName)
-                .toUriString();
-
         PostMedia newPostMedia = PostMedia.builder()
                 .fileName(originalFileName) // Normalize file name
                 .storedFileName(storedFileName)
-                .size(file.getSize())
-                .fileDownloadUri(fileDownloadUri)
                 .contentType(file.getContentType())
                 .post(post)
+                .isMedia(isMedia)
                 .build();
 
         postMediaRepository.save(newPostMedia);

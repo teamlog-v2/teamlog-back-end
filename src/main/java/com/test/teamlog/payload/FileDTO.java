@@ -12,7 +12,6 @@ public class FileDTO {
         private String contentType;
         private String fileName;
         private String fileDownloadUri;
-        private Long size;
     }
 
     @Data

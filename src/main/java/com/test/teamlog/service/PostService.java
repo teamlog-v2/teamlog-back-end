@@ -5,9 +5,13 @@ import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.*;
 import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,26 +29,33 @@ public class PostService {
     private final FileStorageService fileStorageService;
 
     // 단일 포스트 조회
-    public PostDTO.PostResponse getPost(Long id){
+    public PostDTO.PostResponse getPost(Long id) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post","id",id));
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
 
         List<String> hashtags = new ArrayList<>();
-        if(post.getHashtags() !=null) {
-            for(PostTag tag : post.getHashtags())
+        if (post.getHashtags() != null) {
+            for (PostTag tag : post.getHashtags())
                 hashtags.add(tag.getName());
         }
 
         List<FileDTO.FileInfo> media = new ArrayList<>();
-        if(post.getMedia() != null) {
-            for(PostMedia temp : post.getMedia()){
+        List<FileDTO.FileInfo> files = new ArrayList<>();
+        if (post.getMedia() != null) {
+            for (PostMedia temp : post.getMedia()) {
+                String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path("/api/downloadFile/")
+                        .path(temp.getStoredFileName())
+                        .toUriString();
                 FileDTO.FileInfo fileInfo = FileDTO.FileInfo.builder()
                         .contentType(temp.getContentType())
-                        .fileDownloadUri(temp.getFileDownloadUri())
+                        .fileDownloadUri(fileDownloadUri)
                         .fileName(temp.getFileName())
-                        .size(temp.getSize())
                         .build();
-                media.add(fileInfo);
+                if (temp.getIsMedia())
+                    media.add(fileInfo);
+                else
+                    files.add(fileInfo);
             }
         }
 
@@ -53,9 +64,11 @@ public class PostService {
                 .contents(post.getContents())
                 .hashtags(hashtags)
                 .media(media)
+                .files(files)
                 .likeCount(post.getPostLikers().size())
                 .commentCount(post.getComments().size())
                 .writeTime(post.getCreateTime())
+                .location(post.getLocation())
                 .build();
 
         return postResponse;
@@ -63,18 +76,21 @@ public class PostService {
 
     // 포스트 생성
     @Transactional
-    public ApiResponse createPost(PostDTO.PostRequest request, MultipartFile[] files){
+    public ApiResponse createPost(PostDTO.PostRequest request, MultipartFile[] media, MultipartFile[] files) {
         User writer = userRepository.findById(request.getWriterId())
-                .orElseThrow(()-> new ResourceNotFoundException("USER","id",request.getWriterId()));
+                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", request.getWriterId()));
 
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", request.getProjectId()));
+
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point point = geometryFactory.createPoint(new Coordinate(request.getLatitude(),request.getLongitude()));
 
         Post post = Post.builder()
                 .contents(request.getContents())
                 .accessModifier(request.getAccessModifier())
                 .commentModifier(request.getCommentModifier())
-                .location(request.getLocation())
+                .location(point)
                 .writer(writer)
                 .project(project)
                 .build();
@@ -83,7 +99,7 @@ public class PostService {
 
         if (request.getHashtags() != null) {
             List<PostTag> hashtags = new ArrayList<>();
-            for(String tagName : request.getHashtags()) {
+            for (String tagName : request.getHashtags()) {
                 PostTag newTag = PostTag.builder()
                         .name(tagName)
                         .post(post)
@@ -93,10 +109,17 @@ public class PostService {
             postTagRepository.saveAll(hashtags);
         }
 
+        if (media != null) {
+            Arrays.asList(media)
+                    .stream()
+                    .map(file -> fileStorageService.storeFile(file, post, Boolean.TRUE))
+                    .collect(Collectors.toList());
+        }
+
         if (files != null) {
             Arrays.asList(files)
                     .stream()
-                    .map(file -> fileStorageService.storeFile(file,post))
+                    .map(file -> fileStorageService.storeFile(file, post, Boolean.FALSE))
                     .collect(Collectors.toList());
         }
 
@@ -107,11 +130,13 @@ public class PostService {
     @Transactional
     public ApiResponse updatePost(Long id, PostDTO.PostRequest request) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post","id",id));
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         post.setContents(request.getContents());
         post.setAccessModifier(request.getAccessModifier());
         post.setCommentModifier(request.getCommentModifier());
-        post.setLocation(request.getLocation());
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Point point = geometryFactory.createPoint(new Coordinate(request.getLatitude(),request.getLongitude()));
+        post.setLocation(point);
 
         postRepository.save(post);
 
@@ -121,7 +146,7 @@ public class PostService {
 //
         if (request.getHashtags().size() > 0) {
             List<PostTag> hashtags = new ArrayList<>();
-            for(String tagName : request.getHashtags()) {
+            for (String tagName : request.getHashtags()) {
                 PostTag newTag = PostTag.builder()
                         .name(tagName)
                         .post(post)
@@ -136,11 +161,11 @@ public class PostService {
 
     // 포스트 삭제
     @Transactional
-    public ApiResponse deletePost(Long id){
+    public ApiResponse deletePost(Long id) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post","id",id));
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         fileStorageService.deleteFilesByPost(post);
         postRepository.delete(post);
-        return new ApiResponse(Boolean.TRUE,"포스트 삭제 성공");
+        return new ApiResponse(Boolean.TRUE, "포스트 삭제 성공");
     }
 }

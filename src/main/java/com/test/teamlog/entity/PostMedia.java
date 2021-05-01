@@ -22,17 +22,15 @@ public class PostMedia {
     @Column(name="stored_file_name",nullable = false)
     private String storedFileName;
 
-    @Column(name="file_download_uri",nullable=false)
-    private String fileDownloadUri;
-
-    private Long size;
-
     @Column(name="content_type",nullable = false)
     private String contentType;
 
     @ManyToOne
     @JoinColumn(name = "post_id",nullable = false)
     private Post post;
+
+    @Column(name="is_media", nullable = false)
+    private Boolean isMedia;
 
     public void setPost(Post post) {
         if(this.post != null) {
