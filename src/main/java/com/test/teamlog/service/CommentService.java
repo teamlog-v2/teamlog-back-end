@@ -3,6 +3,7 @@ package com.test.teamlog.service;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.*;
+import com.test.teamlog.repository.CommentMentionRepository;
 import com.test.teamlog.repository.CommentRepository;
 import com.test.teamlog.repository.PostRepository;
 import com.test.teamlog.repository.UserRepository;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
+    private final CommentMentionRepository commentMentionRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
@@ -36,7 +38,11 @@ public class CommentService {
                     .profileImgPath(comment.getWriter().getProfileImgPath())
                     .build();
 
-            //        List<String> commentMentions = null;
+            List<String> commentMentions = new ArrayList<>();
+            for(CommentMention targetUSer : comment.getCommentMentions()){
+                commentMentions.add(targetUSer.getTargetUser().getId());
+            }
+
             List<CommentDTO.CommentInfo> childComments = new ArrayList<>();
             for(Comment childComment : comment.getChildComments()) {
                 UserDTO.UserSimpleInfo user = UserDTO.UserSimpleInfo.builder()
@@ -45,11 +51,17 @@ public class CommentService {
                         .profileImgPath(childComment.getWriter().getProfileImgPath())
                         .build();
 
+                List<String> mentions = new ArrayList<>();
+                for(CommentMention targetUSer : comment.getCommentMentions()){
+                    mentions.add(targetUSer.getTargetUser().getId());
+                }
+
                 CommentDTO.CommentInfo childTemp = CommentDTO.CommentInfo.builder()
                         .id(childComment.getId())
                         .contents(childComment.getContents())
                         .writer(user)
                         .writeTime(childComment.getCreateTime())
+                        .commentMentions(mentions)
                         .build();
                 childComments.add(childTemp);
             }
@@ -60,6 +72,7 @@ public class CommentService {
                     .writer(writer)
                     .childComments(childComments)
                     .writeTime(comment.getCreateTime())
+                    .commentMentions(commentMentions)
                     .build();
             responses.add(temp);
         }
@@ -89,6 +102,21 @@ public class CommentService {
                 .build();
 
         commentRepository.save(comment);
+
+        List<CommentMention> commentMentions = new ArrayList<>();
+        for(String targetId : request.getCommentMentions())
+        {
+            User target = userRepository.findById(targetId)
+                    .orElseThrow(()-> new ResourceNotFoundException("USER","id",targetId));
+
+            CommentMention commentMention = CommentMention.builder()
+                    .comment(comment)
+                    .targetUser(target)
+                    .build();
+            commentMentions.add(commentMention);
+        }
+
+        commentMentionRepository.saveAll(commentMentions);
 
         return new ApiResponse(Boolean.TRUE, "댓글 생성 성공");
     }

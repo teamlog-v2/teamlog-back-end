@@ -15,6 +15,7 @@ public class CommentDTO {
         private String writerId;
         private Long postId;
         private String contents;
+        private List<String> commentMentions;
     }
 
     @Data
