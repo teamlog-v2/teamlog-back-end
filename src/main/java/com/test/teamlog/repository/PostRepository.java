@@ -1,5 +1,6 @@
 package com.test.teamlog.repository;
 
+import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Post;
 import com.test.teamlog.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +15,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     public int getPostCount(@Param("project") Project project);
 
     public List<Post> findAllByProject(Project project);
+//    public List<Post> findAllByLocationIsNotNullAndAccessModifier(AccessModifier accessModifier);
 }

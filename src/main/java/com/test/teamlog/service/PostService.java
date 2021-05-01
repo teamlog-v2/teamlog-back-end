@@ -65,7 +65,8 @@ public class PostService {
                 .likeCount(post.getPostLikers().size())
                 .commentCount(post.getComments().size())
                 .writeTime(post.getCreateTime())
-                .location(post.getLocation())
+                .latitude(post.getLocation().getX())
+                .longitude(post.getLocation().getY())
                 .build();
 
         return postResponse;
@@ -91,6 +92,17 @@ public class PostService {
         }
         return responses;
     }
+
+//    // 위치정보가 있는 Public 포스트들 조회
+//    public List<PostDTO.PostResponse> getLocationPosts() {
+//        List<Post> posts = postRepository.findAllByLocationIsNotNullAndAccessModifier(AccessModifier.PUBLIC);
+//
+//        List<PostDTO.PostResponse> responses = new ArrayList<>();
+//        for(Post post : posts) {
+//            responses.add(convertToPostResponse(post));
+//        }
+//        return responses;
+//    }
 
     // 포스트 생성
     @Transactional
@@ -126,7 +138,6 @@ public class PostService {
             }
             postTagRepository.saveAll(hashtags);
         }
-
         if (media != null) {
             Arrays.asList(media)
                     .stream()

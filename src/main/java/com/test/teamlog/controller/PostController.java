@@ -17,6 +17,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/posts")
+@CrossOrigin(origins = "*" )
 public class PostController {
     private final PostService postService;
 
@@ -33,6 +34,13 @@ public class PostController {
         List<PostDTO.PostResponse> response = postService.getPostsByProject(projectId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+//    @ApiOperation(value = "위치정보가 있는 Public 포스트들 조회")
+//    @GetMapping("/with-location")
+//    public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts() {
+//        List<PostDTO.PostResponse> response = postService.getLocationPosts();
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 
     @ApiOperation(value = "포스트 생성")
     @PostMapping
