@@ -35,11 +35,7 @@ public class TaskService {
 
         List<UserDTO.UserSimpleInfo> performers = new ArrayList<>();
         for (TaskPerformer temp : task.getTaskPerformers()) {
-            UserDTO.UserSimpleInfo userInfo = UserDTO.UserSimpleInfo.builder()
-                    .id(temp.getUser().getId())
-                    .name(temp.getUser().getName())
-                    .profileImgPath(temp.getUser().getProfileImgPath())
-                    .build();
+            UserDTO.UserSimpleInfo userInfo = new UserDTO.UserSimpleInfo(temp.getUser());
             performers.add(userInfo);
         }
 
@@ -117,6 +113,7 @@ public class TaskService {
         task.setDeadline(request.getDeadline());
         task.setTaskName(request.getTaskName());
 
+        // 비교해서 없어진 것은 지워야함.
         List<TaskPerformer> performers = new ArrayList<>();
         for(String userId : request.getPerformersId()) {
             User tempUser = userRepository.findById(userId)

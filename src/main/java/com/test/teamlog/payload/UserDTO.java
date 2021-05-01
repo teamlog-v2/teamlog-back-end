@@ -3,6 +3,7 @@ package com.test.teamlog.payload;
 import com.test.teamlog.entity.User;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.constraints.NotBlank;
 
@@ -37,7 +38,11 @@ public class UserDTO {
         public UserSimpleInfo(User user) {
             this.id = user.getId();
             this.name = user.getName();
-            this.profileImgPath = user.getProfileImgPath();
+            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/api/downloadFile/")
+                    .path(user.getProfileImgPath())
+                    .toUriString();
+            this.profileImgPath = imgUri;
         }
     }
 
