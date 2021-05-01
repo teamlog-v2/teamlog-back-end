@@ -31,11 +31,7 @@ public class PostService {
 
     // Post to PostResponse
     public PostDTO.PostResponse convertToPostResponse(Post post) {
-        UserDTO.UserSimpleInfo writer = UserDTO.UserSimpleInfo.builder()
-                .id(post.getWriter().getId())
-                .name(post.getWriter().getName())
-                .profileImgPath(post.getWriter().getProfileImgPath())
-                .build();
+        UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(post.getWriter());
 
         List<String> hashtags = new ArrayList<>();
         if (post.getHashtags() != null) {

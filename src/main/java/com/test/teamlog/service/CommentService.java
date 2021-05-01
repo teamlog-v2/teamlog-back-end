@@ -32,11 +32,7 @@ public class CommentService {
         List<CommentDTO.CommentResponse> responses = new ArrayList<>();
 
         for(Comment comment : parentComments){
-            UserDTO.UserSimpleInfo writer = UserDTO.UserSimpleInfo.builder()
-                    .id(comment.getWriter().getId())
-                    .name(comment.getWriter().getName())
-                    .profileImgPath(comment.getWriter().getProfileImgPath())
-                    .build();
+            UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(comment.getWriter());
 
             List<String> commentMentions = new ArrayList<>();
             for(CommentMention targetUSer : comment.getCommentMentions()){
@@ -45,11 +41,7 @@ public class CommentService {
 
             List<CommentDTO.CommentInfo> childComments = new ArrayList<>();
             for(Comment childComment : comment.getChildComments()) {
-                UserDTO.UserSimpleInfo user = UserDTO.UserSimpleInfo.builder()
-                        .id(childComment.getWriter().getId())
-                        .name(childComment.getWriter().getName())
-                        .profileImgPath(childComment.getWriter().getProfileImgPath())
-                        .build();
+                UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(childComment.getWriter());
 
                 List<String> mentions = new ArrayList<>();
                 for(CommentMention targetUSer : comment.getCommentMentions()){

@@ -29,7 +29,6 @@ public class UserDTO {
     }
 
     @Data
-    @Builder
     public static class UserSimpleInfo {
         private String id;
         private String name;
