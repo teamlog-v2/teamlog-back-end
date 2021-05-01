@@ -84,10 +84,19 @@ public class FileStorageService {
 
     public FileDTO.FileResourceInfo loadFileAsFileResource(String storedFileName) {
         PostMedia media = postMediaRepository.findByStoredFileName(storedFileName);
+
         try {
             Path filePath = this.fileStorageLocation.resolve(storedFileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
             if (resource.exists()) {
+                if(media == null) {
+                    FileDTO.FileResourceInfo fileResource = FileDTO.FileResourceInfo.builder()
+                            .fileName(storedFileName)
+                            .contentType("image/jpeg")
+                            .resource(resource)
+                            .build();
+                    return fileResource;
+                }
                 FileDTO.FileResourceInfo fileResource = FileDTO.FileResourceInfo.builder()
                         .fileName(media.getFileName())
                         .contentType(media.getContentType())
