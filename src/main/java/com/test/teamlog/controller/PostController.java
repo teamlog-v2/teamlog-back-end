@@ -1,5 +1,6 @@
 package com.test.teamlog.controller;
 
+import com.test.teamlog.entity.PostTag;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.payload.ProjectDTO;
@@ -12,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -39,6 +42,14 @@ public class PostController {
     @GetMapping("/with-location")
     public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts() {
         List<PostDTO.PostResponse> response = postService.getLocationPosts();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "해시태그 선별 조회")
+    @GetMapping("/hashtag/{names}")
+    public ResponseEntity<List<PostDTO.PostResponse>> getPostByTag(@PathVariable("names") String[] names) {
+        List<String> tags = Arrays.asList(names);
+        List<PostDTO.PostResponse> response = postService.getPostByTag(tags);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

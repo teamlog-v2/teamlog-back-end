@@ -111,6 +111,16 @@ public class PostService {
         return responses;
     }
 
+    // 해시태그 선별 조회
+    public List<PostDTO.PostResponse> getPostByTag(List<String> names) {
+        List<PostTag> tags = postTagRepository.getPostTagByNames(names);
+        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        for (PostTag tag : tags) {
+            responses.add(convertToPostResponse(tag.getPost()));
+        }
+        return responses;
+    }
+
     // 포스트 생성
     @Transactional
     public ApiResponse createPost(PostDTO.PostRequest request, MultipartFile[] media, MultipartFile[] files) {
