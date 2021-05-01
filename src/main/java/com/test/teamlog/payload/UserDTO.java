@@ -30,10 +30,13 @@ public class UserDTO {
             this.id = user.getId();
             this.name = user.getName();
             this.introduction = user.getIntroduction();
-            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/api/downloadFile/")
-                    .path(user.getProfileImgPath())
-                    .toUriString();
+            String imgUri = null;
+            if(user.getProfileImgPath() != null){
+                imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path("/api/downloadFile/")
+                        .path(user.getProfileImgPath())
+                        .toUriString();
+            }
             this.profileImgPath = imgUri;
         }
     }
@@ -47,10 +50,13 @@ public class UserDTO {
         public UserSimpleInfo(User user) {
             this.id = user.getId();
             this.name = user.getName();
-            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/api/downloadFile/")
-                    .path(user.getProfileImgPath())
-                    .toUriString();
+            String imgUri = null;
+            if(user.getProfileImgPath() != null){
+                imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path("/api/downloadFile/")
+                        .path(user.getProfileImgPath())
+                        .toUriString();
+            }
             this.profileImgPath = imgUri;
         }
     }
