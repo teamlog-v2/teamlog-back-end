@@ -2,6 +2,7 @@ package com.test.teamlog.controller;
 
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
+import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.ProjectService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -48,9 +49,16 @@ public class ProjectController {
 
     @ApiOperation(value = "프로젝트 삭제")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse> deleteProject(@PathVariable("id") Long id) {
         ApiResponse apiResponse = projectService.deleteProject(id);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "프로젝트 멤버 조회")
+    @GetMapping("/{id}/members")
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectMemberList(@PathVariable("id") Long id) {
+        List<UserDTO.UserSimpleInfo> response = projectService.getProjectMemberList(id);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 //    // 프로젝트 위임 : master가 요청했는지 .. 그런건 없다..

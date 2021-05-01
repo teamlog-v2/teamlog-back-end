@@ -1,5 +1,6 @@
 package com.test.teamlog.payload;
 
+import com.test.teamlog.entity.User;
 import lombok.Builder;
 import lombok.Data;
 
@@ -33,6 +34,12 @@ public class UserDTO {
         private String id;
         private String name;
         private String profileImgPath;
+
+        public UserSimpleInfo(User user) {
+            this.id = user.getId();
+            this.name = user.getName();
+            this.profileImgPath = user.getProfileImgPath();
+        }
     }
 
 }

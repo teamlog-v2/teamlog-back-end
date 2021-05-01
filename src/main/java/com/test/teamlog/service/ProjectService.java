@@ -6,11 +6,13 @@ import com.test.teamlog.entity.User;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
+import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.repository.PostRepository;
 import com.test.teamlog.repository.ProjectMemberRepository;
 import com.test.teamlog.repository.ProjectRepository;
 import com.test.teamlog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.engine.jdbc.connections.internal.UserSuppliedConnectionProviderImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -116,6 +118,19 @@ public class ProjectService {
         return new ApiResponse(Boolean.TRUE, "프로젝트 삭제 성공");
     }
 
+    // 프로젝트 멤버 조회
+    public List<UserDTO.UserSimpleInfo> getProjectMemberList(Long id) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
+        List<ProjectMember> members = projectMemberRepository.findByProject(project);
+
+        List<UserDTO.UserSimpleInfo> memberList = new ArrayList<>();
+        for(ProjectMember member : members) {
+            memberList.add(new UserDTO.UserSimpleInfo(member.getUser()));
+        }
+
+        return memberList;
+    }
 //    // 프로젝트 초대
 //    @Transactional
 //    public ApiResponse inviteProject(Long id) {
