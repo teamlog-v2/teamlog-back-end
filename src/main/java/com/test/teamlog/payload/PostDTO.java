@@ -28,6 +28,7 @@ public class PostDTO {
     @Builder
     public static class PostResponse {
         private Long id;
+        private UserDTO.UserSimpleInfo writer;
         private String contents;
         private Double latitude;
         private Double longitude;
