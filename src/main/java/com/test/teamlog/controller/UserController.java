@@ -1,19 +1,22 @@
 package com.test.teamlog.controller;
 
 import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*" )
+@CrossOrigin(origins = "*")
 public class UserController {
     private final UserService userService;
 
@@ -34,10 +37,17 @@ public class UserController {
 
     //Update
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO.UserResponse> updateUser(@PathVariable("id") String id, @Valid @RequestBody UserDTO.UserRequest userRequest) {
-        userService.updateUser(id, userRequest);
-        UserDTO.UserResponse userResponse = userService.getUser(id);
-        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    public ResponseEntity<ApiResponse> updateUser(@PathVariable("id") String id, @Valid @RequestBody UserDTO.UserRequest userRequest) {
+        ApiResponse apiResponse = userService.updateUser(id, userRequest);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "프로필 이미지 변경")
+    @PutMapping("/{id}/profile-image")
+    public ResponseEntity<ApiResponse> updateUser(@PathVariable("id") String id,
+                                                  @RequestPart(value = "profileImg", required = false) MultipartFile image) {
+        ApiResponse apiResponse = userService.updateUserProfileImage(id, image);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     // Delete

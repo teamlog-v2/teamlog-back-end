@@ -50,7 +50,7 @@ public class FileStorageService {
     }
 
     @Transactional
-    public Boolean storeFile(MultipartFile file, Post post, Boolean isMedia) {
+    public String storeFile(MultipartFile file, Post post, Boolean isMedia) {
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
         UUID uuid = UUID.randomUUID();
         String storedFileName = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
@@ -67,18 +67,19 @@ public class FileStorageService {
         } catch (IOException ex) {
             throw new FileStorageException("Could not store file " + originalFileName + ". Please try again!", ex);
         }
+        if(post !=null){
+            PostMedia newPostMedia = PostMedia.builder()
+                    .fileName(originalFileName) // Normalize file name
+                    .storedFileName(storedFileName)
+                    .contentType(file.getContentType())
+                    .post(post)
+                    .isMedia(isMedia)
+                    .build();
 
-        PostMedia newPostMedia = PostMedia.builder()
-                .fileName(originalFileName) // Normalize file name
-                .storedFileName(storedFileName)
-                .contentType(file.getContentType())
-                .post(post)
-                .isMedia(isMedia)
-                .build();
+            postMediaRepository.save(newPostMedia);
+        }
 
-        postMediaRepository.save(newPostMedia);
-
-        return Boolean.TRUE;
+        return storedFileName;
     }
 
     public FileDTO.FileResourceInfo loadFileAsFileResource(String storedFileName) {
@@ -106,15 +107,18 @@ public class FileStorageService {
         List<PostMedia> mediaFiles = postMediaRepository.findAllByPost(post);
 
         for (PostMedia media : mediaFiles) {
-            Path mediaPath = this.fileStorageLocation.resolve(media.getStoredFileName());
-            File file = new File(mediaPath.toString());
-            if (file.exists()) {
-                if (file.delete()) {
-                    System.out.println("파일-"+media.getFileName() + " 삭제 성공");
-                }
-            } else throw new MyFileNotFoundException("File not found " + media.getFileName());
+            deleteFile(media.getStoredFileName());
             postMediaRepository.delete(media);
         }
+    }
 
+    public void deleteFile(String storedFileName) {
+        Path mediaPath = this.fileStorageLocation.resolve(storedFileName);
+        File file = new File(mediaPath.toString());
+        if (file.exists()) {
+            if (file.delete()) {
+                System.out.println("파일-"+ storedFileName + " 삭제 성공");
+            }
+        } else throw new MyFileNotFoundException("File not found " + storedFileName);
     }
 }

@@ -8,14 +8,15 @@ import com.test.teamlog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
 
-    //회원 조회
     public UserDTO.UserResponse getUser(String id){
         User user = userRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("USER","id",id));
@@ -51,13 +52,27 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(String id, UserDTO.UserRequest userRequest) {
+    public ApiResponse updateUser(String id, UserDTO.UserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("USER","ID",id));
         user.setName(userRequest.getName());
         user.setIntroduction(userRequest.getIntroduction());
-        user.setProfileImgPath(user.getProfileImgPath());
         userRepository.save(user);
+        return new ApiResponse(Boolean.TRUE, "프로필 수정 성공");
+    }
+
+    @Transactional
+    public ApiResponse updateUserProfileImage(String id, MultipartFile image) {
+        User user = userRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("USER","ID",id));
+        if(user.getProfileImgPath() != null){
+            fileStorageService.deleteFile(user.getProfileImgPath());
+            user.setProfileImgPath(null);
+        }
+        String profileImgPath = fileStorageService.storeFile(image,null,null);
+        user.setProfileImgPath(profileImgPath);
+        userRepository.save(user);
+        return new ApiResponse(Boolean.TRUE, "프로필 이미지 수정 성공");
     }
 
     //회원 탈퇴
