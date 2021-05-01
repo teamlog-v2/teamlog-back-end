@@ -15,5 +15,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     public int getPostCount(@Param("project") Project project);
 
     public List<Post> findAllByProject(Project project);
-//    public List<Post> findAllByLocationIsNotNullAndAccessModifier(AccessModifier accessModifier);
+    public List<Post> findAllByLocationIsNotNullAndAccessModifier(AccessModifier accessModifier);
 }

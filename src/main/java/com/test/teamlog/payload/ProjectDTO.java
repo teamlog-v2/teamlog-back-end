@@ -1,9 +1,12 @@
 package com.test.teamlog.payload;
 
 import com.test.teamlog.entity.AccessModifier;
+import com.test.teamlog.entity.Project;
+import com.test.teamlog.entity.User;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,5 +41,15 @@ public class ProjectDTO {
         private int postCount;
         private LocalDateTime updateTime; // 마지막 활동 시간
         private String thumbnail; // 대표 이미지
+    }
+
+    @Data
+    public static class ProjectSimpleInfo {
+        private Long id;
+        private String name;
+        public ProjectSimpleInfo(Project project) {
+            this.id = project.getId();
+            this.name = project.getName();
+        }
     }
 }
