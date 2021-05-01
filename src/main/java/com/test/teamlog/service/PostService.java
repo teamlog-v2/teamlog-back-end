@@ -28,11 +28,8 @@ public class PostService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
 
-    // 단일 포스트 조회
-    public PostDTO.PostResponse getPost(Long id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-
+    // Post to PostResponse
+    public PostDTO.PostResponse convertToPostResponse(Post post) {
         List<String> hashtags = new ArrayList<>();
         if (post.getHashtags() != null) {
             for (PostTag tag : post.getHashtags())
@@ -72,6 +69,27 @@ public class PostService {
                 .build();
 
         return postResponse;
+    }
+
+    // 단일 포스트 조회
+    public PostDTO.PostResponse getPost(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+
+        return convertToPostResponse(post);
+    }
+
+    // 프로젝트 내 포스트 조회
+    public List<PostDTO.PostResponse> getPostsByProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        List<Post> posts = postRepository.findAllByProject(project);
+
+        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        for(Post post : posts) {
+            responses.add(convertToPostResponse(post));
+        }
+        return responses;
     }
 
     // 포스트 생성

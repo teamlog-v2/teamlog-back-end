@@ -22,8 +22,15 @@ public class PostController {
 
     @ApiOperation(value = "단일 포스트 조회")
     @GetMapping("/{id}")
-    public ResponseEntity<PostDTO.PostResponse> getProjectById(@PathVariable("id") long id) {
+    public ResponseEntity<PostDTO.PostResponse> getPostById(@PathVariable("id") long id) {
         PostDTO.PostResponse response = postService.getPost(id);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "프로젝트의 모든 포스트 조회")
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<List<PostDTO.PostResponse>> getPostsByProject(@PathVariable("projectId") long projectId) {
+        List<PostDTO.PostResponse> response = postService.getPostsByProject(projectId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
