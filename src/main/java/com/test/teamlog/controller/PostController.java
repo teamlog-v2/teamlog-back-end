@@ -53,6 +53,14 @@ public class PostController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "프로젝트 내 게시물 검색")
+    @GetMapping("/project/{projectId}/{keyword}")
+    public ResponseEntity<List<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
+                                                                   @PathVariable("keyword") String keyword) {
+        List<PostDTO.PostResponse> response = postService.searchPostsInProject(projectId,keyword);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "포스트 생성")
     @PostMapping
     public ResponseEntity<ApiResponse> createProject(@RequestPart(value="key", required=true) PostDTO.PostRequest request,

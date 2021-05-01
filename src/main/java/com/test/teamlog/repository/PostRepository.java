@@ -16,4 +16,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     public List<Post> findAllByProject(Project project);
     public List<Post> findAllByLocationIsNotNullAndAccessModifier(AccessModifier accessModifier);
+
+    @Query("SELECT p FROM Post p WHERE p.contents like concat('%',:keyword,'%') and p.project = :project ")
+    public List<Post> searchPostsInProject(@Param("project") Project project, @Param("keyword") String keyword);
 }

@@ -121,6 +121,20 @@ public class PostService {
         return responses;
     }
 
+    // 키워드로 게시물 조회
+    public List<PostDTO.PostResponse> searchPostsInProject(Long projectId, String keyword) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+
+        List<Post> posts = postRepository.searchPostsInProject(project, keyword);
+
+        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        for(Post post : posts) {
+            responses.add(convertToPostResponse(post));
+        }
+        return responses;
+    }
+
     // 포스트 생성
     @Transactional
     public ApiResponse createPost(PostDTO.PostRequest request, MultipartFile[] media, MultipartFile[] files) {
