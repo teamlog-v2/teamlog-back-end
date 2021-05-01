@@ -65,9 +65,11 @@ public class PostService {
                 .likeCount(post.getPostLikers().size())
                 .commentCount(post.getComments().size())
                 .writeTime(post.getCreateTime())
-                .latitude(post.getLocation().getX())
-                .longitude(post.getLocation().getY())
                 .build();
+        if(post.getLocation() != null) {
+            postResponse.setLatitude(post.getLocation().getX());
+            postResponse.setLongitude(post.getLocation().getY());
+        }
 
         return postResponse;
     }
@@ -113,8 +115,11 @@ public class PostService {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", request.getProjectId()));
 
-        GeometryFactory geometryFactory = new GeometryFactory();
-        Point point = geometryFactory.createPoint(new Coordinate(request.getLatitude(),request.getLongitude()));
+        Point point = null;
+        if(request.getLatitude() != null && request.getLongitude() != null ) {
+            GeometryFactory geometryFactory = new GeometryFactory();
+            point = geometryFactory.createPoint(new Coordinate(request.getLatitude(),request.getLongitude()));
+        }
 
         Post post = Post.builder()
                 .contents(request.getContents())

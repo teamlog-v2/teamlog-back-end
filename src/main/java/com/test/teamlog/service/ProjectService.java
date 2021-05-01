@@ -115,4 +115,10 @@ public class ProjectService {
         projectRepository.delete(project);
         return new ApiResponse(Boolean.TRUE, "프로젝트 삭제 성공");
     }
+
+//    // 프로젝트 초대
+//    @Transactional
+//    public ApiResponse inviteProject(Long id) {
+//
+//    }
 }
