@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -156,6 +157,9 @@ public class PostService {
                     .map(file -> fileStorageService.storeFile(file, post, Boolean.FALSE))
                     .collect(Collectors.toList());
         }
+
+        project.setUpdateTime(LocalDateTime.now());
+        projectRepository.save(project);
 
         return new ApiResponse(Boolean.TRUE, "포스트 생성 성공");
     }
