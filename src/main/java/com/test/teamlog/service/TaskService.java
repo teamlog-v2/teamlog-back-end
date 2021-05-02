@@ -34,9 +34,11 @@ public class TaskService {
                 .orElseThrow(()-> new ResourceNotFoundException("Task","id",id));
 
         List<UserDTO.UserSimpleInfo> performers = new ArrayList<>();
-        for (TaskPerformer temp : task.getTaskPerformers()) {
-            UserDTO.UserSimpleInfo userInfo = new UserDTO.UserSimpleInfo(temp.getUser());
-            performers.add(userInfo);
+        if(task.getTaskPerformers() !=null) {
+            for (TaskPerformer temp : task.getTaskPerformers()) {
+                UserDTO.UserSimpleInfo userInfo = new UserDTO.UserSimpleInfo(temp.getUser());
+                performers.add(userInfo);
+            }
         }
         TaskDTO.TaskResponse taskResponse = new TaskDTO.TaskResponse(task);
         taskResponse.setPerformers(performers);
@@ -74,19 +76,20 @@ public class TaskService {
         Task result = taskRepository.save(task);
 
         List<TaskPerformer> performers = new ArrayList<>();
+        if(request.getPerformersId() !=null) {
+            for (String userId : request.getPerformersId()) {
+                User tempUser = userRepository.findById(userId)
+                        .orElseThrow(() -> new ResourceNotFoundException("USER", "id", userId));
 
-        for(String userId : request.getPerformersId()) {
-            User tempUser = userRepository.findById(userId)
-                    .orElseThrow(()-> new ResourceNotFoundException("USER","id",userId));
+                TaskPerformer performer = TaskPerformer.builder()
+                        .task(task)
+                        .user(tempUser)
+                        .build();
 
-            TaskPerformer performer = TaskPerformer.builder()
-                    .task(task)
-                    .user(tempUser)
-                    .build();
-
-            performers.add(performer);
+                performers.add(performer);
+            }
+            taskPerformerRepository.saveAll(performers);
         }
-        taskPerformerRepository.saveAll(performers);
 
         return result.getId();
     }
