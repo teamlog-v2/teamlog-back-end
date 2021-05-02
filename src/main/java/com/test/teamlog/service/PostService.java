@@ -112,11 +112,11 @@ public class PostService {
     }
 
     // 해시태그 선별 조회
-    public List<PostDTO.PostResponse> getPostByTag(List<String> names) {
+    public List<PostDTO.PostResponse> getPostByTag(Long projectId, List<String> names) {
         List<PostTag> tags = postTagRepository.getPostTagByNames(names);
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (PostTag tag : tags) {
-            responses.add(convertToPostResponse(tag.getPost()));
+            if(projectId == tag.getPost().getProject().getId()) responses.add(convertToPostResponse(tag.getPost()));
         }
         return responses;
     }

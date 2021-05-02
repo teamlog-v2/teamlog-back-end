@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/posts")
-@CrossOrigin(origins = "*" )
+@CrossOrigin(origins = "*")
 public class PostController {
     private final PostService postService;
 
@@ -46,15 +46,15 @@ public class PostController {
     }
 
     @ApiOperation(value = "해시태그 선별 조회")
-    @GetMapping("/hashtag/{names}")
-    public ResponseEntity<List<PostDTO.PostResponse>> getPostByTag(@PathVariable("names") String[] names) {
+    @GetMapping("/project/{projectId}/hashtag/{names}")
+    public ResponseEntity<List<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
+                                                                   @PathVariable("names") String[] names) {
+        
         long start = System.currentTimeMillis();
-
         List<String> tags = Arrays.asList(names);
-        List<PostDTO.PostResponse> response = postService.getPostByTag(tags);
+        List<PostDTO.PostResponse> response = postService.getPostByTag(projectId, tags);
         long end = System.currentTimeMillis();
         System.out.println("수행시간: " + (end - start) + " ms");
-
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -62,23 +62,23 @@ public class PostController {
     @GetMapping("/project/{projectId}/{keyword}")
     public ResponseEntity<List<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
                                                                    @PathVariable("keyword") String keyword) {
-        List<PostDTO.PostResponse> response = postService.searchPostsInProject(projectId,keyword);
+        List<PostDTO.PostResponse> response = postService.searchPostsInProject(projectId, keyword);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "포스트 생성")
     @PostMapping
-    public ResponseEntity<ApiResponse> createProject(@RequestPart(value="key", required=true) PostDTO.PostRequest request,
-                                                     @RequestPart(value="media", required=false) MultipartFile[] media,
-                                                     @RequestPart(value="files", required=false) MultipartFile[] files) {
-        ApiResponse apiResponse = postService.createPost(request,media,files);
+    public ResponseEntity<ApiResponse> createProject(@RequestPart(value = "key", required = true) PostDTO.PostRequest request,
+                                                     @RequestPart(value = "media", required = false) MultipartFile[] media,
+                                                     @RequestPart(value = "files", required = false) MultipartFile[] files) {
+        ApiResponse apiResponse = postService.createPost(request, media, files);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "포스트 수정")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
-                                                              @RequestBody PostDTO.PostRequest request) {
+                                                     @RequestBody PostDTO.PostRequest request) {
         ApiResponse apiResponse = postService.updatePost(id, request);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
