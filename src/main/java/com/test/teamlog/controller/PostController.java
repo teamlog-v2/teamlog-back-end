@@ -48,8 +48,13 @@ public class PostController {
     @ApiOperation(value = "해시태그 선별 조회")
     @GetMapping("/hashtag/{names}")
     public ResponseEntity<List<PostDTO.PostResponse>> getPostByTag(@PathVariable("names") String[] names) {
+        long start = System.currentTimeMillis();
+
         List<String> tags = Arrays.asList(names);
         List<PostDTO.PostResponse> response = postService.getPostByTag(tags);
+        long end = System.currentTimeMillis();
+        System.out.println("수행시간: " + (end - start) + " ms");
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

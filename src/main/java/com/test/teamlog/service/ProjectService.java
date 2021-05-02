@@ -32,16 +32,7 @@ public class ProjectService {
     public ProjectDTO.ProjectResponse getProject(Long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
-        ProjectDTO.ProjectResponse projectResponse = ProjectDTO.ProjectResponse.builder()
-                .id(project.getId())
-                .name(project.getName())
-                .introduction(project.getIntroduction())
-                .accessModifier(project.getAccessModifier())
-                .masterId(project.getMaster().getId())
-                .memberCount(project.getProjectMembers().size())
-                .followerCount(project.getProjectFollowers().size())
-                .createTime(project.getCreateTime())
-                .build();
+        ProjectDTO.ProjectResponse projectResponse = new ProjectDTO.ProjectResponse(project);
         return projectResponse;
     }
 
@@ -131,9 +122,4 @@ public class ProjectService {
 
         return memberList;
     }
-//    // 프로젝트 초대
-//    @Transactional
-//    public ApiResponse inviteProject(Long id) {
-//
-//    }
 }

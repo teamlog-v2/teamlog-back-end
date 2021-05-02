@@ -1,5 +1,6 @@
 package com.test.teamlog.payload;
 
+import com.test.teamlog.entity.Task;
 import com.test.teamlog.entity.TaskStatus;
 import lombok.*;
 
@@ -16,7 +17,6 @@ public class TaskDTO {
     }
 
     @Data
-    @Builder
     public static class TaskResponse {
         private Long id;
         private String taskName;
@@ -24,5 +24,13 @@ public class TaskDTO {
         private LocalDateTime deadline;
         private LocalDateTime updateTime;
         private List<UserDTO.UserSimpleInfo> performers;
+        public TaskResponse(Task task) {
+            this.id = task.getId();
+            this.taskName = task.getTaskName();
+            this.status = task.getStatus().getValue();
+            this.updateTime = task.getUpdateTime();
+            this.deadline = task.getDeadline();
+            this.performers = null;
+        }
     }
 }

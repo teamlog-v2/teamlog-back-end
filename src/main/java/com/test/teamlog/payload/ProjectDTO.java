@@ -21,7 +21,6 @@ public class ProjectDTO {
     }
 
     @Data
-    @Builder
     public static class ProjectResponse {
         private Long id;
         private String name;
@@ -31,6 +30,16 @@ public class ProjectDTO {
         private String masterId;
         private int memberCount;
         private int followerCount;
+        public ProjectResponse(Project project) {
+            this.id = project.getId();
+            this.name = project.getName();
+            this.introduction = project.getIntroduction();
+            this.accessModifier = project.getAccessModifier();
+            this.masterId = project.getMaster().getId();
+            this.memberCount = project.getProjectMembers().size();
+            this.followerCount = project.getProjectFollowers().size();
+            this.createTime = project.getCreateTime();
+        }
     }
 
     @Data

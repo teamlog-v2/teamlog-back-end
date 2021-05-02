@@ -38,15 +38,8 @@ public class TaskService {
             UserDTO.UserSimpleInfo userInfo = new UserDTO.UserSimpleInfo(temp.getUser());
             performers.add(userInfo);
         }
-
-        TaskDTO.TaskResponse taskResponse = TaskDTO.TaskResponse.builder()
-                .id(task.getId())
-                .taskName(task.getTaskName())
-                .status(task.getStatus().getValue())
-                .updateTime(task.getUpdateTime())
-                .deadline(task.getDeadline())
-                .performers(performers)
-                .build();
+        TaskDTO.TaskResponse taskResponse = new TaskDTO.TaskResponse(task);
+        taskResponse.setPerformers(performers);
         return taskResponse;
     }
 
@@ -59,13 +52,7 @@ public class TaskService {
         List<TaskDTO.TaskResponse> responses = new ArrayList<>();
         for(Task t : tasks)
         {
-            TaskDTO.TaskResponse taskResponse = TaskDTO.TaskResponse.builder()
-                    .id(t.getId())
-                    .taskName(t.getTaskName())
-                    .status(t.getStatus().getValue())
-                    .deadline(t.getDeadline())
-                    .updateTime(t.getUpdateTime())
-                    .build();
+            TaskDTO.TaskResponse taskResponse = new TaskDTO.TaskResponse(t);
             responses.add(taskResponse);
         }
         return responses;

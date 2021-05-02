@@ -71,7 +71,7 @@ public class PostService {
                 .commentCount(post.getComments().size())
                 .writeTime(post.getCreateTime())
                 .build();
-        if(post.getLocation() != null) {
+        if (post.getLocation() != null) {
             postResponse.setLatitude(post.getLocation().getX());
             postResponse.setLongitude(post.getLocation().getY());
         }
@@ -94,7 +94,7 @@ public class PostService {
         List<Post> posts = postRepository.findAllByProject(project);
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
-        for(Post post : posts) {
+        for (Post post : posts) {
             responses.add(convertToPostResponse(post));
         }
         return responses;
@@ -105,7 +105,7 @@ public class PostService {
         List<Post> posts = postRepository.findAllByLocationIsNotNullAndAccessModifier(AccessModifier.PUBLIC);
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
-        for(Post post : posts) {
+        for (Post post : posts) {
             responses.add(convertToPostResponse(post));
         }
         return responses;
@@ -129,7 +129,7 @@ public class PostService {
         List<Post> posts = postRepository.searchPostsInProject(project, keyword);
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
-        for(Post post : posts) {
+        for (Post post : posts) {
             responses.add(convertToPostResponse(post));
         }
         return responses;
@@ -145,9 +145,9 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", request.getProjectId()));
 
         Point point = null;
-        if(request.getLatitude() != null && request.getLongitude() != null ) {
+        if (request.getLatitude() != null && request.getLongitude() != null) {
             GeometryFactory geometryFactory = new GeometryFactory();
-            point = geometryFactory.createPoint(new Coordinate(request.getLatitude(),request.getLongitude()));
+            point = geometryFactory.createPoint(new Coordinate(request.getLatitude(), request.getLongitude()));
         }
 
         Post post = Post.builder()
@@ -201,7 +201,7 @@ public class PostService {
         post.setAccessModifier(request.getAccessModifier());
         post.setCommentModifier(request.getCommentModifier());
         GeometryFactory geometryFactory = new GeometryFactory();
-        Point point = geometryFactory.createPoint(new Coordinate(request.getLatitude(),request.getLongitude()));
+        Point point = geometryFactory.createPoint(new Coordinate(request.getLatitude(), request.getLongitude()));
         post.setLocation(point);
 
         postRepository.save(post);
