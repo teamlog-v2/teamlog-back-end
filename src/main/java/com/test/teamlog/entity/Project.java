@@ -1,6 +1,7 @@
 package com.test.teamlog.entity;
 
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -36,8 +37,10 @@ public class Project extends BaseTimeEntity{
     private Team team;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
     private List<ProjectMember> projectMembers = new ArrayList<ProjectMember>();
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
     private List<ProjectFollower> projectFollowers = new ArrayList<ProjectFollower>();
 }
