@@ -116,7 +116,10 @@ public class PostService {
         List<PostTag> tags = postTagRepository.getPostTagByNames(names);
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (PostTag tag : tags) {
-            if(projectId == tag.getPost().getProject().getId()) responses.add(convertToPostResponse(tag.getPost()));
+            if(projectId.equals(tag.getPost().getProject().getId()))
+            {
+                responses.add(convertToPostResponse(tag.getPost()));
+            }
         }
         return responses;
     }
