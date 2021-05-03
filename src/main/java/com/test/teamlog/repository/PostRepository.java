@@ -3,7 +3,6 @@ package com.test.teamlog.repository;
 import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Post;
 import com.test.teamlog.entity.Project;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

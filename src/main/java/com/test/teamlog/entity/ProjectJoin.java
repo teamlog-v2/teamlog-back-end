@@ -1,15 +1,17 @@
 package com.test.teamlog.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Getter @Setter
 @Entity
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "project_join",
         uniqueConstraints =@UniqueConstraint(columnNames = {"project_id", "user_id"}))
 public class ProjectJoin extends BaseTimeEntity {
@@ -28,5 +30,5 @@ public class ProjectJoin extends BaseTimeEntity {
     private boolean isAccepted = false;
 
     @Column(name = "is_invited",nullable = false)
-    private boolean isInvited;
+    private boolean isInvited = false;
 }
