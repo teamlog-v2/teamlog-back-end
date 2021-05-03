@@ -43,9 +43,9 @@ public class CommentService {
             for(Comment childComment : comment.getChildComments()) {
                 UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(childComment.getWriter());
 
-                List<String> mentions = new ArrayList<>();
-                for(CommentMention targetUSer : comment.getCommentMentions()){
-                    mentions.add(targetUSer.getTargetUser().getId());
+                List<String> childCommentMentions = new ArrayList<>();
+                for(CommentMention targetUSer : childComment.getCommentMentions()){
+                    childCommentMentions.add(targetUSer.getTargetUser().getId());
                 }
 
                 CommentDTO.CommentInfo childTemp = CommentDTO.CommentInfo.builder()
@@ -53,7 +53,7 @@ public class CommentService {
                         .contents(childComment.getContents())
                         .writer(user)
                         .writeTime(childComment.getCreateTime())
-                        .commentMentions(mentions)
+                        .commentMentions(childCommentMentions)
                         .build();
                 childComments.add(childTemp);
             }
