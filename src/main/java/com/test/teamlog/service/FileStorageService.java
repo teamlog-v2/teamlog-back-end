@@ -20,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,11 +51,12 @@ public class FileStorageService {
     }
 
     @Transactional
-    public String storeFile(MultipartFile file, Post post, Boolean isMedia) {
+    public String storeFile(MultipartFile file, Post post, Boolean isMedia){
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
         UUID uuid = UUID.randomUUID();
         String storedFileName = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-                + "(" + uuid.toString() + ")";
+                + "(" + uuid.toString() + ")." + fileExtension;
         try {
             // Check invalid characters
             if (originalFileName.contains("..")) {

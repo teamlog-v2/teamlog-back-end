@@ -43,19 +43,26 @@ public class PostService {
         List<FileDTO.FileInfo> files = new ArrayList<>();
         if (post.getMedia() != null) {
             for (PostMedia temp : post.getMedia()) {
-                String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/api/downloadFile/")
-                        .path(temp.getStoredFileName())
-                        .toUriString();
                 FileDTO.FileInfo fileInfo = FileDTO.FileInfo.builder()
                         .contentType(temp.getContentType())
-                        .fileDownloadUri(fileDownloadUri)
                         .fileName(temp.getFileName())
                         .build();
-                if (temp.getIsMedia())
+                if (temp.getIsMedia()) {
+                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                            .path("/resources/")
+                            .path(temp.getStoredFileName())
+                            .toUriString();
+                    fileInfo.setFileDownloadUri(fileDownloadUri);
                     media.add(fileInfo);
-                else
+                }
+                else {
+                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                            .path("/api/downloadFile/")
+                            .path(temp.getStoredFileName())
+                            .toUriString();
+                    fileInfo.setFileDownloadUri(fileDownloadUri);
                     files.add(fileInfo);
+                }
             }
         }
 
