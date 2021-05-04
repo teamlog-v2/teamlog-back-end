@@ -14,8 +14,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT COUNT(p) FROM Post p WHERE p.project = :project")
     public int getPostCount(@Param("project") Project project);
 
-    @Query("SELECT distinct p FROM Post p left join fetch p.hashtags order by p.createTime desc")
-    public List<Post> findAllByProject(Project project);
+    @Query("SELECT distinct p FROM Post p left join fetch p.hashtags Where p.project = :project order by p.createTime desc")
+    public List<Post> findAllByProject(@Param("project") Project project);
 
     public List<Post> findAllByLocationIsNotNullAndAccessModifier(AccessModifier accessModifier);
 
