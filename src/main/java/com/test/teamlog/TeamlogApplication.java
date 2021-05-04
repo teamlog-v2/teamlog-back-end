@@ -19,7 +19,9 @@ public class TeamlogApplication implements WebMvcConfigurer {
 	@Override
 	public void addResourceHandlers(final ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("/resources/**")
-				.addResourceLocations("file:/home/ubuntu/teamlog-storage/");
+				.addResourceLocations("file:/home/ubuntu/teamlog-storage/","file:src/resources/static");
+		registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
+		registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
 	}
 
 	public static void main(String[] args) {
