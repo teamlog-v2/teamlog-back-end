@@ -2,6 +2,7 @@ package com.test.teamlog.controller;
 
 import com.test.teamlog.entity.PostTag;
 import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.PagedResponse;
 import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.service.PostService;
@@ -35,14 +36,26 @@ public class PostController {
                 .body(response);
     }
 
-    @ApiOperation(value = "프로젝트의 모든 포스트 조회")
-    @GetMapping("/project/{projectId}")
-    public ResponseEntity<List<PostDTO.PostResponse>> getPostsByProject(@PathVariable("projectId") long projectId) {
-        List<PostDTO.PostResponse> response = postService.getPostsByProject(projectId);
+    @ApiOperation(value = "모든 포스트 조회")
+    @GetMapping
+    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getAllPosts(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                           @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        PagedResponse<PostDTO.PostResponse> response = postService.getAllPosts(page, size);
+
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
                 .body(response);
-//        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "프로젝트의 모든 포스트 조회")
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostsByProject(@PathVariable("projectId") long projectId,
+                                                                        @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                        @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        PagedResponse<PostDTO.PostResponse> response = postService.getPostsByProject(projectId,page,size);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
+                .body(response);
     }
 
     @ApiOperation(value = "위치정보가 있는 Public 포스트들 조회")
@@ -56,12 +69,13 @@ public class PostController {
 
     @ApiOperation(value = "해시태그 선별 조회")
     @GetMapping("/project/{projectId}/hashtag/{names}")
-    public ResponseEntity<List<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
-                                                                   @PathVariable("names") String[] names) {
-
+    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
+                                                                   @PathVariable("names") String[] names,
+                                                                   @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                   @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         long start = System.currentTimeMillis();
-        List<String> tags = Arrays.asList(names);
-        List<PostDTO.PostResponse> response = postService.getPostByTag(projectId, tags);
+        List<String> hashtags = Arrays.asList(names);
+        PagedResponse<PostDTO.PostResponse> response = postService.getPostsInProjectByHashTag(projectId, hashtags, page, size);
         long end = System.currentTimeMillis();
         System.out.println("수행시간: " + (end - start) + " ms");
         return ResponseEntity.ok()
@@ -71,9 +85,11 @@ public class PostController {
 
     @ApiOperation(value = "프로젝트 내 게시물 검색")
     @GetMapping("/project/{projectId}/{keyword}")
-    public ResponseEntity<List<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
-                                                                   @PathVariable("keyword") String keyword) {
-        List<PostDTO.PostResponse> response = postService.searchPostsInProject(projectId, keyword);
+    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
+                                                                   @PathVariable("keyword") String keyword,
+                                                                   @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                   @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        PagedResponse<PostDTO.PostResponse> response = postService.searchPostsInProject(projectId, keyword, page, size);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
                 .body(response);

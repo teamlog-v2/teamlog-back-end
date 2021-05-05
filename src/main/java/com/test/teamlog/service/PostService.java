@@ -1,6 +1,7 @@
 package com.test.teamlog.service;
 
 import com.test.teamlog.entity.*;
+import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.*;
 import com.test.teamlog.repository.*;
@@ -8,6 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,82 +34,74 @@ public class PostService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
 
-    // Post to PostResponse
-    public PostDTO.PostResponse convertToPostResponse(Post post) {
-        UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(post.getWriter());
-
-        List<String> hashtags = new ArrayList<>();
-        if (post.getHashtags() != null) {
-            for (PostTag tag : post.getHashtags())
-                hashtags.add(tag.getName());
-        }
-
-        List<FileDTO.FileInfo> media = new ArrayList<>();
-        List<FileDTO.FileInfo> files = new ArrayList<>();
-        if (post.getMedia() != null) {
-            for (PostMedia temp : post.getMedia()) {
-                FileDTO.FileInfo fileInfo = FileDTO.FileInfo.builder()
-                        .contentType(temp.getContentType())
-                        .fileName(temp.getFileName())
-                        .build();
-                if (temp.getIsMedia()) {
-                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                            .path("/resources/")
-                            .path(temp.getStoredFileName())
-                            .toUriString();
-                    fileInfo.setFileDownloadUri(fileDownloadUri);
-                    media.add(fileInfo);
-                }
-                else {
-                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                            .path("/api/downloadFile/")
-                            .path(temp.getStoredFileName())
-                            .toUriString();
-                    fileInfo.setFileDownloadUri(fileDownloadUri);
-                    files.add(fileInfo);
-                }
-            }
-        }
-
-        PostDTO.PostResponse postResponse = PostDTO.PostResponse.builder()
-                .id(post.getId())
-                .project(new ProjectDTO.ProjectSimpleInfo(post.getProject()))
-                .writer(writer)
-                .contents(post.getContents())
-                .hashtags(hashtags)
-                .media(media)
-                .files(files)
-                .likeCount(post.getPostLikers().size())
-                .commentCount(post.getComments().size())
-                .writeTime(post.getCreateTime())
-                .build();
-        if (post.getLocation() != null) {
-            postResponse.setLatitude(post.getLocation().getX());
-            postResponse.setLongitude(post.getLocation().getY());
-        }
-
-        return postResponse;
-    }
-
     // 단일 포스트 조회
     public PostDTO.PostResponse getPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-
         return convertToPostResponse(post);
     }
 
+    // 모든 포스트 조회
+    public PagedResponse<PostDTO.PostResponse> getAllPosts(int page, int size) {
+        validatePageNumberAndSize(page, size);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
+
+        Page<Post> posts = postRepository.findAll(pageable);
+        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        for (Post post : posts) {
+            responses.add(convertToPostResponse(post));
+        }
+        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
+                posts.getTotalPages(), posts.isLast());
+    }
+
     // 프로젝트 내 포스트 조회
-    public List<PostDTO.PostResponse> getPostsByProject(Long projectId) {
+    public PagedResponse<PostDTO.PostResponse> getPostsByProject(Long projectId ,int page, int size) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        List<Post> posts = postRepository.findAllByProject(project);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
+        Page<Post> posts = postRepository.findAllByProject(project, pageable);
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
             responses.add(convertToPostResponse(post));
         }
-        return responses;
+        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
+                posts.getTotalPages(), posts.isLast());
+    }
+
+    // 키워드로 게시물 조회
+    public PagedResponse<PostDTO.PostResponse> searchPostsInProject(Long projectId, String keyword, int page, int size) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
+        Page<Post> posts = postRepository.searchPostsInProject(project, keyword, pageable);
+
+        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        for (Post post : posts) {
+            responses.add(convertToPostResponse(post));
+        }
+        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
+                posts.getTotalPages(), posts.isLast());
+    }
+
+    // 해시태그 선별 조회
+    public PagedResponse<PostDTO.PostResponse> getPostsInProjectByHashTag(Long projectId, List<String> names, int page, int size) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
+        Page<Post> posts = postRepository.getPostsInProjectByHashTag(project, names, pageable);
+
+        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        for (Post post : posts) {
+            responses.add(convertToPostResponse(post));
+        }
+        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
+                posts.getTotalPages(), posts.isLast());
     }
 
     // 위치정보가 있는 Public 포스트들 조회
@@ -118,31 +115,18 @@ public class PostService {
         return responses;
     }
 
-    // 해시태그 선별 조회
-    public List<PostDTO.PostResponse> getPostByTag(Long projectId, List<String> names) {
-        List<PostTag> tags = postTagRepository.getPostTagByNames(names);
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
-        for (PostTag tag : tags) {
-            if(projectId.equals(tag.getPost().getProject().getId()))
-            {
-                responses.add(convertToPostResponse(tag.getPost()));
-            }
+    private void validatePageNumberAndSize(int page, int size) {
+        if (page < 0) {
+            throw new BadRequestException("페이지 번호가 0보다 작습니다.");
         }
-        return responses;
-    }
 
-    // 키워드로 게시물 조회
-    public List<PostDTO.PostResponse> searchPostsInProject(Long projectId, String keyword) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-
-        List<Post> posts = postRepository.searchPostsInProject(project, keyword);
-
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
-        for (Post post : posts) {
-            responses.add(convertToPostResponse(post));
+        if (size < 0) {
+            throw new BadRequestException("페이지 크기가 0보다 작습니다.");
         }
-        return responses;
+
+        if (size > 10) {
+            throw new BadRequestException("페이지 크기는 최대 10 입니다. ");
+        }
     }
 
     // 포스트 생성
@@ -244,4 +228,63 @@ public class PostService {
         postRepository.delete(post);
         return new ApiResponse(Boolean.TRUE, "포스트 삭제 성공");
     }
+
+    // Post to PostResponse
+    public PostDTO.PostResponse convertToPostResponse(Post post) {
+        UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(post.getWriter());
+
+        List<String> hashtags = new ArrayList<>();
+        if (post.getHashtags() != null) {
+            for (PostTag tag : post.getHashtags())
+                hashtags.add(tag.getName());
+        }
+
+        List<FileDTO.FileInfo> media = new ArrayList<>();
+        List<FileDTO.FileInfo> files = new ArrayList<>();
+        if (post.getMedia() != null) {
+            for (PostMedia temp : post.getMedia()) {
+                FileDTO.FileInfo fileInfo = FileDTO.FileInfo.builder()
+                        .contentType(temp.getContentType())
+                        .fileName(temp.getFileName())
+                        .build();
+                if (temp.getIsMedia()) {
+                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                            .path("/resources/")
+                            .path(temp.getStoredFileName())
+                            .toUriString();
+                    fileInfo.setFileDownloadUri(fileDownloadUri);
+                    media.add(fileInfo);
+                }
+                else {
+                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                            .path("/api/downloadFile/")
+                            .path(temp.getStoredFileName())
+                            .toUriString();
+                    fileInfo.setFileDownloadUri(fileDownloadUri);
+                    files.add(fileInfo);
+                }
+            }
+        }
+
+
+        PostDTO.PostResponse postResponse = PostDTO.PostResponse.builder()
+                .id(post.getId())
+                .project(new ProjectDTO.ProjectSimpleInfo(post.getProject()))
+                .writer(writer)
+                .contents(post.getContents())
+                .hashtags(hashtags)
+                .media(media)
+                .files(files)
+                .likeCount(post.getPostLikers().size())
+                .commentCount(post.getComments().size())
+                .writeTime(post.getCreateTime())
+                .build();
+        if (post.getLocation() != null) {
+            postResponse.setLatitude(post.getLocation().getX());
+            postResponse.setLongitude(post.getLocation().getY());
+        }
+
+        return postResponse;
+    }
+
 }
