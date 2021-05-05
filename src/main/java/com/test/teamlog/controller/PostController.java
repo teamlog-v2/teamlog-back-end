@@ -22,13 +22,13 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/posts")
+@RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class PostController {
     private final PostService postService;
 
     @ApiOperation(value = "단일 포스트 조회")
-    @GetMapping("/{id}")
+    @GetMapping("/posts/{id}")
     public ResponseEntity<PostDTO.PostResponse> getPostById(@PathVariable("id") long id) {
         PostDTO.PostResponse response = postService.getPost(id);
         return ResponseEntity.ok()
@@ -37,7 +37,7 @@ public class PostController {
     }
 
     @ApiOperation(value = "모든 포스트 조회")
-    @GetMapping
+    @GetMapping("/posts")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getAllPosts(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
                                                                            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         PagedResponse<PostDTO.PostResponse> response = postService.getAllPosts(page, size);
@@ -48,7 +48,7 @@ public class PostController {
     }
 
     @ApiOperation(value = "프로젝트의 모든 포스트 조회")
-    @GetMapping("/project/{projectId}")
+    @GetMapping("/posts/project/{projectId}")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostsByProject(@PathVariable("projectId") long projectId,
                                                                         @RequestParam(value = "page", required = false, defaultValue = "0") int page,
                                                                         @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
@@ -59,7 +59,7 @@ public class PostController {
     }
 
     @ApiOperation(value = "위치정보가 있는 Public 포스트들 조회")
-    @GetMapping("/with-location")
+    @GetMapping("/posts/with-location")
     public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts() {
         List<PostDTO.PostResponse> response = postService.getLocationPosts();
         return ResponseEntity.ok()
@@ -67,8 +67,20 @@ public class PostController {
                 .body(response);
     }
 
+    @ApiOperation(value = "프로젝트 내 게시물의 해시태그들 조회")
+    @GetMapping("/projects/{projectId}/hashtags")
+    public ResponseEntity<List<String>> getHashTagsInProjectPosts(@PathVariable("projectId") long projectId) {
+        long start = System.currentTimeMillis();
+        List<String> response = postService.getHashTagsInProjectPosts(projectId);
+        long end = System.currentTimeMillis();
+        System.out.println("수행시간: " + (end - start) + " ms");
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
+                .body(response);
+    }
+    
     @ApiOperation(value = "해시태그 선별 조회")
-    @GetMapping("/project/{projectId}/hashtag/{names}")
+    @GetMapping("/posts/project/{projectId}/hashtag/{names}")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
                                                                    @PathVariable("names") String[] names,
                                                                    @RequestParam(value = "page", required = false, defaultValue = "0") int page,
@@ -84,7 +96,7 @@ public class PostController {
     }
 
     @ApiOperation(value = "프로젝트 내 게시물 검색")
-    @GetMapping("/project/{projectId}/{keyword}")
+    @GetMapping("/posts/project/{projectId}/{keyword}")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
                                                                    @PathVariable("keyword") String keyword,
                                                                    @RequestParam(value = "page", required = false, defaultValue = "0") int page,
@@ -96,7 +108,7 @@ public class PostController {
     }
 
     @ApiOperation(value = "포스트 생성")
-    @PostMapping
+    @PostMapping("/posts")
     public ResponseEntity<ApiResponse> createProject(@RequestPart(value = "key", required = true) PostDTO.PostRequest request,
                                                      @RequestPart(value = "media", required = false) MultipartFile[] media,
                                                      @RequestPart(value = "files", required = false) MultipartFile[] files) {
@@ -105,7 +117,7 @@ public class PostController {
     }
 
     @ApiOperation(value = "포스트 수정")
-    @PutMapping("/{id}")
+    @PutMapping("/posts/{id}")
     public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
                                                      @RequestBody PostDTO.PostRequest request) {
         ApiResponse apiResponse = postService.updatePost(id, request);
@@ -113,7 +125,7 @@ public class PostController {
     }
 
     @ApiOperation(value = "포스트 삭제")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/posts/{id}")
     public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id) {
         ApiResponse apiResponse = postService.deletePost(id);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

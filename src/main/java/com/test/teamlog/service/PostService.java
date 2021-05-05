@@ -88,6 +88,16 @@ public class PostService {
                 posts.getTotalPages(), posts.isLast());
     }
 
+    // 프로젝트의 해시태그들 조회
+    public List<String> getHashTagsInProjectPosts(Long id) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
+
+        List<String> hashtags = postTagRepository.getHashTagsInProjectPosts(project);
+
+        return hashtags;
+    }
+
     // 해시태그 선별 조회
     public PagedResponse<PostDTO.PostResponse> getPostsInProjectByHashTag(Long projectId, List<String> names, int page, int size) {
         Project project = projectRepository.findById(projectId)
