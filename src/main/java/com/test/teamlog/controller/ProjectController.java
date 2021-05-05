@@ -6,11 +6,13 @@ import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.ProjectService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,14 +25,18 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<ProjectDTO.ProjectResponse> getProjectById(@PathVariable("id") long id) {
         ProjectDTO.ProjectResponse response = projectService.getProject(id);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
+                .body(response);
     }
 
     @ApiOperation(value = "유저 프로젝트 리스트 조회")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByUser(@PathVariable("userId") String userId) {
         List<ProjectDTO.ProjectListResponse> response = projectService.getProjectsByUser(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
+                .body(response);
     }
 
     @ApiOperation(value = "프로젝트 생성")
@@ -58,7 +64,9 @@ public class ProjectController {
     @GetMapping("/{id}/members")
     public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectMemberList(@PathVariable("id") Long id) {
         List<UserDTO.UserSimpleInfo> response = projectService.getProjectMemberList(id);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
+                .body(response);
     }
 
 //    // 프로젝트 위임 : master가 요청했는지 .. 그런건 없다..

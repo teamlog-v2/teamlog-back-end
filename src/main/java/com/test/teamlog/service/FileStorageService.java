@@ -56,7 +56,7 @@ public class FileStorageService {
         String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
         UUID uuid = UUID.randomUUID();
         String storedFileName = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-                + "(" + uuid.toString() + ")." + fileExtension;
+                + "(" + uuid.toString() + ")" + fileExtension;
         try {
             // Check invalid characters
             if (originalFileName.contains("..")) {
