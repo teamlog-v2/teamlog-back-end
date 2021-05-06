@@ -3,6 +3,8 @@ package com.test.teamlog.payload;
 import com.test.teamlog.entity.User;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.constraints.NotBlank;
@@ -61,4 +63,11 @@ public class UserDTO {
         }
     }
 
+    @Setter @Getter
+    public static class UserFollowInfo extends UserSimpleInfo {
+        private Boolean isFollow;
+        public UserFollowInfo(User user) {
+            super(user);
+        }
+    }
 }

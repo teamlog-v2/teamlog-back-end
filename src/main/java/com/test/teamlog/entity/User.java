@@ -1,10 +1,11 @@
 package com.test.teamlog.entity;
 
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -25,4 +26,12 @@ public class User {
 
     @Column(name = "profile_img_path")
     private String profileImgPath;
+
+    @OneToMany(mappedBy="toUser")
+    @BatchSize(size = 10)
+    private List<UserFollow> followers;
+
+    @OneToMany(mappedBy="fromUser")
+    @BatchSize(size = 10)
+    private List<UserFollow> following;
 }

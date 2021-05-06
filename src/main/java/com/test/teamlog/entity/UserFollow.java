@@ -1,13 +1,14 @@
 package com.test.teamlog.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
-@Getter
-@Setter
 @Entity
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "user_follow")
 public class UserFollow {
     @Id
@@ -21,4 +22,5 @@ public class UserFollow {
     @ManyToOne
     @JoinColumn(name = "to_user_id", nullable = false)
     private User toUser;
+
 }
