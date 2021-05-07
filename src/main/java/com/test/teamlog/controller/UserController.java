@@ -1,17 +1,22 @@
 package com.test.teamlog.controller;
 
+import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.payload.UserDTO;
+import com.test.teamlog.security.JwtUtil;
 import com.test.teamlog.service.UserService;
+import com.test.teamlog.util.CookieUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,6 +24,26 @@ import javax.validation.Valid;
 @CrossOrigin(origins = "*")
 public class UserController {
     private final UserService userService;
+    private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
+//    private final RedisUtil redisUtil;
+
+    // Read
+    @PostMapping("sign-in")
+    public ResponseEntity<ApiResponse> getUserById(@RequestBody UserDTO.SignInRequest userRequest,
+                                           HttpServletRequest req,
+                                           HttpServletResponse res) {
+        User user = userService.signIn(userRequest);
+        if (user != null) {
+            String token = jwtUtil.generateToken(user);
+            Cookie accessToken = cookieUtil.createCookie(JwtUtil.ACCESS_TOKEN_NAME, token);
+            // TODO : 추후 Redis 세팅 후 refresh token 사용 고려
+            res.addCookie(accessToken);
+            return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "로그인 성공"), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(new ApiResponse(Boolean.FALSE, "로그인 실패"), HttpStatus.NOT_FOUND);
+        }
+    }
 
     // Read
     @GetMapping("/{id}")

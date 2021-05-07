@@ -11,6 +11,12 @@ import javax.validation.constraints.NotBlank;
 
 public class UserDTO {
     @Data
+    public static class SignInRequest {
+        private String id;
+        private String password;
+    }
+
+    @Data
     public static class UserRequest {
         @NotBlank(message = "올바른 값 입력해주세요")
         private String id;
