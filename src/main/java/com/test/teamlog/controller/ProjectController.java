@@ -45,7 +45,7 @@ public class ProjectController {
     @PostMapping
     public ResponseEntity<ApiResponse> createProject(@RequestBody ProjectDTO.ProjectRequest request,
                                                      @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = projectService.createProject(request);
+        ApiResponse apiResponse = projectService.createProject(request, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
@@ -54,14 +54,15 @@ public class ProjectController {
     public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
                                                      @RequestBody ProjectDTO.ProjectRequest request,
                                                      @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = projectService.updateProject(id, request);
+        ApiResponse apiResponse = projectService.updateProject(id, request, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @ApiOperation(value = "프로젝트 삭제")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteProject(@PathVariable("id") Long id) {
-        ApiResponse apiResponse = projectService.deleteProject(id);
+    public ResponseEntity<ApiResponse> deleteProject(@PathVariable("id") Long id,
+                                                     @AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = projectService.deleteProject(id, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

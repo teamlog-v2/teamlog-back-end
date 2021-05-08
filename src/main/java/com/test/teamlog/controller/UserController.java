@@ -30,14 +30,13 @@ public class UserController {
 
     // Read
     @PostMapping("sign-in")
-    public ResponseEntity<ApiResponse> getUserById(@RequestBody UserDTO.SignInRequest userRequest,
-                                           HttpServletRequest req,
-                                           HttpServletResponse res) {
+    public ResponseEntity<ApiResponse> signIn(@RequestBody UserDTO.SignInRequest userRequest,
+                                                   HttpServletRequest req,
+                                                   HttpServletResponse res) {
         User user = userService.signIn(userRequest);
         if (user != null) {
             String token = jwtUtil.generateToken(user);
             Cookie accessToken = cookieUtil.createCookie(JwtUtil.ACCESS_TOKEN_NAME, token);
-            // TODO : 추후 Redis 세팅 후 refresh token 사용 고려
             res.addCookie(accessToken);
             return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "로그인 성공"), HttpStatus.OK);
         } else {
@@ -72,20 +71,18 @@ public class UserController {
     }
 
     @ApiOperation(value = "프로필 이미지 변경")
-    @PutMapping("/{id}/profile-image")
-    public ResponseEntity<ApiResponse> updateUser(@PathVariable("id") String id,
-                                                  @RequestPart(value = "profileImg", required = false) MultipartFile image,
+    @PutMapping("/profile-image")
+    public ResponseEntity<ApiResponse> updateUser(@RequestPart(value = "profileImg", required = false) MultipartFile image,
                                                   @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = userService.updateUserProfileImage(id, image);
+        ApiResponse apiResponse = userService.updateUserProfileImage(image, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     // Delete
     @ApiOperation(value = "유저 삭제")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteUser(@PathVariable("id") String id, 
-                                                  @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = userService.deleteUser(id);
+    @DeleteMapping
+    public ResponseEntity<ApiResponse> deleteUser(@AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = userService.deleteUser(currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

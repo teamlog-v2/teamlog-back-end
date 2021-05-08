@@ -19,7 +19,6 @@ public class PostDTO {
         private AccessModifier commentModifier;
         private Double latitude;
         private Double longitude;
-        private String writerId;
         private Long projectId;
         private List<String> hashtags;
     }

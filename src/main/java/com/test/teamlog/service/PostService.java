@@ -141,10 +141,7 @@ public class PostService {
 
     // 포스트 생성
     @Transactional
-    public ApiResponse createPost(PostDTO.PostRequest request, MultipartFile[] media, MultipartFile[] files) {
-        User writer = userRepository.findById(request.getWriterId())
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", request.getWriterId()));
-
+    public ApiResponse createPost(PostDTO.PostRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", request.getProjectId()));
 
@@ -159,7 +156,7 @@ public class PostService {
                 .accessModifier(request.getAccessModifier())
                 .commentModifier(request.getCommentModifier())
                 .location(point)
-                .writer(writer)
+                .writer(currentUser)
                 .project(project)
                 .build();
 

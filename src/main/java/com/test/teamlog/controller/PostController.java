@@ -47,9 +47,9 @@ public class PostController {
     @ApiOperation(value = "프로젝트의 모든 포스트 조회")
     @GetMapping("/posts/project/{projectId}")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostsByProject(@PathVariable("projectId") long projectId,
-                                                                        @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                        @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        PagedResponse<PostDTO.PostResponse> response = postService.getPostsByProject(projectId,page,size);
+                                                                                 @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                                 @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        PagedResponse<PostDTO.PostResponse> response = postService.getPostsByProject(projectId, page, size);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
                 .body(response);
@@ -75,13 +75,13 @@ public class PostController {
                 .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
                 .body(response);
     }
-    
+
     @ApiOperation(value = "해시태그 선별 조회")
     @GetMapping("/posts/project/{projectId}/hashtag/{names}")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
-                                                                   @PathVariable("names") String[] names,
-                                                                   @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                   @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+                                                                            @PathVariable("names") String[] names,
+                                                                            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         long start = System.currentTimeMillis();
         List<String> hashtags = Arrays.asList(names);
         PagedResponse<PostDTO.PostResponse> response = postService.getPostsInProjectByHashTag(projectId, hashtags, page, size);
@@ -95,9 +95,9 @@ public class PostController {
     @ApiOperation(value = "프로젝트 내 게시물 검색")
     @GetMapping("/posts/project/{projectId}/{keyword}")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
-                                                                   @PathVariable("keyword") String keyword,
-                                                                   @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                   @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+                                                                            @PathVariable("keyword") String keyword,
+                                                                            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         PagedResponse<PostDTO.PostResponse> response = postService.searchPostsInProject(projectId, keyword, page, size);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
@@ -110,7 +110,7 @@ public class PostController {
                                                      @RequestPart(value = "media", required = false) MultipartFile[] media,
                                                      @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                      @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = postService.createPost(request, media, files);
+        ApiResponse apiResponse = postService.createPost(request, media, files, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 

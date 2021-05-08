@@ -55,7 +55,7 @@ public class CommentController {
     @PostMapping("/comments")
     public ResponseEntity<ApiResponse> createProject(@RequestBody CommentDTO.CommentRequest request,
                                                      @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = commentService.createComment(request);
+        ApiResponse apiResponse = commentService.createComment(request, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 

@@ -57,36 +57,30 @@ public class UserService {
     }
 
     @Transactional
-    public ApiResponse updateUser(String id, UserDTO.UserRequest userRequest) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "ID", id));
-        user.setName(userRequest.getName());
-        user.setIntroduction(userRequest.getIntroduction());
-        userRepository.save(user);
+    public ApiResponse updateUser(UserDTO.UserRequest userRequest, User currentUser) {
+        currentUser.setName(userRequest.getName());
+        currentUser.setIntroduction(userRequest.getIntroduction());
+        userRepository.save(currentUser);
         return new ApiResponse(Boolean.TRUE, "프로필 수정 성공");
     }
 
     @Transactional
-    public ApiResponse updateUserProfileImage(String id, MultipartFile image) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "ID", id));
-        if (user.getProfileImgPath() != null) {
-            fileStorageService.deleteFile(user.getProfileImgPath());
-            user.setProfileImgPath(null);
+    public ApiResponse updateUserProfileImage(MultipartFile image, User currentUser) {
+        if (currentUser.getProfileImgPath() != null) {
+            fileStorageService.deleteFile(currentUser.getProfileImgPath());
+            currentUser.setProfileImgPath(null);
         }
         String profileImgPath = fileStorageService.storeFile(image, null, null);
-        user.setProfileImgPath(profileImgPath);
-        userRepository.save(user);
+        currentUser.setProfileImgPath(profileImgPath);
+        userRepository.save(currentUser);
         return new ApiResponse(Boolean.TRUE, "프로필 이미지 수정 성공");
     }
 
     //회원 탈퇴
     @Transactional
-    public ApiResponse deleteUser(String id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "ID", id));
+    public ApiResponse deleteUser(User currentUser) {
         // TODO : 허가된 사용자인지 검증해야함..
-        userRepository.delete(user);
+        userRepository.delete(currentUser);
         return new ApiResponse(Boolean.TRUE, "회원 탈퇴 성공");
     }
 }

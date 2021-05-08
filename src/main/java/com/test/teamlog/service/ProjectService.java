@@ -70,20 +70,17 @@ public class ProjectService {
 
     // 프로젝트 생성
     @Transactional
-    public ApiResponse createProject(ProjectDTO.ProjectRequest request) {
-        User master = userRepository.findById(request.getMasterId())
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", request.getMasterId()));
-
+    public ApiResponse createProject(ProjectDTO.ProjectRequest request, User currentUser) {
         Project project = Project.builder()
                 .name(request.getName())
                 .introduction(request.getIntroduction())
                 .accessModifier(request.getAccessModifier())
-                .master(master)
+                .master(currentUser)
                 .build();
         projectRepository.save(project);
 
         ProjectMember member = ProjectMember.builder()
-                .user(master)
+                .user(currentUser)
                 .project(project)
                 .build();
         projectMemberRepository.save(member);
@@ -93,7 +90,8 @@ public class ProjectService {
 
     // 프로젝트 수정
     @Transactional
-    public ApiResponse updateProject(Long id, ProjectDTO.ProjectRequest request) {
+    public ApiResponse updateProject(Long id, ProjectDTO.ProjectRequest request, User currentUser) {
+        // TODO : 마스터랑 현재사용자 비교
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
         project.setName(request.getName());
@@ -112,7 +110,8 @@ public class ProjectService {
 
     // 프로젝트 삭제
     @Transactional
-    public ApiResponse deleteProject(Long id) {
+    public ApiResponse deleteProject(Long id, User currentUser) {
+        // TODO : 마스터랑 현재사용자 비교
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
 

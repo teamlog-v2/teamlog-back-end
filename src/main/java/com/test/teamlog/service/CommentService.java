@@ -139,10 +139,7 @@ public class CommentService {
 
     // 댓글 생성
     @Transactional
-    public ApiResponse createComment(CommentDTO.CommentRequest request) {
-        User writer = userRepository.findById(request.getWriterId())
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", request.getWriterId()));
-
+    public ApiResponse createComment(CommentDTO.CommentRequest request, User currentUser) {
         Post post = postRepository.findById(request.getPostId())
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", request.getPostId()));
 
@@ -153,7 +150,7 @@ public class CommentService {
         }
 
         Comment comment = Comment.builder()
-                .writer(writer)
+                .writer(currentUser)
                 .post(post)
                 .contents(request.getContents())
                 .parentComment(parentComment)

@@ -22,14 +22,19 @@ public class UserFollowService {
     private final UserFollowRepository userFollowRepository;
 
     // 팔로워 리스트 조회
-    public List<UserDTO.UserFollowInfo> getFollowerList(String userId){
-        User user = userRepository.findById(userId)
-                .orElseThrow(()-> new ResourceNotFoundException("User","ID",userId));
+    public List<UserDTO.UserFollowInfo> getFollowerList(String userId, User currentUser){
+        User user = null;
+        if(userId.equals(currentUser.getId())){
+            user = currentUser;
+        } else {
+            user = userRepository.findById(userId)
+                    .orElseThrow(()-> new ResourceNotFoundException("User","ID",userId));
+        }
         List<UserFollow> followers = user.getFollowers();
         List<UserDTO.UserFollowInfo> responses = new ArrayList<>();
         for (UserFollow follower : followers) {
             UserDTO.UserFollowInfo temp = new UserDTO.UserFollowInfo(follower.getFromUser());
-            for(UserFollow following : user.getFollowing()){
+            for(UserFollow following : currentUser.getFollowing()){
                 if(following.getToUser().equals(follower.getFromUser())) {
                     temp.setIsFollow(Boolean.TRUE);
                     break;
@@ -43,14 +48,26 @@ public class UserFollowService {
     }
 
     // 팔로잉 리스트 조회
-    public List<UserDTO.UserFollowInfo> getFollowingList(String userId){
-        User user = userRepository.findById(userId)
-                .orElseThrow(()-> new ResourceNotFoundException("User","ID",userId));
+    public List<UserDTO.UserFollowInfo> getFollowingList(String userId, User currentUser){
+        User user = null;
+        if(userId.equals(currentUser.getId())){
+            user = currentUser;
+        } else {
+            user = userRepository.findById(userId)
+                    .orElseThrow(()-> new ResourceNotFoundException("User","ID",userId));
+        }
         List<UserFollow> followings = user.getFollowing();
         List<UserDTO.UserFollowInfo> responses = new ArrayList<>();
         for (UserFollow following : followings) {
             UserDTO.UserFollowInfo temp = new UserDTO.UserFollowInfo(following.getToUser());
-            temp.setIsFollow(Boolean.TRUE);
+            for(UserFollow currentUserfollowing : currentUser.getFollowing()){
+                if(currentUserfollowing.getToUser().equals(following.getFromUser())) {
+                    temp.setIsFollow(Boolean.TRUE);
+                    break;
+                } else {
+                    temp.setIsFollow(Boolean.FALSE);
+                }
+            }
             responses.add(temp);
         }
         return responses;
@@ -58,14 +75,12 @@ public class UserFollowService {
 
     // 팔로우
     @Transactional
-    public ApiResponse followUser(String userId, String targetUserID){
-        User user = userRepository.findById(userId)
-                .orElseThrow(()-> new ResourceNotFoundException("User","ID",userId));
+    public ApiResponse followUser(User currentUser, String targetUserID){
         User targetUser = userRepository.findById(targetUserID)
                 .orElseThrow(()-> new ResourceNotFoundException("User","ID",targetUserID));
 
         UserFollow newFollow = UserFollow.builder()
-                .fromUser(user)
+                .fromUser(currentUser)
                 .toUser(targetUser)
                 .build();
 
@@ -75,12 +90,10 @@ public class UserFollowService {
 
     // 언팔로우
     @Transactional
-    public ApiResponse unfollowUser(String userId, String targetUserID) {
+    public ApiResponse unfollowUser(String userId, User currentUser) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new ResourceNotFoundException("User","ID",userId));
-        User targetUser = userRepository.findById(targetUserID)
-                .orElseThrow(()-> new ResourceNotFoundException("User","ID",targetUserID));
-        UserFollow userFollow = userFollowRepository.findByFromUserAndToUser(user,targetUser);
+        UserFollow userFollow = userFollowRepository.findByFromUserAndToUser(user,currentUser);
         userFollowRepository.delete(userFollow);
         return new ApiResponse(Boolean.TRUE, "언팔로우 성공");
     }

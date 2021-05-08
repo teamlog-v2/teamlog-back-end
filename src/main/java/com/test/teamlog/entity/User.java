@@ -30,11 +30,11 @@ public class User implements UserDetails {
     @Column(name = "profile_img_path")
     private String profileImgPath;
 
-    @OneToMany(mappedBy="toUser")
+    @OneToMany(mappedBy="toUser", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<UserFollow> followers;
 
-    @OneToMany(mappedBy="fromUser")
+    @OneToMany(mappedBy="fromUser", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<UserFollow> following;
 
