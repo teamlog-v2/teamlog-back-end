@@ -1,5 +1,6 @@
 package com.test.teamlog.controller;
 
+import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.payload.UserDTO;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +28,7 @@ public class ProjectController {
     public ResponseEntity<ProjectDTO.ProjectResponse> getProjectById(@PathVariable("id") long id) {
         ProjectDTO.ProjectResponse response = projectService.getProject(id);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
                 .body(response);
     }
 
@@ -35,20 +37,23 @@ public class ProjectController {
     public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByUser(@PathVariable("userId") String userId) {
         List<ProjectDTO.ProjectListResponse> response = projectService.getProjectsByUser(userId);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
                 .body(response);
     }
 
     @ApiOperation(value = "프로젝트 생성")
     @PostMapping
-    public ResponseEntity<ApiResponse> createProject(@RequestBody ProjectDTO.ProjectRequest request) {
+    public ResponseEntity<ApiResponse> createProject(@RequestBody ProjectDTO.ProjectRequest request,
+                                                     @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = projectService.createProject(request);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "프로젝트 수정")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id, @RequestBody ProjectDTO.ProjectRequest request) {
+    public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
+                                                     @RequestBody ProjectDTO.ProjectRequest request,
+                                                     @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = projectService.updateProject(id, request);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -65,7 +70,7 @@ public class ProjectController {
     public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectMemberList(@PathVariable("id") Long id) {
         List<UserDTO.UserSimpleInfo> response = projectService.getProjectMemberList(id);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
                 .body(response);
     }
 

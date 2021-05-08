@@ -1,5 +1,6 @@
 package com.test.teamlog.controller;
 
+import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.CommentDTO;
 import com.test.teamlog.payload.PagedResponse;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
 public class CommentController {
     private final CommentService commentService;
 
@@ -29,9 +30,8 @@ public class CommentController {
                                                                                          @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         PagedResponse<CommentDTO.CommentInfo> response = commentService.getParentComments(postId, page, size);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
-                .body(response);
-    }
+                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .body(response);    }
 
     @ApiOperation(value = "대댓글 조회")
     @GetMapping("/comments/{commentId}/child-comments")
@@ -40,7 +40,7 @@ public class CommentController {
                                                                                   @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         PagedResponse<CommentDTO.CommentInfo> response = commentService.getChildComments(commentId, page, size);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(31536000, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
                 .body(response);
     }
 
@@ -53,21 +53,25 @@ public class CommentController {
 
     @ApiOperation(value = "댓글 생성")
     @PostMapping("/comments")
-    public ResponseEntity<ApiResponse> createProject(@RequestBody CommentDTO.CommentRequest request) {
+    public ResponseEntity<ApiResponse> createProject(@RequestBody CommentDTO.CommentRequest request,
+                                                     @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = commentService.createComment(request);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "댓글 수정")
     @PutMapping("/comments/{id}")
-    public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id, @RequestBody CommentDTO.CommentRequest request) {
+    public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
+                                                     @RequestBody CommentDTO.CommentRequest request,
+                                                     @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = commentService.updateComment(id, request);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @ApiOperation(value = "댓글 삭제")
     @DeleteMapping("/comments/{id}")
-    public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
+                                                  @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = commentService.deleteComment(id);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

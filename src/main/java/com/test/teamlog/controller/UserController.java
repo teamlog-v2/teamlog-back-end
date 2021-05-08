@@ -9,6 +9,7 @@ import com.test.teamlog.util.CookieUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
 public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
@@ -49,7 +49,9 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO.UserResponse> getUserById(@PathVariable("id") String id) {
         UserDTO.UserResponse userResponse = userService.getUser(id);
-        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .body(userResponse);
     }
 
     // Create
@@ -61,23 +63,28 @@ public class UserController {
     }
 
     //Update
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateUser(@PathVariable("id") String id, @Valid @RequestBody UserDTO.UserRequest userRequest) {
-        ApiResponse apiResponse = userService.updateUser(id, userRequest);
+    @ApiOperation(value = "유저 수정")
+    @PutMapping
+    public ResponseEntity<ApiResponse> updateUser(@Valid @RequestBody UserDTO.UserRequest userRequest,
+                                                  @AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = userService.updateUser(userRequest, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @ApiOperation(value = "프로필 이미지 변경")
     @PutMapping("/{id}/profile-image")
     public ResponseEntity<ApiResponse> updateUser(@PathVariable("id") String id,
-                                                  @RequestPart(value = "profileImg", required = false) MultipartFile image) {
+                                                  @RequestPart(value = "profileImg", required = false) MultipartFile image,
+                                                  @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.updateUserProfileImage(id, image);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     // Delete
+    @ApiOperation(value = "유저 삭제")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteUser(@PathVariable("id") String id) {
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable("id") String id, 
+                                                  @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.deleteUser(id);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
