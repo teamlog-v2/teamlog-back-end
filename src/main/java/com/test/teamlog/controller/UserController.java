@@ -29,8 +29,8 @@ public class UserController {
 
     @ApiOperation(value = "로그인 된 사용자인지 검증")
     @GetMapping("/validate")
-    public ResponseEntity<ApiResponse> validateUser() {
-        return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "로그인 된 사용자"), HttpStatus.OK);
+    public ResponseEntity<String> validateUser(@AuthenticationPrincipal User currentUser) {
+        return new ResponseEntity<>(currentUser.getId(), HttpStatus.OK);
     }
 
     @ApiOperation(value = "로그인")
@@ -43,7 +43,7 @@ public class UserController {
             String token = jwtUtil.generateToken(user);
             Cookie accessToken = cookieUtil.createCookie(JwtUtil.ACCESS_TOKEN_NAME, token);
             res.addCookie(accessToken);
-            return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "로그인 성공"), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, user.getId()), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(new ApiResponse(Boolean.FALSE, "로그인 실패"), HttpStatus.NOT_FOUND);
         }
