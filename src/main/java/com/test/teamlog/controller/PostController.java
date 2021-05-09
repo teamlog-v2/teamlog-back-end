@@ -69,13 +69,13 @@ public class PostController {
     @ApiOperation(value = "프로젝트의 모든 포스트 조회")
     @GetMapping("/posts/project/{projectId}")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostsByProject(@PathVariable("projectId") long projectId,
-                                                                                 @RequestParam(value = "names", required = false) String[] names,
+                                                                                 @RequestParam(value = "hashtag", required = false) String[] hashtag,
                                                                                  @RequestParam(value = "keyword", required = false) String keyword,
                                                                                  @RequestParam(value = "order", required = false, defaultValue = "1") Integer order,
                                                                                  @RequestParam(value = "cursor", required = false) Long cursor,
                                                                                  @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        List<String> hashtags = null;
-        if(names != null) hashtags = Arrays.asList(names);
+        List<String> hashtagList = null;
+        if(hashtag != null) hashtagList = Arrays.asList(hashtag);
 
         Sort.Direction sort = Sort.Direction.DESC;
         String comparisonOperator = "<";
@@ -84,12 +84,12 @@ public class PostController {
             comparisonOperator = ">";
         }
         PagedResponse<PostDTO.PostResponse> response = null;
-        if(keyword != null & hashtags != null){
-            response = postService.searchPostsInProjectByHashtagAndKeyword(projectId, keyword, hashtags, sort, comparisonOperator, cursor, size);
+        if(keyword != null & hashtagList != null){
+            response = postService.searchPostsInProjectByHashtagAndKeyword(projectId, keyword, hashtagList, sort, comparisonOperator, cursor, size);
         } else if (keyword != null) {
             response = postService.searchPostsInProject(projectId, keyword, sort, comparisonOperator, cursor, size);
-        } else if (hashtags != null) {
-            response = postService.getPostsInProjectByHashtag(projectId, hashtags, sort, comparisonOperator, cursor, size);
+        } else if (hashtagList != null) {
+            response = postService.getPostsInProjectByHashtag(projectId, hashtagList, sort, comparisonOperator, cursor, size);
         } else {
             response = postService.getPostsByProject(projectId, sort, comparisonOperator, cursor, size);
         }
