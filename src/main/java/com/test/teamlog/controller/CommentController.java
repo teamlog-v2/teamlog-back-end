@@ -30,8 +30,9 @@ public class CommentController {
                                                                                          @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         PagedResponse<CommentDTO.CommentInfo> response = commentService.getParentComments(postId, page, size);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
-                .body(response);    }
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
+                .body(response);
+    }
 
     @ApiOperation(value = "대댓글 조회")
     @GetMapping("/comments/{commentId}/child-comments")
@@ -40,7 +41,7 @@ public class CommentController {
                                                                                   @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         PagedResponse<CommentDTO.CommentInfo> response = commentService.getChildComments(commentId, page, size);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 

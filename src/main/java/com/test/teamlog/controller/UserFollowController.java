@@ -27,7 +27,7 @@ public class UserFollowController {
                                                                         @AuthenticationPrincipal User currentUser) {
         List<UserDTO.UserFollowInfo> response = userFollowService.getFollowerList(id, currentUser);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 
@@ -37,21 +37,21 @@ public class UserFollowController {
                                                                          @AuthenticationPrincipal User currentUser) {
         List<UserDTO.UserFollowInfo> response = userFollowService.getFollowingList(id, currentUser);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 
     @ApiOperation(value = "팔로우")
-    @PostMapping("/userfollows")
-    public ResponseEntity<ApiResponse> followUser(@RequestParam(value = "to-user", required = true) String toUserId,
+    @PostMapping("/userfollows/{targetId}")
+    public ResponseEntity<ApiResponse> followUser(@PathVariable("targetId") String toUserId,
                                                   @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userFollowService.followUser(currentUser, toUserId);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "팔로잉")
-    @DeleteMapping("/userfollows")
-    public ResponseEntity<ApiResponse> unfollowUser(@RequestParam(value = "from-user", required = true) String fromUserId,
+    @ApiOperation(value = "언팔로우")
+    @DeleteMapping("/userfollows/{targetId}")
+    public ResponseEntity<ApiResponse> unfollowUser(@PathVariable("targetId") String fromUserId,
                                                     @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userFollowService.unfollowUser(fromUserId, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

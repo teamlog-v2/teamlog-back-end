@@ -21,18 +21,23 @@ import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/users")
+@RequestMapping("/api")
 public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
-//    private final RedisUtil redisUtil;
 
-    // Read
-    @PostMapping("sign-in")
+    @ApiOperation(value = "로그인 된 사용자인지 검증")
+    @GetMapping("/validate")
+    public ResponseEntity<ApiResponse> validateUser() {
+        return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "로그인 된 사용자"), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "로그인")
+    @PostMapping("/sign-in")
     public ResponseEntity<ApiResponse> signIn(@RequestBody UserDTO.SignInRequest userRequest,
-                                                   HttpServletRequest req,
-                                                   HttpServletResponse res) {
+                                              HttpServletRequest req,
+                                              HttpServletResponse res) {
         User user = userService.signIn(userRequest);
         if (user != null) {
             String token = jwtUtil.generateToken(user);
@@ -44,8 +49,8 @@ public class UserController {
         }
     }
 
-    // Read
-    @GetMapping("/{id}")
+    @ApiOperation(value = "회원 조회")
+    @GetMapping("/users/{id}")
     public ResponseEntity<UserDTO.UserResponse> getUserById(@PathVariable("id") String id) {
         UserDTO.UserResponse userResponse = userService.getUser(id);
         return ResponseEntity.ok()
@@ -53,8 +58,8 @@ public class UserController {
                 .body(userResponse);
     }
 
-    // Create
-    @PostMapping("")
+    @ApiOperation(value = "회원 가입")
+    @PostMapping("/users")
     public ResponseEntity<UserDTO.UserResponse> signUp(@Valid @RequestBody UserDTO.UserRequest userRequest) {
         userService.signUp(userRequest);
         UserDTO.UserResponse userResponse = userService.getUser(userRequest.getId());
@@ -62,8 +67,8 @@ public class UserController {
     }
 
     //Update
-    @ApiOperation(value = "유저 수정")
-    @PutMapping
+    @ApiOperation(value = "회원 수정")
+    @PutMapping("/users")
     public ResponseEntity<ApiResponse> updateUser(@Valid @RequestBody UserDTO.UserRequest userRequest,
                                                   @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.updateUser(userRequest, currentUser);
@@ -71,7 +76,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "프로필 이미지 변경")
-    @PutMapping("/profile-image")
+    @PutMapping("/users/profile-image")
     public ResponseEntity<ApiResponse> updateUser(@RequestPart(value = "profileImg", required = false) MultipartFile image,
                                                   @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.updateUserProfileImage(image, currentUser);
@@ -79,8 +84,8 @@ public class UserController {
     }
 
     // Delete
-    @ApiOperation(value = "유저 삭제")
-    @DeleteMapping
+    @ApiOperation(value = "회원 삭제")
+    @DeleteMapping("/users")
     public ResponseEntity<ApiResponse> deleteUser(@AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.deleteUser(currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

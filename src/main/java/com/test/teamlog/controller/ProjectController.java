@@ -28,7 +28,7 @@ public class ProjectController {
     public ResponseEntity<ProjectDTO.ProjectResponse> getProjectById(@PathVariable("id") long id) {
         ProjectDTO.ProjectResponse response = projectService.getProject(id);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 
@@ -37,7 +37,7 @@ public class ProjectController {
     public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByUser(@PathVariable("userId") String userId) {
         List<ProjectDTO.ProjectListResponse> response = projectService.getProjectsByUser(userId);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 
@@ -71,7 +71,7 @@ public class ProjectController {
     public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectMemberList(@PathVariable("id") Long id) {
         List<UserDTO.UserSimpleInfo> response = projectService.getProjectMemberList(id);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 

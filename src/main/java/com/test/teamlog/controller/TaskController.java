@@ -34,7 +34,7 @@ public class TaskController {
     public ResponseEntity<List<TaskDTO.TaskResponse>> getTasksByProject(@PathVariable("id") Long id) {
         List<TaskDTO.TaskResponse> taskList = taskService.getTasksByProject(id);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(taskList);
     }
 

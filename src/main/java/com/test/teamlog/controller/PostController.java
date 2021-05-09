@@ -29,7 +29,7 @@ public class PostController {
     public ResponseEntity<PostDTO.PostResponse> getPostById(@PathVariable("id") long id) {
         PostDTO.PostResponse response = postService.getPost(id);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 
@@ -40,7 +40,7 @@ public class PostController {
         PagedResponse<PostDTO.PostResponse> response = postService.getAllPosts(page, size);
 
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 
@@ -51,7 +51,7 @@ public class PostController {
                                                                                  @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         PagedResponse<PostDTO.PostResponse> response = postService.getPostsByProject(projectId, page, size);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 
@@ -60,7 +60,7 @@ public class PostController {
     public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts() {
         List<PostDTO.PostResponse> response = postService.getLocationPosts();
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 
@@ -72,7 +72,7 @@ public class PostController {
         long end = System.currentTimeMillis();
         System.out.println("수행시간: " + (end - start) + " ms");
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 
@@ -88,7 +88,7 @@ public class PostController {
         long end = System.currentTimeMillis();
         System.out.println("수행시간: " + (end - start) + " ms");
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 
@@ -100,7 +100,7 @@ public class PostController {
                                                                             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         PagedResponse<PostDTO.PostResponse> response = postService.searchPostsInProject(projectId, keyword, page, size);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
     }
 
