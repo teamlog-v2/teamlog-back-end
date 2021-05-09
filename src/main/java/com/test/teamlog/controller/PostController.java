@@ -7,6 +7,7 @@ import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.service.PostService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,17 +45,6 @@ public class PostController {
                 .body(response);
     }
 
-    @ApiOperation(value = "프로젝트의 모든 포스트 조회")
-    @GetMapping("/posts/project/{projectId}")
-    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostsByProject(@PathVariable("projectId") long projectId,
-                                                                                 @RequestParam(value = "cursor", required = false) Long cursor,
-                                                                                 @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        PagedResponse<PostDTO.PostResponse> response = postService.getPostsByProject(projectId, cursor, size);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
-    }
-
     @ApiOperation(value = "위치정보가 있는 Public 포스트들 조회")
     @GetMapping("/posts/with-location")
     public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts() {
@@ -76,30 +66,34 @@ public class PostController {
                 .body(response);
     }
 
-    @ApiOperation(value = "해시태그 선별 조회")
-    @GetMapping("/posts/project/{projectId}/hashtag/{names}")
-    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
-                                                                            @PathVariable("names") String[] names,
-                                                                            @RequestParam(value = "cursor", required = false) Long cursor,
-                                                                            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        long start = System.currentTimeMillis();
-        List<String> hashtags = Arrays.asList(names);
-        PagedResponse<PostDTO.PostResponse> response = postService.getPostsInProjectByHashTag(projectId, hashtags, cursor
-                , size);
-        long end = System.currentTimeMillis();
-        System.out.println("수행시간: " + (end - start) + " ms");
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
-    }
+    @ApiOperation(value = "프로젝트의 모든 포스트 조회")
+    @GetMapping("/posts/project/{projectId}")
+    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostsByProject(@PathVariable("projectId") long projectId,
+                                                                                 @RequestParam(value = "names", required = false) String[] names,
+                                                                                 @RequestParam(value = "keyword", required = false) String keyword,
+                                                                                 @RequestParam(value = "order", required = false, defaultValue = "1") Integer order,
+                                                                                 @RequestParam(value = "cursor", required = false) Long cursor,
+                                                                                 @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        List<String> hashtags = null;
+        if(names != null) hashtags = Arrays.asList(names);
 
-    @ApiOperation(value = "프로젝트 내 게시물 검색")
-    @GetMapping("/posts/project/{projectId}/{keyword}")
-    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
-                                                                            @PathVariable("keyword") String keyword,
-                                                                            @RequestParam(value = "cursor", required = false) Long cursor,
-                                                                            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        PagedResponse<PostDTO.PostResponse> response = postService.searchPostsInProject(projectId, keyword, cursor, size);
+        Sort.Direction sort = Sort.Direction.DESC;
+        String comparisonOperator = "<";
+        if(order == -1) {
+            sort = Sort.Direction.ASC;
+            comparisonOperator = ">";
+        }
+        PagedResponse<PostDTO.PostResponse> response = null;
+        if(keyword != null & hashtags != null){
+            response = postService.searchPostsInProjectByHashtagAndKeyword(projectId, keyword, hashtags, sort, comparisonOperator, cursor, size);
+        } else if (keyword != null) {
+            response = postService.searchPostsInProject(projectId, keyword, sort, comparisonOperator, cursor, size);
+        } else if (hashtags != null) {
+            response = postService.getPostsInProjectByHashtag(projectId, hashtags, sort, comparisonOperator, cursor, size);
+        } else {
+            response = postService.getPostsByProject(projectId, sort, comparisonOperator, cursor, size);
+        }
+
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);

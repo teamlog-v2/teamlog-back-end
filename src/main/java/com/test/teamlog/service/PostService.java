@@ -57,16 +57,17 @@ public class PostService {
     }
 
     // 프로젝트 내 포스트 조회
-    public PagedResponse<PostDTO.PostResponse> getPostsByProject(Long projectId, Long cursor, int size) {
+    public PagedResponse<PostDTO.PostResponse> getPostsByProject(Long projectId, Sort.Direction sort, String cop,
+                                                                 Long cursor, int size) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        Pageable pageable = PageRequest.of(0, size, Sort.Direction.DESC, "createTime");
+        Pageable pageable = PageRequest.of(0, size, sort, "createTime");
 
         Page<Post> posts = null;
-        if(cursor == null) {
+        if (cursor == null) {
             posts = postRepository.findAllByProject(project, pageable);
         } else {
-            posts = postRepository.findAllByProjectAndCursor(project, cursor, pageable);
+            posts = postRepository.findAllByProjectAndCursor(project, cursor ,cop, pageable);
         }
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
@@ -78,19 +79,68 @@ public class PostService {
     }
 
     // 키워드로 게시물 조회
-    public PagedResponse<PostDTO.PostResponse> searchPostsInProject(Long projectId, String keyword, Long cursor, int size) {
+    public PagedResponse<PostDTO.PostResponse> searchPostsInProject(Long projectId, String keyword, Sort.Direction sort,
+                                                                    String cop, Long cursor, int size) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        Pageable pageable = PageRequest.of(0, size, Sort.Direction.DESC, "createTime");
+        Pageable pageable = PageRequest.of(0, size, sort, "createTime");
 
         Page<Post> posts = null;
-        if(cursor == null) {
+        if (cursor == null) {
             posts = postRepository.searchPostsInProject(project, keyword, pageable);
         } else {
-            posts = postRepository.searchPostsInProjectByCursor(project, cursor, keyword, pageable);
+            posts = postRepository.searchPostsInProjectByCursor(project, cursor, keyword, cop, pageable);
         }
 
+        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        for (Post post : posts) {
+            responses.add(convertToPostResponse(post));
+        }
+        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
+                posts.getTotalPages(), posts.isLast());
+    }
+
+    // 해시태그 선별 조회 + 키워드 검색
+    public PagedResponse<PostDTO.PostResponse> searchPostsInProjectByHashtagAndKeyword(Long projectId,
+                                                                                       String keyword,
+                                                                                       List<String> names,
+                                                                                       Sort.Direction sort,
+                                                                                       String cop,
+                                                                                       Long cursor,
+                                                                                       int size) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        Pageable pageable = PageRequest.of(0, size, sort, "createTime");
+
+        Page<Post> posts = null;
+        if (cursor == null) {
+            posts = postRepository.searchPostsInProjectByHashtagAndKeyword(project, names, keyword, pageable);
+        } else {
+            posts = postRepository.searchPostsInProjectByHashtagAndKeywordAndCursor(project, cursor, names,
+                    keyword, cop, pageable);
+        }
+        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        for (Post post : posts) {
+            responses.add(convertToPostResponse(post));
+        }
+        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
+                posts.getTotalPages(), posts.isLast());
+    }
+
+    // 해시태그 선별 조회
+    public PagedResponse<PostDTO.PostResponse> getPostsInProjectByHashtag(Long projectId, List<String> names, Sort.Direction sort,
+                                                                          String cop, Long cursor, int size) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        Pageable pageable = PageRequest.of(0, size, sort, "createTime");
+
+        Page<Post> posts = null;
+        if (cursor == null) {
+            posts = postRepository.getPostsInProjectByHashTag(project, names, pageable);
+        } else {
+            posts = postRepository.getPostsInProjectByHashTagAndCursor(project, cursor, names, cop, pageable);
+        }
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
             responses.add(convertToPostResponse(post));
@@ -107,27 +157,6 @@ public class PostService {
         List<String> hashtags = postTagRepository.getHashTagsInProjectPosts(project);
 
         return hashtags;
-    }
-
-    // 해시태그 선별 조회
-    public PagedResponse<PostDTO.PostResponse> getPostsInProjectByHashTag(Long projectId, List<String> names, Long cursor, int size) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-
-        Pageable pageable = PageRequest.of(0, size, Sort.Direction.DESC, "createTime");
-
-        Page<Post> posts = null;
-        if(cursor == null) {
-            posts = postRepository.getPostsInProjectByHashTag(project, names, pageable);
-        } else {
-            posts = postRepository.getPostsInProjectByHashTag(project, cursor, names, pageable);
-        }
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
-        for (Post post : posts) {
-            responses.add(convertToPostResponse(post));
-        }
-        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
-                posts.getTotalPages(), posts.isLast());
     }
 
     // 위치정보가 있는 Public 포스트들 조회
@@ -277,8 +306,7 @@ public class PostService {
                             .toUriString();
                     fileInfo.setFileDownloadUri(fileDownloadUri);
                     media.add(fileInfo);
-                }
-                else {
+                } else {
                     String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                             .path("/api/downloadFile/")
                             .path(temp.getStoredFileName())
