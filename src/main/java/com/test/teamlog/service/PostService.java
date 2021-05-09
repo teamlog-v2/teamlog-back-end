@@ -45,7 +45,7 @@ public class PostService {
     public PagedResponse<PostDTO.PostResponse> getAllPosts(int page, int size) {
         validatePageNumberAndSize(page, size);
 
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
+        Pageable pageable = PageRequest.of(0, size, Sort.Direction.DESC, "createTime");
 
         Page<Post> posts = postRepository.findAll(pageable);
         List<PostDTO.PostResponse> responses = new ArrayList<>();
@@ -57,12 +57,17 @@ public class PostService {
     }
 
     // 프로젝트 내 포스트 조회
-    public PagedResponse<PostDTO.PostResponse> getPostsByProject(Long projectId ,int page, int size) {
+    public PagedResponse<PostDTO.PostResponse> getPostsByProject(Long projectId, Long cursor, int size) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        Pageable pageable = PageRequest.of(0, size, Sort.Direction.DESC, "createTime");
 
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
-        Page<Post> posts = postRepository.findAllByProject(project, pageable);
+        Page<Post> posts = null;
+        if(cursor == null) {
+            posts = postRepository.findAllByProject(project, pageable);
+        } else {
+            posts = postRepository.findAllByProjectAndCursor(project, cursor, pageable);
+        }
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
@@ -73,12 +78,18 @@ public class PostService {
     }
 
     // 키워드로 게시물 조회
-    public PagedResponse<PostDTO.PostResponse> searchPostsInProject(Long projectId, String keyword, int page, int size) {
+    public PagedResponse<PostDTO.PostResponse> searchPostsInProject(Long projectId, String keyword, Long cursor, int size) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
-        Page<Post> posts = postRepository.searchPostsInProject(project, keyword, pageable);
+        Pageable pageable = PageRequest.of(0, size, Sort.Direction.DESC, "createTime");
+
+        Page<Post> posts = null;
+        if(cursor == null) {
+            posts = postRepository.searchPostsInProject(project, keyword, pageable);
+        } else {
+            posts = postRepository.searchPostsInProjectByCursor(project, cursor, keyword, pageable);
+        }
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
@@ -99,13 +110,18 @@ public class PostService {
     }
 
     // 해시태그 선별 조회
-    public PagedResponse<PostDTO.PostResponse> getPostsInProjectByHashTag(Long projectId, List<String> names, int page, int size) {
+    public PagedResponse<PostDTO.PostResponse> getPostsInProjectByHashTag(Long projectId, List<String> names, Long cursor, int size) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
-        Page<Post> posts = postRepository.getPostsInProjectByHashTag(project, names, pageable);
+        Pageable pageable = PageRequest.of(0, size, Sort.Direction.DESC, "createTime");
 
+        Page<Post> posts = null;
+        if(cursor == null) {
+            posts = postRepository.getPostsInProjectByHashTag(project, names, pageable);
+        } else {
+            posts = postRepository.getPostsInProjectByHashTag(project, cursor, names, pageable);
+        }
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
             responses.add(convertToPostResponse(post));

@@ -47,9 +47,9 @@ public class PostController {
     @ApiOperation(value = "프로젝트의 모든 포스트 조회")
     @GetMapping("/posts/project/{projectId}")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostsByProject(@PathVariable("projectId") long projectId,
-                                                                                 @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                                 @RequestParam(value = "cursor", required = false) Long cursor,
                                                                                  @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        PagedResponse<PostDTO.PostResponse> response = postService.getPostsByProject(projectId, page, size);
+        PagedResponse<PostDTO.PostResponse> response = postService.getPostsByProject(projectId, cursor, size);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);
@@ -80,11 +80,12 @@ public class PostController {
     @GetMapping("/posts/project/{projectId}/hashtag/{names}")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
                                                                             @PathVariable("names") String[] names,
-                                                                            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                            @RequestParam(value = "cursor", required = false) Long cursor,
                                                                             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         long start = System.currentTimeMillis();
         List<String> hashtags = Arrays.asList(names);
-        PagedResponse<PostDTO.PostResponse> response = postService.getPostsInProjectByHashTag(projectId, hashtags, page, size);
+        PagedResponse<PostDTO.PostResponse> response = postService.getPostsInProjectByHashTag(projectId, hashtags, cursor
+                , size);
         long end = System.currentTimeMillis();
         System.out.println("수행시간: " + (end - start) + " ms");
         return ResponseEntity.ok()
@@ -96,9 +97,9 @@ public class PostController {
     @GetMapping("/posts/project/{projectId}/{keyword}")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getPostByTag(@PathVariable("projectId") long projectId,
                                                                             @PathVariable("keyword") String keyword,
-                                                                            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                            @RequestParam(value = "cursor", required = false) Long cursor,
                                                                             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        PagedResponse<PostDTO.PostResponse> response = postService.searchPostsInProject(projectId, keyword, page, size);
+        PagedResponse<PostDTO.PostResponse> response = postService.searchPostsInProject(projectId, keyword, cursor, size);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
                 .body(response);

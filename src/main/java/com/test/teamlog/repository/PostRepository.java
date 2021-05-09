@@ -19,11 +19,23 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT p FROM Post p Where p.project = :project")
     public Page<Post> findAllByProject(@Param("project") Project project, Pageable pageable);
 
+    @Query("SELECT p FROM Post p Where p.project = :project AND p.id < :cursor")
+    public Page<Post> findAllByProjectAndCursor(@Param("project") Project project, @Param("cursor") Long cursor, Pageable pageable);
+
     public List<Post> findAllByLocationIsNotNullAndAccessModifier(AccessModifier accessModifier);
 
     @Query("SELECT p FROM Post p WHERE (p.contents LIKE concat('%',:keyword,'%') AND p.project = :project)")
     public Page<Post> searchPostsInProject(@Param("project") Project project, @Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT p FROM Post p WHERE (p.contents LIKE concat('%',:keyword,'%') AND p.project = :project AND p.id < :cursor)")
+    public Page<Post> searchPostsInProjectByCursor(@Param("project") Project project, @Param("cursor") Long cursor,
+                                                   @Param("keyword") String keyword, Pageable pageable);
+
     @Query("SELECT p FROM Post p, PostTag h WHERE h.post = p AND h.name IN (:names) AND p.project = :project GROUP BY p.id")
     public Page<Post> getPostsInProjectByHashTag(@Param("project") Project project, @Param("names") List<String> names, Pageable pageable);
+
+    @Query("SELECT p FROM Post p, PostTag h WHERE h.post = p AND h.name IN (:names) AND p.project = :project AND p.id < :cursor GROUP BY p.id")
+    public Page<Post> getPostsInProjectByHashTag(@Param("project") Project project, @Param("cursor") Long cursor,
+                                                 @Param("names") List<String> names, Pageable pageable);
+
 }
