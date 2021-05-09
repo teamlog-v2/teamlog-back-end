@@ -12,9 +12,9 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    public final static long TOKEN_VALIDATION_SECOND = 1000L * 60 * 24 * 3;
+    public static final long TOKEN_VALIDATION_SECOND = 1000L * 60 * 24 * 3;
 
-    final static public String ACCESS_TOKEN_NAME = "ACCESS_TOKEN";
+    public static final String ACCESS_TOKEN_NAME = "ACCESS_TOKEN";
 
     @Value("${app.jwtSecret}")
     private String JWT_SECRET;

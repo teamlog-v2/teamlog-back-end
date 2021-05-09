@@ -1,6 +1,5 @@
 package com.test.teamlog.security;
 
-import com.test.teamlog.entity.User;
 import com.test.teamlog.service.CustomUserDetailsService;
 import com.test.teamlog.util.CookieUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -34,32 +33,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
 
-        final Cookie jwtToken = cookieUtil.getCookie(httpServletRequest,JwtUtil.ACCESS_TOKEN_NAME);
+        final Cookie jwtToken = cookieUtil.getCookie(httpServletRequest, JwtUtil.ACCESS_TOKEN_NAME);
 
-        String username = null;
-        String jwt = null;
+        try {
+            if (jwtToken != null) {
+                String jwt = jwtToken.getValue();
+                String userId = jwtUtil.getUserId(jwt);
 
-        try{
-            System.out.println(jwtToken.getValue());
-            if(jwtToken != null){
-                jwt = jwtToken.getValue();
-                username = jwtUtil.getUserId(jwt);
-            }
-            if(username!=null){
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (userId != null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
 
-                if(jwtUtil.validateToken(jwt,userDetails)){
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
-                    usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
-                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                    if (jwtUtil.validateToken(jwt, userDetails)) {
+                        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
+                        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                    }
                 }
             }
-        }catch (ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
 
-        }catch(Exception e){
+        } catch (Exception e) {
 
         }
 
-        filterChain.doFilter(httpServletRequest,httpServletResponse);
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 }
