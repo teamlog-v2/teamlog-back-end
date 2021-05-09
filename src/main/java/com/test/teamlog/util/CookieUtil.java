@@ -16,6 +16,14 @@ public class CookieUtil {
         return token;
     }
 
+    public Cookie createEmptyCookie(String cookieName) {
+        Cookie token = new Cookie(cookieName, null);
+        token.setHttpOnly(true);
+        token.setMaxAge(0);
+        token.setPath("/");
+        return token;
+    }
+
     public Cookie getCookie(HttpServletRequest req, String cookieName) {
         final Cookie[] cookies = req.getCookies();
         if (cookies == null) return null;

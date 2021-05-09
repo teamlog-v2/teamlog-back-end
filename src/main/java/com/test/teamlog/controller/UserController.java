@@ -49,6 +49,14 @@ public class UserController {
         }
     }
 
+    @ApiOperation(value = "로그아웃")
+    @GetMapping("/sign-out")
+    public ResponseEntity<ApiResponse> signOut(HttpServletRequest req, HttpServletResponse res) {
+        Cookie accessToken = cookieUtil.createEmptyCookie(JwtUtil.ACCESS_TOKEN_NAME);
+        res.addCookie(accessToken);
+        return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "로그아웃 성공"), HttpStatus.OK);
+    }
+
     @ApiOperation(value = "회원 조회")
     @GetMapping("/users/{id}")
     public ResponseEntity<UserDTO.UserResponse> getUserById(@PathVariable("id") String id) {
