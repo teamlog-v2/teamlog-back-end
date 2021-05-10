@@ -63,10 +63,18 @@ public class CommentService {
         Comment comment = commentRepository.findById(parentCommentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", parentCommentId));
 
+        List<CommentDTO.CommentInfo> responses = new ArrayList<>();
+
+        if(size == 0) {
+            Pageable pageable = PageRequest.of(page, 1, Sort.Direction.DESC, "createTime");
+            Page<Comment> childComments = commentRepository.getChildCommentsByParentComment(comment, pageable);
+            return new PagedResponse<>(responses, 0, 0,
+                    childComments.getTotalElements(), 0, true);
+        }
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
         Page<Comment> childComments = commentRepository.getChildCommentsByParentComment(comment, pageable);
 
-        List<CommentDTO.CommentInfo> responses = new ArrayList<>();
+        responses = new ArrayList<>();
         for (Comment childComment : childComments) {
             UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(childComment.getWriter());
 
