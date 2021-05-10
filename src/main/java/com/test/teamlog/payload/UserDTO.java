@@ -41,7 +41,7 @@ public class UserDTO {
             String imgUri = null;
             if(user.getProfileImgPath() != null){
                 imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/api/downloadFile/")
+                        .path("/resources/")
                         .path(user.getProfileImgPath())
                         .toUriString();
             }

@@ -52,7 +52,7 @@ public class ProjectService {
             int postcount = postRepository.getPostCount(project.getProject());
 
             String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/api/downloadFile/")
+                    .path("/resources/")
                     .path(defaultProjectImages[project.getProject().getId().intValue() % 4])
                     .toUriString();
             System.out.println(imgUri);
