@@ -5,11 +5,10 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Getter
-@Setter
+@Builder
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Table(name = "post_media")
 public class PostMedia {
     @Id

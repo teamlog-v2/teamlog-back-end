@@ -5,10 +5,10 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Getter @Setter
+@Builder
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Table(name = "user_follow")
 public class UserFollow {
     @Id

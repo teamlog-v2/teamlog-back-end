@@ -6,11 +6,10 @@ import org.hibernate.annotations.BatchSize;
 import javax.persistence.*;
 
 @Entity
-@Getter
-@Setter
+@Builder
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Table(name = "post_tag")
 public class PostTag {
     @Id

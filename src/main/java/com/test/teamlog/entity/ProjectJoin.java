@@ -8,10 +8,10 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
+@Builder
+@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Table(name = "project_join",
         uniqueConstraints =@UniqueConstraint(columnNames = {"project_id", "user_id"}))
 public class ProjectJoin extends BaseTimeEntity {

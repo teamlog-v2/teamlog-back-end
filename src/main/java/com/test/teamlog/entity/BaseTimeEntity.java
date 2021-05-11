@@ -12,8 +12,7 @@ import javax.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
 
 @MappedSuperclass
-@Getter
-@Setter
+@Setter @Getter
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseTimeEntity {
 

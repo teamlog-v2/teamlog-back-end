@@ -1,13 +1,14 @@
 package com.test.teamlog.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
-@Getter
-@Setter
 @Entity
+@Builder
+@Setter @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "post_liker")
 public class PostLiker {
     @Id @GeneratedValue
