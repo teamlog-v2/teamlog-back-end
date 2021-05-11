@@ -49,7 +49,7 @@ public class ProjectService {
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
         for (ProjectMember project : projectList) {
-            int postcount = postRepository.getPostCount(project.getProject());
+            long postcount = postRepository.getPostsCount(project.getProject());
 
             String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/resources/")

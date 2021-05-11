@@ -44,7 +44,7 @@ public class ProjectDTO {
     public static class ProjectListResponse {
         private Long id;
         private String name;
-        private int postCount;
+        private long postCount;
         private LocalDateTime updateTime; // 마지막 활동 시간
         private String thumbnail; // 대표 이미지
     }

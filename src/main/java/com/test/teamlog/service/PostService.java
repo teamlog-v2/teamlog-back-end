@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,9 +58,9 @@ public class PostService {
                                                                  Long cursor, int size) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        Pageable pageable = PageRequest.of(0, size, sort, "createTime");
+        Pageable pageable = PageRequest.of(0, size, sort, "id");
 
-        Page<Post> posts = null;
+        Slice<Post> posts = null;
         if (cursor == null) {
             posts = postRepository.findAllByProject(project, pageable);
         } else {
@@ -74,8 +71,11 @@ public class PostService {
         for (Post post : posts) {
             responses.add(convertToPostResponse(post));
         }
-        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
-                posts.getTotalPages(), posts.isLast());
+
+        long totalElements = postRepository.getPostsCount(project);
+
+        return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
+                0, posts.isLast());
     }
 
     // 키워드로 게시물 조회
@@ -84,9 +84,9 @@ public class PostService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        Pageable pageable = PageRequest.of(0, size, sort, "createTime");
+        Pageable pageable = PageRequest.of(0, size, sort, "id");
 
-        Page<Post> posts = null;
+        Slice<Post> posts = null;
         if (cursor == null) {
             posts = postRepository.searchPostsInProject(project, keyword, pageable);
         } else {
@@ -97,8 +97,10 @@ public class PostService {
         for (Post post : posts) {
             responses.add(convertToPostResponse(post));
         }
-        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
-                posts.getTotalPages(), posts.isLast());
+        long totalElements = postRepository.getPostsCountByKeyword(project, keyword);
+
+        return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
+                0, posts.isLast());
     }
 
     // 해시태그 선별 조회 + 키워드 검색
@@ -111,9 +113,9 @@ public class PostService {
                                                                                        int size) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        Pageable pageable = PageRequest.of(0, size, sort, "createTime");
+        Pageable pageable = PageRequest.of(0, size, sort, "id");
 
-        Page<Post> posts = null;
+        Slice<Post> posts = null;
         if (cursor == null) {
             posts = postRepository.searchPostsInProjectByHashtagAndKeyword(project, names, keyword, pageable);
         } else {
@@ -124,8 +126,10 @@ public class PostService {
         for (Post post : posts) {
             responses.add(convertToPostResponse(post));
         }
-        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
-                posts.getTotalPages(), posts.isLast());
+        long totalElements = postRepository.getPostsCountByHashtagAndKeyword(project, names, keyword, pageable).getTotalElements();
+
+        return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
+                0, posts.isLast());
     }
 
     // 해시태그 선별 조회
@@ -133,9 +137,9 @@ public class PostService {
                                                                           String cop, Long cursor, int size) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        Pageable pageable = PageRequest.of(0, size, sort, "createTime");
+        Pageable pageable = PageRequest.of(0, size, sort, "id");
 
-        Page<Post> posts = null;
+        Slice<Post> posts = null;
         if (cursor == null) {
             posts = postRepository.getPostsInProjectByHashTag(project, names, pageable);
         } else {
@@ -145,8 +149,10 @@ public class PostService {
         for (Post post : posts) {
             responses.add(convertToPostResponse(post));
         }
-        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
-                posts.getTotalPages(), posts.isLast());
+        long totalElements = postRepository.getPostsCountByHashTag(project, names, pageable).getTotalElements();
+
+        return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
+                0, posts.isLast());
     }
 
     // 프로젝트의 해시태그들 조회
