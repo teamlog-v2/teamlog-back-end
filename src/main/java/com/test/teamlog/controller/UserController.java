@@ -29,8 +29,8 @@ public class UserController {
 
     @ApiOperation(value = "로그인 된 사용자인지 검증")
     @GetMapping("/validate")
-    public ResponseEntity<String> validateUser(@AuthenticationPrincipal User currentUser) {
-        return new ResponseEntity<>(currentUser.getId(), HttpStatus.OK);
+    public ResponseEntity<ApiResponse> validateUser(@AuthenticationPrincipal User currentUser) {
+        return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, currentUser.getId()), HttpStatus.OK);
     }
 
     @ApiOperation(value = "로그인")
