@@ -6,14 +6,12 @@ import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.UserFollowService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,9 +24,7 @@ public class UserFollowController {
     public ResponseEntity<List<UserDTO.UserFollowInfo>> getFollowerList(@PathVariable("id") String id,
                                                                         @AuthenticationPrincipal User currentUser) {
         List<UserDTO.UserFollowInfo> response = userFollowService.getFollowerList(id, currentUser);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "유저 팔로잉 조회")
@@ -36,9 +32,7 @@ public class UserFollowController {
     public ResponseEntity<List<UserDTO.UserFollowInfo>> getFollowingList(@PathVariable("id") String id,
                                                                          @AuthenticationPrincipal User currentUser) {
         List<UserDTO.UserFollowInfo> response = userFollowService.getFollowingList(id, currentUser);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "팔로우")

@@ -29,9 +29,7 @@ public class CommentController {
                                                                                          @RequestParam(value = "page", required = false, defaultValue = "0") int page,
                                                                                          @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         PagedResponse<CommentDTO.CommentInfo> response = commentService.getParentComments(postId, page, size);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "대댓글 조회")
@@ -41,9 +39,7 @@ public class CommentController {
                                                                                   @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
 
         PagedResponse<CommentDTO.CommentInfo> response = commentService.getChildComments(commentId, page, size);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "댓글 조회")

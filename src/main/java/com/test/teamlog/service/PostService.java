@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
     private final PostTagRepository postTagRepository;
+    private final PostMediaRepository postMediaRepository;
     private final ProjectRepository projectRepository;
-    private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
 
     // 단일 포스트 조회
@@ -192,7 +192,7 @@ public class PostService {
 
     // 포스트 생성
     @Transactional
-    public ApiResponse createPost(PostDTO.PostRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
+    public Long createPost(PostDTO.PostRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", request.getProjectId()));
 
@@ -211,7 +211,7 @@ public class PostService {
                 .project(project)
                 .build();
 
-        postRepository.save(post);
+        Post newPost = postRepository.save(post);
 
         if (request.getHashtags() != null) {
             List<PostTag> hashtags = new ArrayList<>();
@@ -223,6 +223,7 @@ public class PostService {
                 hashtags.add(newTag);
             }
             postTagRepository.saveAll(hashtags);
+            post.setHashtags(hashtags);
         }
         if (media != null) {
             Arrays.asList(media)
@@ -241,7 +242,7 @@ public class PostService {
         project.setUpdateTime(LocalDateTime.now());
         projectRepository.save(project);
 
-        return new ApiResponse(Boolean.TRUE, "포스트 생성 성공");
+        return newPost.getId();
     }
 
     // 포스트 수정
@@ -299,8 +300,9 @@ public class PostService {
 
         List<FileDTO.FileInfo> media = new ArrayList<>();
         List<FileDTO.FileInfo> files = new ArrayList<>();
-        if (post.getMedia() != null) {
-            for (PostMedia temp : post.getMedia()) {
+        List<PostMedia> mediaList = postMediaRepository.findAllByPost(post);
+        if (mediaList != null) {
+            for (PostMedia temp : mediaList) {
                 FileDTO.FileInfo fileInfo = FileDTO.FileInfo.builder()
                         .contentType(temp.getContentType())
                         .fileName(temp.getFileName())
@@ -323,6 +325,10 @@ public class PostService {
             }
         }
 
+        int likeCount = 0;
+        if(post.getPostLikers() != null) likeCount = post.getPostLikers().size();
+        int commentCount = 0;
+        if(post.getComments() != null) commentCount = post.getComments().size();
 
         PostDTO.PostResponse postResponse = PostDTO.PostResponse.builder()
                 .id(post.getId())
@@ -332,8 +338,8 @@ public class PostService {
                 .hashtags(hashtags)
                 .media(media)
                 .files(files)
-                .likeCount(post.getPostLikers().size())
-                .commentCount(post.getComments().size())
+                .likeCount(likeCount)
+                .commentCount(commentCount)
                 .writeTime(post.getCreateTime())
                 .build();
         if (post.getLocation() != null) {

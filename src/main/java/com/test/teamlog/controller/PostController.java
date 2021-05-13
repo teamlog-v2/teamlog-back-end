@@ -29,9 +29,7 @@ public class PostController {
     @GetMapping("/posts/{id}")
     public ResponseEntity<PostDTO.PostResponse> getPostById(@PathVariable("id") long id) {
         PostDTO.PostResponse response = postService.getPost(id);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "모든 포스트 조회")
@@ -40,18 +38,14 @@ public class PostController {
                                                                            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         PagedResponse<PostDTO.PostResponse> response = postService.getAllPosts(page, size);
 
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "위치정보가 있는 Public 포스트들 조회")
     @GetMapping("/posts/with-location")
     public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts() {
         List<PostDTO.PostResponse> response = postService.getLocationPosts();
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "프로젝트 내 게시물의 해시태그들 조회")
@@ -61,9 +55,7 @@ public class PostController {
         List<String> response = postService.getHashTagsInProjectPosts(projectId);
         long end = System.currentTimeMillis();
         System.out.println("수행시간: " + (end - start) + " ms");
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "프로젝트의 모든 포스트 조회")
@@ -94,19 +86,18 @@ public class PostController {
             response = postService.getPostsByProject(projectId, sort, comparisonOperator, cursor, size);
         }
 
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "포스트 생성")
     @PostMapping("/posts")
-    public ResponseEntity<ApiResponse> createProject(@RequestPart(value = "key", required = true) PostDTO.PostRequest request,
+    public ResponseEntity<PostDTO.PostResponse> createProject(@RequestPart(value = "key", required = true) PostDTO.PostRequest request,
                                                      @RequestPart(value = "media", required = false) MultipartFile[] media,
                                                      @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                      @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = postService.createPost(request, media, files, currentUser);
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+        Long newPostId = postService.createPost(request, media, files, currentUser);
+        PostDTO.PostResponse newPost = postService.getPost(newPostId);
+        return new ResponseEntity<>(newPost, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "포스트 수정")

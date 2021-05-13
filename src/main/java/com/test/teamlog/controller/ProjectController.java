@@ -27,18 +27,14 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<ProjectDTO.ProjectResponse> getProjectById(@PathVariable("id") long id) {
         ProjectDTO.ProjectResponse response = projectService.getProject(id);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "유저 프로젝트 리스트 조회")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByUser(@PathVariable("userId") String userId) {
         List<ProjectDTO.ProjectListResponse> response = projectService.getProjectsByUser(userId);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "프로젝트 생성")

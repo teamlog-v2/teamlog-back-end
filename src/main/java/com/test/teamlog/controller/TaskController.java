@@ -1,12 +1,10 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.entity.TaskStatus;
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TaskDTO;
 import com.test.teamlog.service.TaskService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,9 +30,7 @@ public class TaskController {
     @GetMapping("projects/{id}/tasks")
     public ResponseEntity<List<TaskDTO.TaskResponse>> getTasksByProject(@PathVariable("id") Long id) {
         List<TaskDTO.TaskResponse> taskList = taskService.getTasksByProject(id);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(taskList);
+        return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
     // Create
