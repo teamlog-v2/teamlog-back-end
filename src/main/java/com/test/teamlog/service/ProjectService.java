@@ -270,12 +270,12 @@ public class ProjectService {
 
     // 마스터 - 프로젝트 멤버 삭제
     @Transactional
-    public ApiResponse expelMember(Long projectId, String userId) {
+    public ApiResponse expelMember(Long projectId, String userId,User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-
+        validateUserIsMaster(project, currentUser);
         ProjectMember member = projectMemberRepository.findByProjectAndUser(project, user)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "UserId", userId));
         projectMemberRepository.delete(member);

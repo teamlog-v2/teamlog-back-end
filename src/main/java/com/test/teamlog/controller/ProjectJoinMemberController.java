@@ -91,7 +91,7 @@ public class ProjectJoinMemberController {
         if(userId == null) {
             apiResponse = projectService.leaveProject(projectId, currentUser);
         } else {
-            apiResponse = projectService.expelMember(projectId, userId);
+            apiResponse = projectService.expelMember(projectId, userId, currentUser);
         }
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
