@@ -75,7 +75,7 @@ public class ProjectJoinMemberController {
     // ----- 프로젝트 멤버 관리 -----
     // ---------------------------
     @ApiOperation(value = "프로젝트 초대 및 신청을 수락")
-    @PostMapping("/projects/{projectId}/members")
+    @PostMapping("/project-joins/{joinId}")
     public ResponseEntity<ApiResponse> acceptProjectInvitation(@PathVariable("joinId") Long joinId) {
         ApiResponse apiResponse = projectService.acceptProjectInvitation(joinId);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
