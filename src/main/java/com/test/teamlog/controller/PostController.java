@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
 import java.util.List;
@@ -67,16 +68,16 @@ public class PostController {
                                                                                  @RequestParam(value = "cursor", required = false) Long cursor,
                                                                                  @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         List<String> hashtagList = null;
-        if(hashtag != null) hashtagList = Arrays.asList(hashtag);
+        if (hashtag != null) hashtagList = Arrays.asList(hashtag);
 
         Sort.Direction sort = Sort.Direction.DESC;
         String comparisonOperator = "<";
-        if(order == -1) {
+        if (order == -1) {
             sort = Sort.Direction.ASC;
             comparisonOperator = ">";
         }
         PagedResponse<PostDTO.PostResponse> response = null;
-        if(keyword != null & hashtagList != null){
+        if (keyword != null & hashtagList != null) {
             response = postService.searchPostsInProjectByHashtagAndKeyword(projectId, keyword, hashtagList, sort, comparisonOperator, cursor, size);
         } else if (keyword != null) {
             response = postService.searchPostsInProject(projectId, keyword, sort, comparisonOperator, cursor, size);
@@ -92,9 +93,9 @@ public class PostController {
     @ApiOperation(value = "포스트 생성")
     @PostMapping("/posts")
     public ResponseEntity<PostDTO.PostResponse> createProject(@RequestPart(value = "key", required = true) PostDTO.PostRequest request,
-                                                     @RequestPart(value = "media", required = false) MultipartFile[] media,
-                                                     @RequestPart(value = "files", required = false) MultipartFile[] files,
-                                                     @AuthenticationPrincipal User currentUser) {
+                                                              @RequestPart(value = "media", required = false) MultipartFile[] media,
+                                                              @RequestPart(value = "files", required = false) MultipartFile[] files,
+                                                              @ApiIgnore @AuthenticationPrincipal User currentUser) {
         Long newPostId = postService.createPost(request, media, files, currentUser);
         PostDTO.PostResponse newPost = postService.getPost(newPostId);
         return new ResponseEntity<>(newPost, HttpStatus.CREATED);
@@ -104,7 +105,7 @@ public class PostController {
     @PutMapping("/posts/{id}")
     public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
                                                      @RequestBody PostDTO.PostRequest request,
-                                                     @AuthenticationPrincipal User currentUser) {
+                                                     @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = postService.updatePost(id, request);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -112,7 +113,7 @@ public class PostController {
     @ApiOperation(value = "포스트 삭제")
     @DeleteMapping("/posts/{id}")
     public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
-                                                  @AuthenticationPrincipal User currentUser) {
+                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = postService.deletePost(id);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

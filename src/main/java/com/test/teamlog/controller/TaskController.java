@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -37,7 +38,7 @@ public class TaskController {
     @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<TaskDTO.TaskResponse> createTask(@PathVariable("projectId") Long projectId,
                                                            @Valid @RequestBody TaskDTO.TaskRequest taskRequest,
-                                                           @AuthenticationPrincipal User currentUser) {
+                                                           @ApiIgnore  @AuthenticationPrincipal User currentUser) {
         Long taskId = taskService.createTask(projectId, taskRequest);
         TaskDTO.TaskResponse taskResponse = taskService.getTask(taskId);
         return new ResponseEntity<>(taskResponse, HttpStatus.CREATED);
@@ -46,7 +47,7 @@ public class TaskController {
     @PutMapping("/tasks/{id}")
     public ResponseEntity<TaskDTO.TaskResponse> updateTaskStatus(@PathVariable("id") Long id,
                                                                  @Valid @RequestBody TaskDTO.TaskRequest request,
-                                                                 @AuthenticationPrincipal User currentUser) {
+                                                                 @ApiIgnore @AuthenticationPrincipal User currentUser) {
         taskService.updateTaskStatus(id, request);
         TaskDTO.TaskResponse taskResponse = taskService.getTask(id);
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
@@ -63,7 +64,7 @@ public class TaskController {
     // Delete
     @DeleteMapping("/tasks/{id}")
     public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
-                                                  @AuthenticationPrincipal User currentUser) {
+                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = taskService.deleteTask(id);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

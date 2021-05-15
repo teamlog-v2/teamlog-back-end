@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +32,7 @@ public class ProjectJoinMemberController {
     @PostMapping("/projects/{projectId}/joins")
     public ResponseEntity<ApiResponse> inviteUserForProject(@PathVariable("projectId") long projectId,
                                                             @RequestParam(value = "userId", required = false) String userId,
-                                                            @AuthenticationPrincipal User currentUser) {
+                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = null;
         // userId 있으면 초대, 없으면 신청
         if (userId != null) {
@@ -66,7 +67,7 @@ public class ProjectJoinMemberController {
 
     @ApiOperation(value = "유저가 받은 프로젝트 초대 조회")
     @GetMapping("users/project-invitation")
-    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinResponse>> getProjectInvitationList(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinResponse>> getProjectInvitationList(@ApiIgnore @AuthenticationPrincipal User currentUser) {
         List<ProjectJoinDTO.ProjectJoinResponse> response = projectService.getProjectInvitationList(currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -85,7 +86,7 @@ public class ProjectJoinMemberController {
     @DeleteMapping("/projects/{projectId}/members")
     public ResponseEntity<ApiResponse> leaveProject(@PathVariable("projectId") long projectId,
                                                     @RequestParam(value = "userId", required = false) String userId,
-                                                    @AuthenticationPrincipal User currentUser) {
+                                                    @ApiIgnore  @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = null;
         // userId 없으면 탈퇴 있으면 추방
         if(userId == null) {

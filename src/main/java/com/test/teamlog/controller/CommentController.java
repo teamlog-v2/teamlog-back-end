@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +53,7 @@ public class CommentController {
     @ApiOperation(value = "댓글 생성")
     @PostMapping("/comments")
     public ResponseEntity<ApiResponse> createProject(@RequestBody CommentDTO.CommentRequest request,
-                                                     @AuthenticationPrincipal User currentUser) {
+                                                     @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = commentService.createComment(request, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -61,7 +62,7 @@ public class CommentController {
     @PutMapping("/comments/{id}")
     public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
                                                      @RequestBody CommentDTO.CommentRequest request,
-                                                     @AuthenticationPrincipal User currentUser) {
+                                                     @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = commentService.updateComment(id, request);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -69,7 +70,7 @@ public class CommentController {
     @ApiOperation(value = "댓글 삭제")
     @DeleteMapping("/comments/{id}")
     public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
-                                                  @AuthenticationPrincipal User currentUser) {
+                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = commentService.deleteComment(id);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

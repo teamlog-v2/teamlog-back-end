@@ -19,10 +19,10 @@ public class PagedResponse<T> {
 
     public PagedResponse(List<T> content, int page, int size, long totalElements, int totalPages, boolean last) {
         setContent(content);
-        this.page = page;
+        this.page = page; // ban
         this.size = size;
         this.totalElements = totalElements;
-        this.totalPages = totalPages;
+        this.totalPages = totalPages; // ban
         this.last = last;
     }
 

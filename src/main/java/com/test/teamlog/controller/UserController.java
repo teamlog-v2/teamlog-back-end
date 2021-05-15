@@ -12,6 +12,7 @@ import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +30,7 @@ public class UserController {
 
     @ApiOperation(value = "로그인 된 사용자인지 검증")
     @GetMapping("/validate")
-    public ResponseEntity<ApiResponse> validateUser(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<ApiResponse> validateUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
         return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, currentUser.getId()), HttpStatus.OK);
     }
 
@@ -78,7 +79,7 @@ public class UserController {
     @ApiOperation(value = "회원 수정")
     @PutMapping("/users")
     public ResponseEntity<ApiResponse> updateUser(@Valid @RequestBody UserDTO.UserRequest userRequest,
-                                                  @AuthenticationPrincipal User currentUser) {
+                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.updateUser(userRequest, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -86,7 +87,7 @@ public class UserController {
     @ApiOperation(value = "프로필 이미지 변경")
     @PutMapping("/users/profile-image")
     public ResponseEntity<ApiResponse> updateUser(@RequestPart(value = "profileImg", required = false) MultipartFile image,
-                                                  @AuthenticationPrincipal User currentUser) {
+                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.updateUserProfileImage(image, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -94,7 +95,7 @@ public class UserController {
     // Delete
     @ApiOperation(value = "회원 삭제")
     @DeleteMapping("/users")
-    public ResponseEntity<ApiResponse> deleteUser(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<ApiResponse> deleteUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.deleteUser(currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

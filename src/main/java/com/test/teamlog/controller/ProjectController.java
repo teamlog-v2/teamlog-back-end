@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +41,7 @@ public class ProjectController {
     @ApiOperation(value = "프로젝트 생성")
     @PostMapping
     public ResponseEntity<ApiResponse> createProject(@RequestBody ProjectDTO.ProjectRequest request,
-                                                     @AuthenticationPrincipal User currentUser) {
+                                                     @ApiIgnore  @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = projectService.createProject(request, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -49,7 +50,7 @@ public class ProjectController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
                                                      @RequestBody ProjectDTO.ProjectRequest request,
-                                                     @AuthenticationPrincipal User currentUser) {
+                                                     @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = projectService.updateProject(id, request, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -57,7 +58,7 @@ public class ProjectController {
     @ApiOperation(value = "프로젝트 삭제")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteProject(@PathVariable("id") Long id,
-                                                     @AuthenticationPrincipal User currentUser) {
+                                                     @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = projectService.deleteProject(id, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
