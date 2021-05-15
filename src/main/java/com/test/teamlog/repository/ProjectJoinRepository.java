@@ -12,4 +12,5 @@ public interface ProjectJoinRepository extends JpaRepository<ProjectJoin, Long> 
     Optional<ProjectJoin> findByProjectAndUser(Project project, User user);
     List<ProjectJoin> findAllByProjectAndIsAcceptedTrueAndIsInvitedFalse(Project project);
     List<ProjectJoin> findAllByUserAndIsAcceptedFalseAndIsInvitedTrue(User user);
+    List<ProjectJoin> findAllByUserAndIsAcceptedTrueAndIsInvitedFalse(User user);
 }

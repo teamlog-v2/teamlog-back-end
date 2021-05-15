@@ -60,7 +60,7 @@ public class ProjectJoinMemberController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "프로젝트 멤버 신청 목록 조회")
+    @ApiOperation(value = "프로젝트 멤버 신청 목록 조회 ( 프로젝트 관리 )")
     @GetMapping("/projects/{id}/joins")
     public ResponseEntity<List<ProjectJoinDTO.ProjectJoinResponse>> getProjectApplyList(@PathVariable("id") Long id) {
         List<ProjectJoinDTO.ProjectJoinResponse> response = projectService.getProjectApplyList(id);
@@ -69,8 +69,15 @@ public class ProjectJoinMemberController {
 
     @ApiOperation(value = "유저가 받은 프로젝트 초대 조회")
     @GetMapping("users/project-invitation")
-    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinResponse>> getProjectInvitationList(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        List<ProjectJoinDTO.ProjectJoinResponse> response = projectService.getProjectInvitationList(currentUser);
+    public ResponseEntity<List<ProjectJoinDTO.ProjectApplyResponse>> getProjectInvitationList(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<ProjectJoinDTO.ProjectApplyResponse> response = projectService.getProjectInvitationList(currentUser);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "유저가 가입 신청한 프로젝트 조회")
+    @GetMapping("users/project-apply")
+    public ResponseEntity<List<ProjectJoinDTO.ProjectApplyResponse>> getProjectApplyList(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<ProjectJoinDTO.ProjectApplyResponse> response = projectService.getProjectApplyList(currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

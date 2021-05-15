@@ -204,16 +204,29 @@ public class ProjectService {
     }
 
     // 유저가 받은 프로젝트 초대 조회
-    public List<ProjectJoinDTO.ProjectJoinResponse> getProjectInvitationList(User currentUser) {
+    public List<ProjectJoinDTO.ProjectApplyResponse> getProjectInvitationList(User currentUser) {
         List<ProjectJoin> projectJoins = projectJoinRepository.findAllByUserAndIsAcceptedFalseAndIsInvitedTrue(currentUser);
 
-        List<ProjectJoinDTO.ProjectJoinResponse> response = new ArrayList<>();
+        List<ProjectJoinDTO.ProjectApplyResponse> response = new ArrayList<>();
         for(ProjectJoin join : projectJoins) {
-            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
-            ProjectJoinDTO.ProjectJoinResponse temp = ProjectJoinDTO.ProjectJoinResponse.builder()
+            ProjectJoinDTO.ProjectApplyResponse temp = ProjectJoinDTO.ProjectApplyResponse.builder()
                     .id(join.getId())
                     .projectName(join.getProject().getName())
-                    .user(user)
+                    .build();
+            response.add(temp);
+        }
+        return response;
+    }
+
+    // 유저가 가입 신청한 프로젝트 조회
+    public List<ProjectJoinDTO.ProjectApplyResponse> getProjectApplyList(User currentUser) {
+        List<ProjectJoin> projectJoins = projectJoinRepository.findAllByUserAndIsAcceptedTrueAndIsInvitedFalse(currentUser);
+
+        List<ProjectJoinDTO.ProjectApplyResponse> response = new ArrayList<>();
+        for(ProjectJoin join : projectJoins) {
+            ProjectJoinDTO.ProjectApplyResponse temp = ProjectJoinDTO.ProjectApplyResponse.builder()
+                    .id(join.getId())
+                    .projectName(join.getProject().getName())
                     .build();
             response.add(temp);
         }
@@ -229,6 +242,7 @@ public class ProjectService {
         ProjectJoin join = projectJoinRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation", "ID", id));
         // TODO : join 삭제 할지 말지?
+        // TODO : 수락하는 사람이 마스터이냐 사용자이냐에 따라 구분해야함.
         join.setAccepted(Boolean.TRUE);
         join.setInvited(Boolean.TRUE);
 
@@ -261,7 +275,7 @@ public class ProjectService {
     public ApiResponse leaveProject(Long projectId, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-
+        // TODO : 자기자신이 마스터면 나갈 수 없어야함.
         ProjectMember member = projectMemberRepository.findByProjectAndUser(project, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "UserId", currentUser.getId()));
         projectMemberRepository.delete(member);

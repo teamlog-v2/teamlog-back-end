@@ -15,4 +15,11 @@ public class ProjectJoinDTO {
         private String projectName;
         private UserDTO.UserSimpleInfo user;
     }
+
+    @Data
+    @Builder
+    public static class ProjectApplyResponse {
+        private Long id;
+        private String projectName;
+    }
 }
