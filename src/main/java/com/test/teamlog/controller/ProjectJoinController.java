@@ -19,7 +19,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Api(description = "프로젝트 초대 관리 컨트롤러")
+@Api(description = "프로젝트 초대 관리")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
