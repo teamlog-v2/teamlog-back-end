@@ -34,22 +34,20 @@ public class PostService {
     private final FileStorageService fileStorageService;
 
     // 단일 포스트 조회
-    public PostDTO.PostResponse getPost(Long id) {
+    public PostDTO.PostResponse getPost(Long id, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-        return convertToPostResponse(post);
+        return convertToPostResponse(post, currentUser);
     }
 
     // 모든 포스트 조회
-    public PagedResponse<PostDTO.PostResponse> getAllPosts(int page, int size) {
-        validatePageNumberAndSize(page, size);
-
+    public PagedResponse<PostDTO.PostResponse> getAllPosts(int page, int size, User currentUser) {
         Pageable pageable = PageRequest.of(0, size, Sort.Direction.DESC, "createTime");
 
         Page<Post> posts = postRepository.findAll(pageable);
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post));
+            responses.add(convertToPostResponse(post, currentUser));
         }
         return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
                 posts.getTotalPages(), posts.isLast());
@@ -57,7 +55,7 @@ public class PostService {
 
     // 프로젝트 내 포스트 조회
     public PagedResponse<PostDTO.PostResponse> getPostsByProject(Long projectId, Sort.Direction sort, String cop,
-                                                                 Long cursor, int size) {
+                                                                 Long cursor, int size, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         Pageable pageable = PageRequest.of(0, size, sort, "id");
@@ -71,7 +69,7 @@ public class PostService {
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post));
+            responses.add(convertToPostResponse(post, currentUser));
         }
 
         long totalElements = postRepository.getPostsCount(project);
@@ -82,7 +80,7 @@ public class PostService {
 
     // 키워드로 게시물 조회
     public PagedResponse<PostDTO.PostResponse> searchPostsInProject(Long projectId, String keyword, Sort.Direction sort,
-                                                                    String cop, Long cursor, int size) {
+                                                                    String cop, Long cursor, int size, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
@@ -97,7 +95,7 @@ public class PostService {
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post));
+            responses.add(convertToPostResponse(post, currentUser));
         }
         long totalElements = postRepository.getPostsCountByKeyword(project, keyword);
 
@@ -112,7 +110,8 @@ public class PostService {
                                                                                        Sort.Direction sort,
                                                                                        String cop,
                                                                                        Long cursor,
-                                                                                       int size) {
+                                                                                       int size,
+                                                                                       User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         Pageable pageable = PageRequest.of(0, size, sort, "id");
@@ -126,7 +125,7 @@ public class PostService {
         }
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post));
+            responses.add(convertToPostResponse(post, currentUser));
         }
         long totalElements = postRepository.getPostsCountByHashtagAndKeyword(project, names, keyword, pageable).getTotalElements();
 
@@ -136,7 +135,7 @@ public class PostService {
 
     // 해시태그 선별 조회
     public PagedResponse<PostDTO.PostResponse> getPostsInProjectByHashtag(Long projectId, List<String> names, Sort.Direction sort,
-                                                                          String cop, Long cursor, int size) {
+                                                                          String cop, Long cursor, int size, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         Pageable pageable = PageRequest.of(0, size, sort, "id");
@@ -149,7 +148,7 @@ public class PostService {
         }
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post));
+            responses.add(convertToPostResponse(post, currentUser));
         }
         long totalElements = postRepository.getPostsCountByHashTag(project, names, pageable).getTotalElements();
 
@@ -168,28 +167,14 @@ public class PostService {
     }
 
     // 위치정보가 있는 Public 포스트들 조회
-    public List<PostDTO.PostResponse> getLocationPosts() {
+    public List<PostDTO.PostResponse> getLocationPosts(User currentUser) {
         List<Post> posts = postRepository.findAllByLocationIsNotNullAndAccessModifier(AccessModifier.PUBLIC);
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post));
+            responses.add(convertToPostResponse(post, currentUser));
         }
         return responses;
-    }
-
-    private void validatePageNumberAndSize(int page, int size) {
-        if (page < 0) {
-            throw new BadRequestException("페이지 번호가 0보다 작습니다.");
-        }
-
-        if (size < 0) {
-            throw new BadRequestException("페이지 크기가 0보다 작습니다.");
-        }
-
-        if (size > 10) {
-            throw new BadRequestException("페이지 크기는 최대 10 입니다. ");
-        }
     }
 
     // 포스트 생성
@@ -291,7 +276,7 @@ public class PostService {
     }
 
     // Post to PostResponse
-    public PostDTO.PostResponse convertToPostResponse(Post post) {
+    public PostDTO.PostResponse convertToPostResponse(Post post, User currentUser) {
         UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(post.getWriter());
 
         List<String> hashtags = new ArrayList<>();
@@ -332,7 +317,9 @@ public class PostService {
         int commentCount = 0;
         if(post.getComments() != null) commentCount = post.getComments().size();
 
+        Boolean isIlikeIt = isILikeIt(post, currentUser);
         PostDTO.PostResponse postResponse = PostDTO.PostResponse.builder()
+                .isILikeIt(isIlikeIt)
                 .id(post.getId())
                 .project(new ProjectDTO.ProjectSimpleInfo(post.getProject()))
                 .writer(writer)
@@ -399,5 +386,9 @@ public class PostService {
             response.add(temp);
         }
         return response;
+    }
+
+    public Boolean isILikeIt(Post post, User currentUser) {
+        return postLikerRepository.findByPostAndUser(post,currentUser).isPresent();
     }
 }

@@ -26,6 +26,7 @@ public class PostDTO {
     @Data
     @Builder
     public static class PostResponse {
+        private Boolean isILikeIt;
         private Long id;
         private ProjectDTO.ProjectSimpleInfo project;
         private UserDTO.UserSimpleInfo writer;

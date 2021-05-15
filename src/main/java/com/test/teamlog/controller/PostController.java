@@ -18,7 +18,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,24 +27,26 @@ public class PostController {
 
     @ApiOperation(value = "단일 포스트 조회")
     @GetMapping("/posts/{id}")
-    public ResponseEntity<PostDTO.PostResponse> getPostById(@PathVariable("id") long id) {
-        PostDTO.PostResponse response = postService.getPost(id);
+    public ResponseEntity<PostDTO.PostResponse> getPostById(@PathVariable("id") long id,
+                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        PostDTO.PostResponse response = postService.getPost(id, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "모든 포스트 조회")
     @GetMapping("/posts")
     public ResponseEntity<PagedResponse<PostDTO.PostResponse>> getAllPosts(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                           @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        PagedResponse<PostDTO.PostResponse> response = postService.getAllPosts(page, size);
+                                                                           @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+                                                                           @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        PagedResponse<PostDTO.PostResponse> response = postService.getAllPosts(page, size, currentUser);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "위치정보가 있는 Public 포스트들 조회")
     @GetMapping("/posts/with-location")
-    public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts() {
-        List<PostDTO.PostResponse> response = postService.getLocationPosts();
+    public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<PostDTO.PostResponse> response = postService.getLocationPosts(currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -66,7 +67,8 @@ public class PostController {
                                                                                  @RequestParam(value = "keyword", required = false) String keyword,
                                                                                  @RequestParam(value = "order", required = false, defaultValue = "1") Integer order,
                                                                                  @RequestParam(value = "cursor", required = false) Long cursor,
-                                                                                 @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+                                                                                 @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+                                                                                 @ApiIgnore @AuthenticationPrincipal User currentUser) {
         List<String> hashtagList = null;
         if (hashtag != null) hashtagList = Arrays.asList(hashtag);
 
@@ -78,13 +80,13 @@ public class PostController {
         }
         PagedResponse<PostDTO.PostResponse> response = null;
         if (keyword != null & hashtagList != null) {
-            response = postService.searchPostsInProjectByHashtagAndKeyword(projectId, keyword, hashtagList, sort, comparisonOperator, cursor, size);
+            response = postService.searchPostsInProjectByHashtagAndKeyword(projectId, keyword, hashtagList, sort, comparisonOperator, cursor, size, currentUser);
         } else if (keyword != null) {
-            response = postService.searchPostsInProject(projectId, keyword, sort, comparisonOperator, cursor, size);
+            response = postService.searchPostsInProject(projectId, keyword, sort, comparisonOperator, cursor, size, currentUser);
         } else if (hashtagList != null) {
-            response = postService.getPostsInProjectByHashtag(projectId, hashtagList, sort, comparisonOperator, cursor, size);
+            response = postService.getPostsInProjectByHashtag(projectId, hashtagList, sort, comparisonOperator, cursor, size, currentUser);
         } else {
-            response = postService.getPostsByProject(projectId, sort, comparisonOperator, cursor, size);
+            response = postService.getPostsByProject(projectId, sort, comparisonOperator, cursor, size, currentUser);
         }
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -97,7 +99,7 @@ public class PostController {
                                                               @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                               @ApiIgnore @AuthenticationPrincipal User currentUser) {
         Long newPostId = postService.createPost(request, media, files, currentUser);
-        PostDTO.PostResponse newPost = postService.getPost(newPostId);
+        PostDTO.PostResponse newPost = postService.getPost(newPostId, currentUser);
         return new ResponseEntity<>(newPost, HttpStatus.CREATED);
     }
 
