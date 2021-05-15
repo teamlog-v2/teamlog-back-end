@@ -6,6 +6,7 @@ import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.payload.ProjectJoinDTO;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.ProjectService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
@@ -18,6 +19,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@Api(description = "프로젝트 초대 및 멤버 관리 컨트롤러")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -40,7 +42,7 @@ public class ProjectJoinMemberController {
         } else {
             apiResponse = projectService.applyForProject(projectId, currentUser);
         }
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
 //    @ApiOperation(value = "프로젝트 멤버 신청")
@@ -79,7 +81,7 @@ public class ProjectJoinMemberController {
     @PostMapping("/project-joins/{joinId}")
     public ResponseEntity<ApiResponse> acceptProjectInvitation(@PathVariable("joinId") Long joinId) {
         ApiResponse apiResponse = projectService.acceptProjectInvitation(joinId);
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "프로젝트 멤버 탈퇴/ 추방(userId 필요) : 임시")
