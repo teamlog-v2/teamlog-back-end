@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class ProjectJoinDTO {
     @Data
     @Builder
-    public static class ProjectJoinResponse {
+    public static class ProjectJoinForProject {
         private Long id;
         private String projectName;
         private UserDTO.UserSimpleInfo user;
@@ -18,7 +18,7 @@ public class ProjectJoinDTO {
 
     @Data
     @Builder
-    public static class ProjectApplyResponse {
+    public static class ProjectJoinForUser {
         private Long id;
         private String projectName;
     }

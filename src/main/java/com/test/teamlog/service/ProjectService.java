@@ -183,17 +183,37 @@ public class ProjectService {
         return new ApiResponse(Boolean.TRUE, "프로젝트 멤버 신청 삭제 완료");
     }
 
-    // 프로젝트 신청 목록 조회 (유저가 신청)
-    public List<ProjectJoinDTO.ProjectJoinResponse> getProjectApplyList(Long projectId) {
+    // 프로젝트 가입 신청자 목록 조회
+    public List<ProjectJoinDTO.ProjectJoinForProject> getProjectApplyListForProject(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
         List<ProjectJoin> projectJoins = projectJoinRepository.findAllByProjectAndIsAcceptedTrueAndIsInvitedFalse(project);
 
-        List<ProjectJoinDTO.ProjectJoinResponse> response = new ArrayList<>();
+        List<ProjectJoinDTO.ProjectJoinForProject> response = new ArrayList<>();
         for(ProjectJoin join : projectJoins) {
             UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
-            ProjectJoinDTO.ProjectJoinResponse temp = ProjectJoinDTO.ProjectJoinResponse.builder()
+            ProjectJoinDTO.ProjectJoinForProject temp = ProjectJoinDTO.ProjectJoinForProject.builder()
+                    .id(join.getId())
+                    .projectName(join.getProject().getName())
+                    .user(user)
+                    .build();
+            response.add(temp);
+        }
+        return response;
+    }
+
+    // 프로젝트 멤버로 초대한 사용자 목록 조회
+    public List<ProjectJoinDTO.ProjectJoinForProject> getProjectInvitationListForProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+
+        List<ProjectJoin> projectJoins = projectJoinRepository.findAllByProjectAndIsAcceptedFalseAndIsInvitedTrue(project);
+
+        List<ProjectJoinDTO.ProjectJoinForProject> response = new ArrayList<>();
+        for(ProjectJoin join : projectJoins) {
+            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
+            ProjectJoinDTO.ProjectJoinForProject temp = ProjectJoinDTO.ProjectJoinForProject.builder()
                     .id(join.getId())
                     .projectName(join.getProject().getName())
                     .user(user)
@@ -204,12 +224,12 @@ public class ProjectService {
     }
 
     // 유저가 받은 프로젝트 초대 조회
-    public List<ProjectJoinDTO.ProjectApplyResponse> getProjectInvitationList(User currentUser) {
+    public List<ProjectJoinDTO.ProjectJoinForUser> getProjectInvitationListForUser(User currentUser) {
         List<ProjectJoin> projectJoins = projectJoinRepository.findAllByUserAndIsAcceptedFalseAndIsInvitedTrue(currentUser);
 
-        List<ProjectJoinDTO.ProjectApplyResponse> response = new ArrayList<>();
+        List<ProjectJoinDTO.ProjectJoinForUser> response = new ArrayList<>();
         for(ProjectJoin join : projectJoins) {
-            ProjectJoinDTO.ProjectApplyResponse temp = ProjectJoinDTO.ProjectApplyResponse.builder()
+            ProjectJoinDTO.ProjectJoinForUser temp = ProjectJoinDTO.ProjectJoinForUser.builder()
                     .id(join.getId())
                     .projectName(join.getProject().getName())
                     .build();
@@ -219,12 +239,12 @@ public class ProjectService {
     }
 
     // 유저가 가입 신청한 프로젝트 조회
-    public List<ProjectJoinDTO.ProjectApplyResponse> getProjectApplyList(User currentUser) {
+    public List<ProjectJoinDTO.ProjectJoinForUser> getProjectApplyListForUser(User currentUser) {
         List<ProjectJoin> projectJoins = projectJoinRepository.findAllByUserAndIsAcceptedTrueAndIsInvitedFalse(currentUser);
 
-        List<ProjectJoinDTO.ProjectApplyResponse> response = new ArrayList<>();
+        List<ProjectJoinDTO.ProjectJoinForUser> response = new ArrayList<>();
         for(ProjectJoin join : projectJoins) {
-            ProjectJoinDTO.ProjectApplyResponse temp = ProjectJoinDTO.ProjectApplyResponse.builder()
+            ProjectJoinDTO.ProjectJoinForUser temp = ProjectJoinDTO.ProjectJoinForUser.builder()
                     .id(join.getId())
                     .projectName(join.getProject().getName())
                     .build();
@@ -314,7 +334,7 @@ public class ProjectService {
             throw new ResourceForbiddenException("마스터 기능", currentUser.getId());
     }
 
-    // 프로젝트 멤버인지 아닌지
+    // 이미 ProjectJoin 있을 경우
     public Boolean isJoinAlreadyExist(Project project, User currentUser) {
         return projectJoinRepository.findByProjectAndUser(project, currentUser).isPresent();
     }

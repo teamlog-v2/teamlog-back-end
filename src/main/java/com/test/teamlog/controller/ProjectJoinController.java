@@ -19,17 +19,14 @@ import springfox.documentation.annotations.ApiIgnore;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Api(description = "프로젝트 초대 및 멤버 관리 컨트롤러")
+@Api(description = "프로젝트 초대 관리 컨트롤러")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
-public class ProjectJoinMemberController {
+public class ProjectJoinController {
     private final ProjectService projectService;
 
-    // -------------------------------
-    // ----- 프로젝트 멤버 신청 관리 -----
-    // -------------------------------
     @ApiOperation(value = "프로젝트 멤버 초대(userId 필요) 및 신청")
     @PostMapping("/projects/{projectId}/joins")
     public ResponseEntity<ApiResponse> inviteUserForProject(@PathVariable("projectId") long projectId,
@@ -60,56 +57,31 @@ public class ProjectJoinMemberController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "프로젝트 멤버 신청 목록 조회 ( 프로젝트 관리 )")
-    @GetMapping("/projects/{id}/joins")
-    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinResponse>> getProjectApplyList(@PathVariable("id") Long id) {
-        List<ProjectJoinDTO.ProjectJoinResponse> response = projectService.getProjectApplyList(id);
+    @ApiOperation(value = "프로젝트 멤버 신청자 목록 조회 ( 프로젝트 관리 )")
+    @GetMapping("/projects/{id}/joins/apply")
+    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForProject>> getProjectApplyListForProject(@PathVariable("id") Long id) {
+        List<ProjectJoinDTO.ProjectJoinForProject> response = projectService.getProjectApplyListForProject(id);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "프로젝트 멤버로 초대한 사용자 목록 ( 프로젝트 관리 )")
+    @GetMapping("/projects/{id}/joins/invitation")
+    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForProject>> getProjectInvitationListForProject(@PathVariable("id") Long id) {
+        List<ProjectJoinDTO.ProjectJoinForProject> response = projectService.getProjectInvitationListForProject(id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "유저가 받은 프로젝트 초대 조회")
     @GetMapping("users/project-invitation")
-    public ResponseEntity<List<ProjectJoinDTO.ProjectApplyResponse>> getProjectInvitationList(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        List<ProjectJoinDTO.ProjectApplyResponse> response = projectService.getProjectInvitationList(currentUser);
+    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForUser>> getProjectInvitationListForUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<ProjectJoinDTO.ProjectJoinForUser> response = projectService.getProjectInvitationListForUser(currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "유저가 가입 신청한 프로젝트 조회")
     @GetMapping("users/project-apply")
-    public ResponseEntity<List<ProjectJoinDTO.ProjectApplyResponse>> getProjectApplyList(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        List<ProjectJoinDTO.ProjectApplyResponse> response = projectService.getProjectApplyList(currentUser);
+    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForUser>> getProjectApplyListForUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<ProjectJoinDTO.ProjectJoinForUser> response = projectService.getProjectApplyListForUser(currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    // ---------------------------
-    // ----- 프로젝트 멤버 관리 -----
-    // ---------------------------
-    @ApiOperation(value = "프로젝트 초대 및 신청을 수락")
-    @PostMapping("/project-joins/{joinId}")
-    public ResponseEntity<ApiResponse> acceptProjectInvitation(@PathVariable("joinId") Long joinId) {
-        ApiResponse apiResponse = projectService.acceptProjectInvitation(joinId);
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
-    }
-
-    @ApiOperation(value = "프로젝트 멤버 탈퇴/ 추방(userId 필요) : 임시")
-    @DeleteMapping("/projects/{projectId}/members")
-    public ResponseEntity<ApiResponse> leaveProject(@PathVariable("projectId") long projectId,
-                                                    @RequestParam(value = "userId", required = false) String userId,
-                                                    @ApiIgnore  @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = null;
-        // userId 없으면 탈퇴 있으면 추방
-        if(userId == null) {
-            apiResponse = projectService.leaveProject(projectId, currentUser);
-        } else {
-            apiResponse = projectService.expelMember(projectId, userId, currentUser);
-        }
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "프로젝트 멤버 삭제 By ProjectMember key")
-    @DeleteMapping("/project-members/{id}")
-    public ResponseEntity<ApiResponse> leaveProject(@PathVariable("id") long id) {
-        ApiResponse apiResponse = projectService.deleteProjectMemeber(id);
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
