@@ -67,9 +67,7 @@ public class ProjectController {
     @GetMapping("/{id}/members")
     public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectMemberList(@PathVariable("id") Long id) {
         List<UserDTO.UserSimpleInfo> response = projectService.getProjectMemberList(id);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.SECONDS))
-                .body(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 //    // 프로젝트 위임 : master가 요청했는지 .. 그런건 없다..

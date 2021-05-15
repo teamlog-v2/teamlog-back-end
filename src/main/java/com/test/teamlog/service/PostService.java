@@ -2,6 +2,7 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.BadRequestException;
+import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.*;
 import com.test.teamlog.repository.*;
@@ -28,6 +29,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostTagRepository postTagRepository;
     private final PostMediaRepository postMediaRepository;
+    private final PostLikerRepository postLikerRepository;
     private final ProjectRepository projectRepository;
     private final FileStorageService fileStorageService;
 
@@ -350,4 +352,52 @@ public class PostService {
         return postResponse;
     }
 
+    // -------------------------------
+    // ------- 포스트 좋아요 관리 -------
+    // -------------------------------
+    // 좋아요
+    @Transactional
+    public ApiResponse likePost(Long postId, User currentUser){
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+
+        // 좋아요 중복 x
+        if(postLikerRepository.findByPostAndUser(post,currentUser).isPresent())
+            throw new ResourceAlreadyExistsException("PostLiker","UserId",currentUser.getId());
+
+        PostLiker postLiker = PostLiker.builder()
+                .post(post)
+                .user(currentUser)
+                .build();
+
+        postLikerRepository.save(postLiker);
+        return new ApiResponse(Boolean.TRUE, "포스트 좋아요 성공");
+    }
+
+    // 좋아요 취소
+    @Transactional
+    public ApiResponse unlikePost(Long postId, User currentUser) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+
+        PostLiker postLiker = postLikerRepository.findByPostAndUser(post, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("PostLiker", "UserId", currentUser.getId()));
+
+        postLikerRepository.delete(postLiker);
+        return new ApiResponse(Boolean.TRUE, "포스트 좋아요 취소 성공");
+    }
+
+    // 포스트 좋아요 목록 조회
+    public List<UserDTO.UserSimpleInfo> getPostLikerList(Long postId){
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+
+        List<PostLiker> postLikers = postLikerRepository.findAllByPost(post);
+        List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
+        for(PostLiker postLiker : postLikers) {
+            UserDTO.UserSimpleInfo temp = new UserDTO.UserSimpleInfo(postLiker.getUser());
+            response.add(temp);
+        }
+        return response;
+    }
 }
