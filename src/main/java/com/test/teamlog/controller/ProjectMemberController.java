@@ -3,6 +3,7 @@ package com.test.teamlog.controller;
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectJoinDTO;
+import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.ProjectService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,5 +51,12 @@ public class ProjectMemberController {
     public ResponseEntity<ApiResponse> leaveProject(@PathVariable("id") long id) {
         ApiResponse apiResponse = projectService.deleteProjectMemeber(id);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "프로젝트 멤버 조회")
+    @GetMapping("/projects/{projectId}/members")
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectMemberList(@PathVariable("id") Long id) {
+        List<UserDTO.UserSimpleInfo> response = projectService.getProjectMemberList(id);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
