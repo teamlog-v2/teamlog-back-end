@@ -30,4 +30,13 @@ public class TeamMember {
     @CreatedDate
     @Column(name = "join_time",nullable = false)
     private LocalDateTime joinTime;
+
+    public void setTeam(Team team) {
+        if(this.team != null) {
+            this.team.getTeamMembers().remove(this);
+        }
+        this.team = team;
+        team.getTeamMembers().add(this);
+    }
+
 }
