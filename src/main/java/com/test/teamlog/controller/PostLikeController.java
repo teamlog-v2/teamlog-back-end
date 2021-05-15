@@ -23,14 +23,14 @@ public class PostLikeController {
     private final PostService postService;
 
     @ApiOperation(value = "해당 포스트를 좋아하는 사람 목록 조회")
-    @GetMapping("/posts/{postId}/post-likers")
+    @GetMapping("/posts/{postId}/likers")
     public ResponseEntity<List<UserDTO.UserSimpleInfo>> getPostLikerList(@PathVariable("postId") long postId) {
         List<UserDTO.UserSimpleInfo> response = postService.getPostLikerList(postId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "포스트 좋아요")
-    @PostMapping("/posts/{postId}/post-likers")
+    @PostMapping("/posts/{postId}/likers")
     public ResponseEntity<ApiResponse> likePost(@PathVariable("postId") long postId,
                                                 @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = postService.likePost(postId, currentUser);
@@ -38,7 +38,7 @@ public class PostLikeController {
     }
 
     @ApiOperation(value = "포스트 좋아요 취소")
-    @DeleteMapping("/posts/{postId}/post-likers")
+    @DeleteMapping("/posts/{postId}/likers")
     public ResponseEntity<ApiResponse> unlikePost(@PathVariable("postId") long postId,
                                                   @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = postService.unlikePost(postId, currentUser);
