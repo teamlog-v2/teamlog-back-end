@@ -23,6 +23,18 @@ public class PostDTO {
         private List<String> hashtags;
     }
 
+    @Getter
+    public static class PostUpdateRequest {
+        private String contents;
+        private AccessModifier accessModifier;
+        private AccessModifier commentModifier;
+        private Double latitude;
+        private Double longitude;
+        private Long projectId;
+        private List<String> hashtags;
+        private List<Long> deletedFileIdList;
+    }
+
     @Data
     @Builder
     public static class PostResponse {

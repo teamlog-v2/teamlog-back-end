@@ -13,6 +13,7 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -232,9 +233,10 @@ public class PostService {
         return newPost.getId();
     }
 
+    // TODO : 포스트 수정내역 추가
     // 포스트 수정
     @Transactional
-    public ApiResponse updatePost(Long id, PostDTO.PostRequest request) {
+    public ApiResponse updatePost(Long id, PostDTO.PostUpdateRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         post.setContents(request.getContents());
@@ -246,13 +248,39 @@ public class PostService {
 
         postRepository.save(post);
 
-//        if (request.getMedia().size() > 0) {
-//            postMediaRepository.saveAll(request.getMedia());
-//        }
-//
+        // 취소한 파일 삭제
+        List<Long> fileIdList = request.getDeletedFileIdList();
+        for(Long fileId : fileIdList){
+            fileStorageService.deleteFileById(id);
+        }
+
+        // 새로운 미디어 추가
+        if (media != null) {
+            Arrays.asList(media)
+                    .stream()
+                    .map(file -> fileStorageService.storeFile(file, post, Boolean.TRUE))
+                    .collect(Collectors.toList());
+        }
+
+        if (files != null) {
+            Arrays.asList(files)
+                    .stream()
+                    .map(file -> fileStorageService.storeFile(file, post, Boolean.FALSE))
+                    .collect(Collectors.toList());
+        }
+
+        // 해시태그 수정
+        List<PostTag> originalHashTags = post.getHashtags();
+        List<String> originalTags = new ArrayList<>();
+        for (PostTag tag : originalHashTags) {
+            originalTags.add(tag.getName());
+        }
+
+        List<String> newTags = request.getHashtags();
+        newTags.removeAll(originalTags); // B-A
         if (request.getHashtags().size() > 0) {
             List<PostTag> hashtags = new ArrayList<>();
-            for (String tagName : request.getHashtags()) {
+            for (String tagName : newTags) {
                 PostTag newTag = PostTag.builder()
                         .name(tagName)
                         .post(post)
@@ -261,6 +289,16 @@ public class PostService {
             }
             postTagRepository.saveAll(hashtags);
         }
+
+        newTags = request.getHashtags();
+        originalTags.removeAll(newTags); // A-B
+
+        for (PostTag tag : originalHashTags) {
+            for(String tagName : originalTags){
+                if(!tag.getName().equals(tagName)) originalHashTags.remove(tag);
+            }
+        }
+        postTagRepository.deleteAll(originalHashTags);
 
         return new ApiResponse(Boolean.TRUE, "포스트 수정 성공");
     }
@@ -291,6 +329,7 @@ public class PostService {
         if (mediaList != null) {
             for (PostMedia temp : mediaList) {
                 FileDTO.FileInfo fileInfo = FileDTO.FileInfo.builder()
+                        .id(temp.getId())
                         .contentType(temp.getContentType())
                         .fileName(temp.getFileName())
                         .build();

@@ -5,6 +5,7 @@ import com.test.teamlog.entity.Post;
 import com.test.teamlog.entity.PostMedia;
 import com.test.teamlog.exception.FileStorageException;
 import com.test.teamlog.exception.MyFileNotFoundException;
+import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.FileDTO;
 import com.test.teamlog.repository.PostMediaRepository;
 import com.test.teamlog.repository.PostRepository;
@@ -121,6 +122,13 @@ public class FileStorageService {
             deleteFile(media.getStoredFileName());
             postMediaRepository.delete(media);
         }
+    }
+
+    @Transactional
+    public void deleteFileById(Long id) {
+        PostMedia media = postMediaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("PostMedia", "id", id));
+        postMediaRepository.delete(media);
     }
 
     public void deleteFile(String storedFileName) {

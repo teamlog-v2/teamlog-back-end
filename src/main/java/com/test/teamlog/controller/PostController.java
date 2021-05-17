@@ -6,6 +6,7 @@ import com.test.teamlog.payload.PagedResponse;
 import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.service.PostService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.CacheControl;
@@ -106,9 +107,11 @@ public class PostController {
     @ApiOperation(value = "포스트 수정")
     @PutMapping("/posts/{id}")
     public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
-                                                     @RequestBody PostDTO.PostRequest request,
+                                                     @ApiParam(value = "생성 리퀘스트 + deletedFileIdList 추가됨.\nList<Long> 타입이고 삭제할 파일 id를 모아서 보내주면됨\n(포스트 조회시 file, media 안에 id도 같이 보내도록 바꿈. 그걸 보내주면 될듯)") @RequestPart(value = "key", required = true) PostDTO.PostUpdateRequest request,
+                                                     @RequestPart(value = "media", required = false) MultipartFile[] media,
+                                                     @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                      @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = postService.updatePost(id, request);
+        ApiResponse apiResponse = postService.updatePost(id, request, media, files, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

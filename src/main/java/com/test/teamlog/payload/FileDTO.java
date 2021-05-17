@@ -9,6 +9,7 @@ public class FileDTO {
     @Data
     @Builder
     public static class FileInfo {
+        private Long id;
         private String contentType;
         private String fileName;
         private String fileDownloadUri;
