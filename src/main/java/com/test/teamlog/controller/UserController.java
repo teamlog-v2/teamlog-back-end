@@ -60,8 +60,9 @@ public class UserController {
 
     @ApiOperation(value = "회원 조회")
     @GetMapping("/users/{id}")
-    public ResponseEntity<UserDTO.UserResponse> getUserById(@PathVariable("id") String id) {
-        UserDTO.UserResponse userResponse = userService.getUser(id);
+    public ResponseEntity<UserDTO.UserResponse> getUserById(@PathVariable("id") String id,
+                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        UserDTO.UserResponse userResponse = userService.getUser(id, currentUser);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
                 .body(userResponse);
@@ -70,8 +71,7 @@ public class UserController {
     @ApiOperation(value = "회원 가입")
     @PostMapping("/users")
     public ResponseEntity<UserDTO.UserResponse> signUp(@Valid @RequestBody UserDTO.UserRequest userRequest) {
-        userService.signUp(userRequest);
-        UserDTO.UserResponse userResponse = userService.getUser(userRequest.getId());
+        UserDTO.UserResponse userResponse = userService.signUp(userRequest);
         return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
     }
 

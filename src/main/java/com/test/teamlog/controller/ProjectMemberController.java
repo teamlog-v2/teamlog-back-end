@@ -55,8 +55,8 @@ public class ProjectMemberController {
 
     @ApiOperation(value = "프로젝트 멤버 조회")
     @GetMapping("/projects/{projectId}/members")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectMemberList(@PathVariable("id") Long id) {
-        List<UserDTO.UserSimpleInfo> response = projectService.getProjectMemberList(id);
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectMemberList(@PathVariable("projectId") Long projectId) {
+        List<UserDTO.UserSimpleInfo> response = projectService.getProjectMemberList(projectId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

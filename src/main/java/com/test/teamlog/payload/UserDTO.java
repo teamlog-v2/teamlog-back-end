@@ -30,6 +30,8 @@ public class UserDTO {
 
     @Data
     public static class UserResponse {
+        private Boolean isMe;
+        private Boolean isFollow;
         private String id;
         private String name;
         private String introduction;

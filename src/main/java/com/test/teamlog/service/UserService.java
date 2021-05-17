@@ -16,11 +16,22 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final UserFollowService userFollowService;
 
-    public UserDTO.UserResponse getUser(String id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
-        return new UserDTO.UserResponse(user);
+    public UserDTO.UserResponse getUser(String id, User currentUser) {
+        UserDTO.UserResponse response = null;
+        if(id.equals(currentUser.getId())) {
+            response = new UserDTO.UserResponse(currentUser);
+            response.setIsMe(Boolean.TRUE);
+            response.setIsFollow(Boolean.FALSE);
+        } else {
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+            response = new UserDTO.UserResponse(user);
+            response.setIsMe(Boolean.FALSE);
+            response.setIsFollow(userFollowService.isFollow(currentUser, user));
+        }
+        return response;
     }
 
     // 로그인
@@ -36,7 +47,7 @@ public class UserService {
 
     // 회원 가입
     @Transactional
-    public void signUp(UserDTO.UserRequest userRequest) {
+    public UserDTO.UserResponse signUp(UserDTO.UserRequest userRequest) {
         validateDuplicateuId(userRequest.getId());
         User user = User.builder()
                 .id(userRequest.getId())
@@ -46,6 +57,7 @@ public class UserService {
                 .profileImgPath(userRequest.getProfileImgPath())
                 .build();
         userRepository.save(user);
+        return new UserDTO.UserResponse(user);
     }
 
     // id 중복 체크

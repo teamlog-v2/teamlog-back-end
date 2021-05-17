@@ -55,8 +55,8 @@ public class TeamMemberController {
 
     @ApiOperation(value = "팀 멤버 조회")
     @GetMapping("/teams/{teamId}/members")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getTeamMemberList(@PathVariable("id") Long id) {
-        List<UserDTO.UserSimpleInfo> response = teamService.getTeamMemberList(id);
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getTeamMemberList(@PathVariable("teamId") Long teamId) {
+        List<UserDTO.UserSimpleInfo> response = teamService.getTeamMemberList(teamId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

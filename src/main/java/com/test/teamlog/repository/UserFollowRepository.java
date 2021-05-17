@@ -8,10 +8,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserFollowRepository extends JpaRepository<UserFollow, Long> {
-    public UserFollow findByFromUserAndToUser(User user, User targetUser);
+    public Optional<UserFollow> findByFromUserAndToUser(User user, User targetUser);
 
     public List<UserFollow> findByFromUser(User user);
 }

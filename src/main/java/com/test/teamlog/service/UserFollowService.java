@@ -86,9 +86,14 @@ public class UserFollowService {
     public ApiResponse unfollowUser(String targetUserId, User currentUser) {
         User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(()-> new ResourceNotFoundException("User","ID",targetUserId));
-        UserFollow userFollow = userFollowRepository.findByFromUserAndToUser(currentUser,targetUser);
+        UserFollow userFollow = userFollowRepository.findByFromUserAndToUser(currentUser,targetUser)
+                .orElseThrow(() -> new ResourceNotFoundException("UserFollow", "FromUserId", currentUser.getId()));
         userFollowRepository.delete(userFollow);
         return new ApiResponse(Boolean.TRUE, "언팔로우 성공");
+    }
+
+    public Boolean isFollow(User fromUser, User targetUser) {
+        return userFollowRepository.findByFromUserAndToUser(fromUser, targetUser).isPresent();
     }
 
 }
