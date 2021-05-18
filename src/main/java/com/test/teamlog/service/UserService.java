@@ -69,11 +69,25 @@ public class UserService {
     }
 
     @Transactional
-    public ApiResponse updateUser(UserDTO.UserRequest userRequest, User currentUser) {
+    public ApiResponse updateUser(UserDTO.UserUpdateRequest userRequest, MultipartFile image, User currentUser) {
+        if(userRequest.getDefaultImage()){
+            if(currentUser.getProfileImgPath() != null) {
+                fileStorageService.deleteFile(currentUser.getProfileImgPath());
+            }
+        } else {
+            if(image != null) {
+                if (currentUser.getProfileImgPath() != null) {
+                    fileStorageService.deleteFile(currentUser.getProfileImgPath());
+                    currentUser.setProfileImgPath(null);
+                }
+                String profileImgPath = fileStorageService.storeFile(image, null, null);
+                currentUser.setProfileImgPath(profileImgPath);
+            }
+        }
         currentUser.setName(userRequest.getName());
         currentUser.setIntroduction(userRequest.getIntroduction());
         userRepository.save(currentUser);
-        return new ApiResponse(Boolean.TRUE, "프로필 수정 성공");
+        return new ApiResponse(Boolean.TRUE, "사용자 정보 수정 성공");
     }
 
     @Transactional
@@ -86,6 +100,16 @@ public class UserService {
         currentUser.setProfileImgPath(profileImgPath);
         userRepository.save(currentUser);
         return new ApiResponse(Boolean.TRUE, "프로필 이미지 수정 성공");
+    }
+
+    @Transactional
+    public ApiResponse deleteUserProfileImage(User currentUser) {
+        if (currentUser.getProfileImgPath() != null) {
+            fileStorageService.deleteFile(currentUser.getProfileImgPath());
+            currentUser.setProfileImgPath(null);
+        }
+        userRepository.save(currentUser);
+        return new ApiResponse(Boolean.TRUE, "프로필 이미지 삭제 성공");
     }
 
     //회원 탈퇴

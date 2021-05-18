@@ -2,6 +2,7 @@ package com.test.teamlog.controller;
 
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.security.JwtUtil;
 import com.test.teamlog.service.UserService;
@@ -63,9 +64,7 @@ public class UserController {
     public ResponseEntity<UserDTO.UserResponse> getUserById(@PathVariable("id") String id,
                                                             @ApiIgnore @AuthenticationPrincipal User currentUser) {
         UserDTO.UserResponse userResponse = userService.getUser(id, currentUser);
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(1800, TimeUnit.SECONDS))
-                .body(userResponse);
+        return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
     @ApiOperation(value = "회원 가입")
@@ -78,17 +77,25 @@ public class UserController {
     //Update
     @ApiOperation(value = "회원 수정")
     @PutMapping("/users")
-    public ResponseEntity<ApiResponse> updateUser(@Valid @RequestBody UserDTO.UserRequest userRequest,
+    public ResponseEntity<ApiResponse> updateUser(@RequestPart(value = "key", required = true) UserDTO.UserUpdateRequest userRequest,
+                                                  @RequestPart(value = "profileImg", required = false) MultipartFile image,
                                                   @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = userService.updateUser(userRequest, currentUser);
+        ApiResponse apiResponse = userService.updateUser(userRequest, image, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @ApiOperation(value = "프로필 이미지 변경")
     @PutMapping("/users/profile-image")
-    public ResponseEntity<ApiResponse> updateUser(@RequestPart(value = "profileImg", required = false) MultipartFile image,
-                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<ApiResponse> updateUserProfileImage(@RequestPart(value = "profileImg", required = true) MultipartFile image,
+                                                              @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.updateUserProfileImage(image, currentUser);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "프로필 이미지 삭제")
+    @DeleteMapping("/users/profile-image")
+    public ResponseEntity<ApiResponse> deleteUserProfileImage(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = userService.deleteUserProfileImage(currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

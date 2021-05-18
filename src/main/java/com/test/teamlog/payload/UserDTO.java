@@ -29,6 +29,18 @@ public class UserDTO {
     }
 
     @Data
+    public static class UserUpdateRequest {
+        @NotBlank(message = "올바른 값 입력해주세요")
+        private String id;
+        @NotBlank(message = "올바른 값 입력해주세요")
+        private String password;
+        @NotBlank(message = "올바른 값 입력해주세요")
+        private String name;
+        private String introduction;
+        private Boolean defaultImage;
+    }
+
+    @Data
     public static class UserResponse {
         private Boolean isMe;
         private Boolean isFollow;
