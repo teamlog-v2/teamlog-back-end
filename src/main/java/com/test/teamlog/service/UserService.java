@@ -73,6 +73,7 @@ public class UserService {
         if(userRequest.getDefaultImage()){
             if(currentUser.getProfileImgPath() != null) {
                 fileStorageService.deleteFile(currentUser.getProfileImgPath());
+                currentUser.setProfileImgPath(null);
             }
         } else {
             if(image != null) {
