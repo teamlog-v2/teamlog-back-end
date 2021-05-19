@@ -314,7 +314,7 @@ public class PostService {
             if(originalHashTags != null){
                 for (PostTag tag : originalHashTags) {
                     for(String tagName : originalTags){
-                        if(!tag.getName().equals(tagName)) originalHashTags.remove(tag);
+                        if(tag.getName().equals(tagName)) originalHashTags.remove(tag);
                     }
                 }
             }
