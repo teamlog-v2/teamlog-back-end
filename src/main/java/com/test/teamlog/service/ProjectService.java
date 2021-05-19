@@ -13,11 +13,13 @@ import com.test.teamlog.payload.ProjectJoinDTO;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.ListIndexBase;
 import org.hibernate.engine.jdbc.connections.internal.UserSuppliedConnectionProviderImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.persistence.Enumerated;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,11 +37,27 @@ public class ProjectService {
             "20210504(171eb9ac-f7ce-4e30-b4c6-a19a28e45c75)",
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
 
+    public ProjectDTO.Relation getRelation(Project project, User currentUser) {
+        if(isUserMemberOfProject(project, currentUser)) {
+            return ProjectDTO.Relation.MEMBER;
+        }
+        ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser).get();
+        if(join != null) {
+            if(join.getIsAccepted() == true && join.getIsInvited() == false) {
+                return ProjectDTO.Relation.APPLIED;
+            }
+            if(join.getIsAccepted() == false && join.getIsInvited() == true) {
+                return ProjectDTO.Relation.INVITED;
+            }
+        }
+        return ProjectDTO.Relation.NONE;
+    }
     // 단일 프로젝트 조회
-    public ProjectDTO.ProjectResponse getProject(Long id) {
+    public ProjectDTO.ProjectResponse getProject(Long id, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
         ProjectDTO.ProjectResponse projectResponse = new ProjectDTO.ProjectResponse(project);
+        projectResponse.setRelation(getRelation(project,currentUser));
         return projectResponse;
     }
 

@@ -27,8 +27,8 @@ public class ProjectJoin extends BaseTimeEntity {
     private User user;
 
     @Column(name = "is_accepted",nullable = false)
-    private boolean isAccepted = false;
+    private Boolean isAccepted = false;
 
     @Column(name = "is_invited",nullable = false)
-    private boolean isInvited = false;
+    private Boolean isInvited = false;
 }

@@ -26,8 +26,9 @@ public class ProjectController {
 
     @ApiOperation(value = "단일 프로젝트 조회")
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectDTO.ProjectResponse> getProjectById(@PathVariable("id") long id) {
-        ProjectDTO.ProjectResponse response = projectService.getProject(id);
+    public ResponseEntity<ProjectDTO.ProjectResponse> getProjectById(@PathVariable("id") long id,
+                                                                     @ApiIgnore  @AuthenticationPrincipal User currentUser) {
+        ProjectDTO.ProjectResponse response = projectService.getProject(id, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

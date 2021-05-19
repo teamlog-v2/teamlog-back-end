@@ -17,8 +17,13 @@ public class ProjectDTO {
         private String masterId;
     }
 
+    public enum Relation {
+        MEMBER,INVITED,APPLIED,NONE;
+    }
+
     @Data
     public static class ProjectResponse {
+        private Relation relation;
         private Long id;
         private String name;
         private String introduction;
