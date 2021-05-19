@@ -42,6 +42,8 @@ public class PostDTO {
         private Long id;
         private ProjectDTO.ProjectSimpleInfo project;
         private UserDTO.UserSimpleInfo writer;
+        private AccessModifier accessModifier;
+        private AccessModifier commentModifier;
         private String contents;
         private Double latitude;
         private Double longitude;

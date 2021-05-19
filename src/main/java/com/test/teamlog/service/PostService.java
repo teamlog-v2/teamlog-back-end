@@ -33,6 +33,7 @@ public class PostService {
     private final PostLikerRepository postLikerRepository;
     private final ProjectRepository projectRepository;
     private final FileStorageService fileStorageService;
+    private final ProjectService projectService;
 
     // 단일 포스트 조회
     public PostDTO.PostResponse getPost(Long id, User currentUser) {
@@ -183,6 +184,7 @@ public class PostService {
     public Long createPost(PostDTO.PostRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", request.getProjectId()));
+        projectService.validateUserIsMemberOfProject(project,currentUser);
 
         Point point = null;
         if (request.getLatitude() != null && request.getLongitude() != null) {
@@ -239,6 +241,8 @@ public class PostService {
     public ApiResponse updatePost(Long id, PostDTO.PostUpdateRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+        projectService.validateUserIsMemberOfProject(post.getProject(),currentUser);
+
         post.setContents(request.getContents());
         post.setAccessModifier(request.getAccessModifier());
         post.setCommentModifier(request.getCommentModifier());
@@ -305,9 +309,11 @@ public class PostService {
 
     // 포스트 삭제
     @Transactional
-    public ApiResponse deletePost(Long id) {
+    public ApiResponse deletePost(Long id, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+        projectService.validateUserIsMemberOfProject(post.getProject(),currentUser);
+
         fileStorageService.deleteFilesByPost(post);
         postRepository.delete(post);
         return new ApiResponse(Boolean.TRUE, "포스트 삭제 성공");
@@ -362,6 +368,8 @@ public class PostService {
                 .id(post.getId())
                 .project(new ProjectDTO.ProjectSimpleInfo(post.getProject()))
                 .writer(writer)
+                .accessModifier(post.getAccessModifier())
+                .commentModifier(post.getCommentModifier())
                 .contents(post.getContents())
                 .hashtags(hashtags)
                 .media(media)
