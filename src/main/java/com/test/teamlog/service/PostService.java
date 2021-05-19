@@ -246,8 +246,11 @@ public class PostService {
         post.setContents(request.getContents());
         post.setAccessModifier(request.getAccessModifier());
         post.setCommentModifier(request.getCommentModifier());
-        GeometryFactory geometryFactory = new GeometryFactory();
-        Point point = geometryFactory.createPoint(new Coordinate(request.getLatitude(), request.getLongitude()));
+        Point point = null;
+        if (request.getLatitude() != null && request.getLongitude() != null) {
+            GeometryFactory geometryFactory = new GeometryFactory();
+            point = geometryFactory.createPoint(new Coordinate(request.getLatitude(), request.getLongitude()));
+        }
         post.setLocation(point);
 
         postRepository.save(post);
