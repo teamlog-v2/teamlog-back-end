@@ -119,7 +119,7 @@ public class PostController {
     @DeleteMapping("/posts/{id}")
     public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
                                                   @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = postService.deletePost(id);
+        ApiResponse apiResponse = postService.deletePost(id, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
