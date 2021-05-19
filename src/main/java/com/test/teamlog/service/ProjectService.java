@@ -281,8 +281,8 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation", "ID", id));
         // TODO : join 삭제 할지 말지?
         // TODO : 수락하는 사람이 마스터이냐 사용자이냐에 따라 구분해야함.
-        join.setAccepted(Boolean.TRUE);
-        join.setInvited(Boolean.TRUE);
+        join.setIsAccepted(Boolean.TRUE);
+        join.setIsInvited(Boolean.TRUE);
 
         projectJoinRepository.save(join);
 
