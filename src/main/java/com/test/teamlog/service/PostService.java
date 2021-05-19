@@ -256,9 +256,11 @@ public class PostService {
         postRepository.save(post);
 
         // 취소한 파일 삭제
-        List<Long> fileIdList = request.getDeletedFileIdList();
-        for(Long fileId : fileIdList){
-            fileStorageService.deleteFileById(id);
+        if(request.getDeletedFileIdList() != null) {
+            List<Long> fileIdList = request.getDeletedFileIdList();
+            for(Long fileId : fileIdList){
+                fileStorageService.deleteFileById(id);
+            }
         }
 
         // 새로운 미디어 추가
@@ -276,37 +278,48 @@ public class PostService {
                     .collect(Collectors.toList());
         }
 
+        List<PostTag> originalHashTags = null;
+        if(post.getHashtags() != null) {
+            originalHashTags = post.getHashtags();
+        }
         // 해시태그 수정
-        List<PostTag> originalHashTags = post.getHashtags();
-        List<String> originalTags = new ArrayList<>();
-        for (PostTag tag : originalHashTags) {
-            originalTags.add(tag.getName());
-        }
-
-        List<String> newTags = request.getHashtags();
-        newTags.removeAll(originalTags); // B-A
-        if (request.getHashtags().size() > 0) {
-            List<PostTag> hashtags = new ArrayList<>();
-            for (String tagName : newTags) {
-                PostTag newTag = PostTag.builder()
-                        .name(tagName)
-                        .post(post)
-                        .build();
-                hashtags.add(newTag);
+        if(request.getHashtags() == null){
+            if(originalHashTags != null) {
+                postTagRepository.deleteAll(originalHashTags);
             }
-            postTagRepository.saveAll(hashtags);
-        }
-
-        newTags = request.getHashtags();
-        originalTags.removeAll(newTags); // A-B
-
-        for (PostTag tag : originalHashTags) {
-            for(String tagName : originalTags){
-                if(!tag.getName().equals(tagName)) originalHashTags.remove(tag);
+        } else {
+            List<String> originalTags = new ArrayList<>();
+            if(originalHashTags != null) {
+                for (PostTag tag : originalHashTags) {
+                    originalTags.add(tag.getName());
+                }
             }
-        }
-        postTagRepository.deleteAll(originalHashTags);
 
+            List<String> newTags = request.getHashtags();
+            newTags.removeAll(originalTags); // B-A
+            if (request.getHashtags().size() > 0) {
+                List<PostTag> hashtags = new ArrayList<>();
+                for (String tagName : newTags) {
+                    PostTag newTag = PostTag.builder()
+                            .name(tagName)
+                            .post(post)
+                            .build();
+                    hashtags.add(newTag);
+                }
+                postTagRepository.saveAll(hashtags);
+            }
+
+            newTags = request.getHashtags();
+            originalTags.removeAll(newTags); // A-B
+            if(originalHashTags != null){
+                for (PostTag tag : originalHashTags) {
+                    for(String tagName : originalTags){
+                        if(!tag.getName().equals(tagName)) originalHashTags.remove(tag);
+                    }
+                }
+            }
+            postTagRepository.deleteAll(originalHashTags);
+        }
         return new ApiResponse(Boolean.TRUE, "포스트 수정 성공");
     }
 
