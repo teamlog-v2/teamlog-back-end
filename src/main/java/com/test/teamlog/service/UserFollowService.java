@@ -22,29 +22,26 @@ public class UserFollowService {
     private final UserFollowRepository userFollowRepository;
 
     // 팔로워 리스트 조회
-    public List<UserDTO.UserFollowInfo> getFollowerList(String userId, User currentUser){
+    public List<UserDTO.UserFollowInfo> getFollowerList(String userId, User currentUser) {
         User user = userRepository.findById(userId)
-                    .orElseThrow(()-> new ResourceNotFoundException("User","ID",userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<UserFollow> currentUserFollowings = userFollowRepository.findByFromUser(currentUser);
-
         List<UserFollow> followers = user.getFollowers();
         List<UserDTO.UserFollowInfo> responses = new ArrayList<>();
         for (UserFollow follower : followers) {
             UserDTO.UserFollowInfo temp = new UserDTO.UserFollowInfo(follower.getFromUser());
-            if(currentUserFollowings == null) {
-                temp.setIsFollow(Boolean.FALSE);
+            if (follower.getFromUser().getId().equals(currentUser.getId())) {
+                temp.setIsFollow(null);
+                responses.add(temp);
                 continue;
             }
-            for(UserFollow following : currentUserFollowings){
-                if(follower.getFromUser().getId().equals(currentUser.getId())) {
-                    temp.setIsFollow(null);
-                    break;
-                }
-                if(following.getToUser().equals(follower.getFromUser())) {
-                    temp.setIsFollow(Boolean.TRUE);
-                    break;
-                } else{
-                    temp.setIsFollow(Boolean.FALSE);
+            temp.setIsFollow(Boolean.FALSE);
+            if(currentUserFollowings.size() > 0) {
+                for (UserFollow following : currentUserFollowings) {
+                    if (following.getToUser().equals(follower.getFromUser())) {
+                        temp.setIsFollow(Boolean.TRUE);
+                        break;
+                    }
                 }
             }
             responses.add(temp);
@@ -53,28 +50,27 @@ public class UserFollowService {
     }
 
     // 팔로잉 리스트 조회
-    public List<UserDTO.UserFollowInfo> getFollowingList(String userId, User currentUser){
+    public List<UserDTO.UserFollowInfo> getFollowingList(String userId, User currentUser) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new ResourceNotFoundException("User","ID",userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<UserFollow> currentUserFollowings = userFollowRepository.findByFromUser(currentUser);
         List<UserFollow> followings = user.getFollowing();
         List<UserDTO.UserFollowInfo> responses = new ArrayList<>();
         for (UserFollow following : followings) {
             UserDTO.UserFollowInfo temp = new UserDTO.UserFollowInfo(following.getToUser());
-            if(currentUserFollowings == null) {
-                temp.setIsFollow(Boolean.FALSE);
+
+            if (following.getToUser().getId().equals(currentUser.getId())) {
+                temp.setIsFollow(null);
+                responses.add(temp);
                 continue;
             }
-            for(UserFollow currentUserfollowing : currentUserFollowings){
-                if(following.getToUser().getId().equals(currentUser.getId())) {
-                    temp.setIsFollow(null);
-                    break;
-                }
-                if(currentUserfollowing.getToUser().equals(following.getToUser())) {
-                    temp.setIsFollow(Boolean.TRUE);
-                    break;
-                } else {
-                    temp.setIsFollow(Boolean.FALSE);
+            temp.setIsFollow(Boolean.FALSE);
+            if (currentUserFollowings.size() == 0) {
+                for (UserFollow currentUserfollowing : currentUserFollowings) {
+                    if (currentUserfollowing.getToUser().equals(following.getToUser())) {
+                        temp.setIsFollow(Boolean.TRUE);
+                        break;
+                    }
                 }
             }
             responses.add(temp);
@@ -84,9 +80,9 @@ public class UserFollowService {
 
     // 팔로우
     @Transactional
-    public ApiResponse followUser(User currentUser, String targetUserID){
+    public ApiResponse followUser(User currentUser, String targetUserID) {
         User targetUser = userRepository.findById(targetUserID)
-                .orElseThrow(()-> new ResourceNotFoundException("User","ID",targetUserID));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "ID", targetUserID));
 
         UserFollow newFollow = UserFollow.builder()
                 .fromUser(currentUser)
@@ -101,8 +97,8 @@ public class UserFollowService {
     @Transactional
     public ApiResponse unfollowUser(String targetUserId, User currentUser) {
         User targetUser = userRepository.findById(targetUserId)
-                .orElseThrow(()-> new ResourceNotFoundException("User","ID",targetUserId));
-        UserFollow userFollow = userFollowRepository.findByFromUserAndToUser(currentUser,targetUser)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "ID", targetUserId));
+        UserFollow userFollow = userFollowRepository.findByFromUserAndToUser(currentUser, targetUser)
                 .orElseThrow(() -> new ResourceNotFoundException("UserFollow", "FromUserId", currentUser.getId()));
         userFollowRepository.delete(userFollow);
         return new ApiResponse(Boolean.TRUE, "언팔로우 성공");
