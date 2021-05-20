@@ -54,6 +54,16 @@ public class TeamController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "팀 마스터 위임")
+    @PutMapping("/{id}/master")
+    public ResponseEntity<ApiResponse> delegateTeamMaster(@PathVariable("id") long id,
+                                                             @RequestParam(value = "new-master", required = true) String newMasterId,
+                                                             @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = teamService.delegateTeamMaster(id, newMasterId, currentUser);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+
     @ApiOperation(value = "팀 삭제")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> deleteTeam(@PathVariable("id") Long id,

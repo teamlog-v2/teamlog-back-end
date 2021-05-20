@@ -38,26 +38,27 @@ public class ProjectService {
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
 
     public ProjectDTO.Relation getRelation(Project project, User currentUser) {
-        if(isUserMemberOfProject(project, currentUser)) {
+        if (isUserMemberOfProject(project, currentUser)) {
             return ProjectDTO.Relation.MEMBER;
         }
         ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
-        if(join != null) {
-            if(join.getIsAccepted() == true && join.getIsInvited() == false) {
+        if (join != null) {
+            if (join.getIsAccepted() == true && join.getIsInvited() == false) {
                 return ProjectDTO.Relation.APPLIED;
             }
-            if(join.getIsAccepted() == false && join.getIsInvited() == true) {
+            if (join.getIsAccepted() == false && join.getIsInvited() == true) {
                 return ProjectDTO.Relation.INVITED;
             }
         }
         return ProjectDTO.Relation.NONE;
     }
+
     // 단일 프로젝트 조회
     public ProjectDTO.ProjectResponse getProject(Long id, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
         ProjectDTO.ProjectResponse projectResponse = new ProjectDTO.ProjectResponse(project);
-        projectResponse.setRelation(getRelation(project,currentUser));
+        projectResponse.setRelation(getRelation(project, currentUser));
         return projectResponse;
     }
 
@@ -114,7 +115,7 @@ public class ProjectService {
     public ApiResponse updateProject(Long id, ProjectDTO.ProjectRequest request, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
-        validateUserIsMaster(project,currentUser);
+        validateUserIsMaster(project, currentUser);
 
         project.setName(request.getName());
         project.setIntroduction(request.getIntroduction());
@@ -130,12 +131,26 @@ public class ProjectService {
         return new ApiResponse(Boolean.TRUE, "프로젝트 수정 성공");
     }
 
+    // 프로젝트 마스터 위임
+    @Transactional
+    public ApiResponse delegateProjectMaster(Long id, String newMasterId, User currentUser) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
+        validateUserIsMaster(project, currentUser);
+
+        User newMaster = userRepository.findById(newMasterId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", newMasterId));
+        project.setMaster(newMaster);
+        projectRepository.save(project);
+        return new ApiResponse(Boolean.TRUE, "프로젝트 마스터 위임 성공");
+    }
+
     // 프로젝트 삭제
     @Transactional
     public ApiResponse deleteProject(Long id, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
-        validateUserIsMaster(project,currentUser);
+        validateUserIsMaster(project, currentUser);
 
         projectRepository.delete(project);
         return new ApiResponse(Boolean.TRUE, "프로젝트 삭제 성공");
@@ -152,10 +167,10 @@ public class ProjectService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        if(isUserMemberOfProject(project,user))
+        if (isUserMemberOfProject(project, user))
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
 
-        if(isJoinAlreadyExist(project,user))
+        if (isJoinAlreadyExist(project, user))
             throw new ResourceAlreadyExistsException("해당 프로젝트의 멤버 신청 혹은 초대가 존재합니다.");
 
         ProjectJoin projectJoin = ProjectJoin.builder()
@@ -175,10 +190,10 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        if(isUserMemberOfProject(project,currentUser))
+        if (isUserMemberOfProject(project, currentUser))
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
 
-        if(isJoinAlreadyExist(project,currentUser))
+        if (isJoinAlreadyExist(project, currentUser))
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트에 멤버 신청 혹은 초대가 존재합니다.");
 
         ProjectJoin projectJoin = ProjectJoin.builder()
@@ -211,7 +226,7 @@ public class ProjectService {
         List<ProjectJoin> projectJoins = projectJoinRepository.findAllByProjectAndIsAcceptedTrueAndIsInvitedFalse(project);
 
         List<ProjectJoinDTO.ProjectJoinForProject> response = new ArrayList<>();
-        for(ProjectJoin join : projectJoins) {
+        for (ProjectJoin join : projectJoins) {
             UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
             ProjectJoinDTO.ProjectJoinForProject temp = ProjectJoinDTO.ProjectJoinForProject.builder()
                     .id(join.getId())
@@ -231,7 +246,7 @@ public class ProjectService {
         List<ProjectJoin> projectJoins = projectJoinRepository.findAllByProjectAndIsAcceptedFalseAndIsInvitedTrue(project);
 
         List<ProjectJoinDTO.ProjectJoinForProject> response = new ArrayList<>();
-        for(ProjectJoin join : projectJoins) {
+        for (ProjectJoin join : projectJoins) {
             UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
             ProjectJoinDTO.ProjectJoinForProject temp = ProjectJoinDTO.ProjectJoinForProject.builder()
                     .id(join.getId())
@@ -248,7 +263,7 @@ public class ProjectService {
         List<ProjectJoin> projectJoins = projectJoinRepository.findAllByUserAndIsAcceptedFalseAndIsInvitedTrue(currentUser);
 
         List<ProjectJoinDTO.ProjectJoinForUser> response = new ArrayList<>();
-        for(ProjectJoin join : projectJoins) {
+        for (ProjectJoin join : projectJoins) {
             ProjectJoinDTO.ProjectJoinForUser temp = ProjectJoinDTO.ProjectJoinForUser.builder()
                     .id(join.getId())
                     .projectName(join.getProject().getName())
@@ -263,7 +278,7 @@ public class ProjectService {
         List<ProjectJoin> projectJoins = projectJoinRepository.findAllByUserAndIsAcceptedTrueAndIsInvitedFalse(currentUser);
 
         List<ProjectJoinDTO.ProjectJoinForUser> response = new ArrayList<>();
-        for(ProjectJoin join : projectJoins) {
+        for (ProjectJoin join : projectJoins) {
             ProjectJoinDTO.ProjectJoinForUser temp = ProjectJoinDTO.ProjectJoinForUser.builder()
                     .id(join.getId())
                     .projectName(join.getProject().getName())
@@ -324,7 +339,7 @@ public class ProjectService {
 
     // 마스터 - 프로젝트 멤버 삭제
     @Transactional
-    public ApiResponse expelMember(Long projectId, String userId,User currentUser) {
+    public ApiResponse expelMember(Long projectId, String userId, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         User user = userRepository.findById(userId)
@@ -350,7 +365,7 @@ public class ProjectService {
     // ---------------------------
     // 마스터 검증
     public void validateUserIsMaster(Project project, User currentUser) {
-        if(!project.getMaster().getId().equals(currentUser.getId()))
+        if (!project.getMaster().getId().equals(currentUser.getId()))
             throw new ResourceForbiddenException("권한이 없습니다.");
     }
 

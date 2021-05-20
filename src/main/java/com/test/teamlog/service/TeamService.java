@@ -92,6 +92,20 @@ public class TeamService {
         return new TeamDTO.TeamResponse(newTeam);
     }
 
+    // 팀 마스터 위임
+    @Transactional
+    public ApiResponse delegateTeamMaster(Long id, String newMasterId, User currentUser) {
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
+        validateUserIsMaster(team, currentUser);
+
+        User newMaster = userRepository.findById(newMasterId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", newMasterId));
+        team.setMaster(newMaster);
+        teamRepository.save(team);
+        return new ApiResponse(Boolean.TRUE, "팀 마스터 위임 성공");
+    }
+
     // 팀 삭제
     @Transactional
     public ApiResponse deleteTeam(Long id, User currentUser) {
