@@ -28,6 +28,7 @@ public class PostUpdateHistory {
     private User user;
 
     @CreatedDate
-    @Column(name = "update_time", nullable = false)
-    private LocalDateTime updateTime;
+    @Column(name = "create_time", nullable = false)
+    private LocalDateTime createTime;
+
 }

@@ -26,6 +26,16 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
 
+
+    @ApiOperation(value = "포스트 수정 내역 조회")
+    @GetMapping("/posts/{id}/historys")
+    public ResponseEntity<List<PostDTO.PostHistoryInfo>> getPostUpdateHistory(@PathVariable("id") long id,
+                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
+
+        List<PostDTO.PostHistoryInfo> response = postService.getPostUpdateHistory(id);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "단일 포스트 조회")
     @GetMapping("/posts/{id}")
     public ResponseEntity<PostDTO.PostResponse> getPostById(@PathVariable("id") long id,

@@ -32,6 +32,7 @@ public class PostService {
     private final PostTagRepository postTagRepository;
     private final PostMediaRepository postMediaRepository;
     private final PostLikerRepository postLikerRepository;
+    private final PostUpdateHistoryRepository postUpdateHistoryRepository;
     private final ProjectRepository projectRepository;
     private final FileStorageService fileStorageService;
     private final ProjectService projectService;
@@ -230,13 +231,19 @@ public class PostService {
                     .collect(Collectors.toList());
         }
 
+        // 포스트 수정내역 생성
+        PostUpdateHistory history = PostUpdateHistory.builder()
+                .post(post)
+                .user(currentUser)
+                .build();
+        postUpdateHistoryRepository.save(history);
+
         project.setUpdateTime(LocalDateTime.now());
         projectRepository.save(project);
 
         return newPost.getId();
     }
 
-    // TODO : 포스트 수정내역 추가
     // 포스트 수정
     @Transactional
     public ApiResponse updatePost(Long id, PostDTO.PostUpdateRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
@@ -314,6 +321,13 @@ public class PostService {
                 post.addHashTags(hashtags);
             }
         }
+        // 포스트 수정내역 생성
+        PostUpdateHistory history = PostUpdateHistory.builder()
+                .post(post)
+                .user(currentUser)
+                .build();
+        postUpdateHistoryRepository.save(history);
+
         return new ApiResponse(Boolean.TRUE, "포스트 수정 성공");
     }
 
@@ -397,7 +411,22 @@ public class PostService {
         return postResponse;
     }
 
-    // -------------------------------
+    @Transactional
+    public List<PostDTO.PostHistoryInfo> getPostUpdateHistory(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+        List<PostUpdateHistory> historyList = postUpdateHistoryRepository.findAllByPost(post,sort);
+        List<PostDTO.PostHistoryInfo> historyResponse = new ArrayList<>();
+        for(PostUpdateHistory history : historyList) {
+            historyResponse.add(new PostDTO.PostHistoryInfo(history));
+        }
+        return historyResponse;
+    }
+
+
+        // -------------------------------
     // ------- 포스트 좋아요 관리 -------
     // -------------------------------
     // 좋아요

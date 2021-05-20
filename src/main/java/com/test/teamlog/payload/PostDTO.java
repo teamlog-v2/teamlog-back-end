@@ -7,6 +7,7 @@ import lombok.Getter;
 
 import org.locationtech.jts.geom.Point;
 
+import javax.persistence.PostUpdate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,5 +54,15 @@ public class PostDTO {
         private List<String> hashtags;
         private List<FileDTO.FileInfo> media = new ArrayList<FileDTO.FileInfo>();
         private List<FileDTO.FileInfo> files = new ArrayList<FileDTO.FileInfo>();
+    }
+
+    @Getter
+    public static class PostHistoryInfo {
+        private UserDTO.UserSimpleInfo writer;
+        private LocalDateTime writeTime;
+        public PostHistoryInfo(PostUpdateHistory history) {
+            this.writer = new UserDTO.UserSimpleInfo(history.getUser());
+            this.writeTime = history.getCreateTime();
+        }
     }
 }
