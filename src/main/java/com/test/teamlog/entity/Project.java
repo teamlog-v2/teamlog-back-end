@@ -47,4 +47,8 @@ public class Project extends BaseTimeEntity{
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<ProjectFollower> projectFollowers = new ArrayList<ProjectFollower>();
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
+    private List<ProjectJoin> projectJoins = new ArrayList<ProjectJoin>();
 }

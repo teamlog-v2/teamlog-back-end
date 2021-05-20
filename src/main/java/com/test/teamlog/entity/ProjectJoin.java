@@ -31,4 +31,12 @@ public class ProjectJoin extends BaseTimeEntity {
 
     @Column(name = "is_invited",nullable = false)
     private Boolean isInvited = false;
+
+    public void setProject(Project project) {
+        if(this.project != null) {
+            this.project.getProjectJoins().remove(this);
+        }
+        this.project = project;
+        project.getProjectJoins().add(this);
+    }
 }
