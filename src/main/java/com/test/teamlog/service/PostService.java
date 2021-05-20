@@ -20,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,7 +67,7 @@ public class PostService {
         if (cursor == null) {
             posts = postRepository.findAllByProject(project, pageable);
         } else {
-            posts = postRepository.findAllByProjectAndCursor(project, cursor ,cop, pageable);
+            posts = postRepository.findAllByProjectAndCursor(project, cursor, cop, pageable);
         }
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
@@ -256,13 +257,12 @@ public class PostService {
         postRepository.save(post);
 
         // 취소한 파일 삭제
-        if(request.getDeletedFileIdList() != null) {
+        if (request.getDeletedFileIdList() != null) {
             List<Long> fileIdList = request.getDeletedFileIdList();
-            for(Long fileId : fileIdList){
+            for (Long fileId : fileIdList) {
                 fileStorageService.deleteFileById(id);
             }
         }
-
         // 새로운 미디어 추가
         if (media != null) {
             Arrays.asList(media)
@@ -279,46 +279,40 @@ public class PostService {
         }
 
         List<PostTag> originalHashTags = null;
-        if(post.getHashtags() != null) {
+        if (post.getHashtags() != null) {
             originalHashTags = post.getHashtags();
         }
-        // 해시태그 수정
-        if(request.getHashtags() == null){
-            if(originalHashTags != null) {
-                postTagRepository.deleteAll(originalHashTags);
-            }
+
+        if(request.getHashtags() == null) {
+            if(originalHashTags != null) post.removeHashTags(originalHashTags);
         } else {
-            List<String> originalTags = new ArrayList<>();
+            List<String> newHashTagNames = request.getHashtags();
+            List<String> maintainedHashTagNames = new ArrayList<>();
             if(originalHashTags != null) {
+                List<PostTag> deletedHashTags = new ArrayList<>();
                 for (PostTag tag : originalHashTags) {
-                    originalTags.add(tag.getName());
+                    if (newHashTagNames.contains(tag.getName())) {
+                        maintainedHashTagNames.add(tag.getName());
+                    }
+                    else {
+                        deletedHashTags.add(tag);
+                    }
                 }
+                post.removeHashTags(deletedHashTags);
             }
 
-            List<String> newTags = request.getHashtags();
-            newTags.removeAll(originalTags); // B-A
-            if (request.getHashtags().size() > 0) {
+            newHashTagNames.removeAll(maintainedHashTagNames); // new
+            if(newHashTagNames.size() > 0){
                 List<PostTag> hashtags = new ArrayList<>();
-                for (String tagName : newTags) {
+                for (String tagName : request.getHashtags()) {
                     PostTag newTag = PostTag.builder()
                             .name(tagName)
                             .post(post)
                             .build();
                     hashtags.add(newTag);
                 }
-                postTagRepository.saveAll(hashtags);
+                post.addHashTags(hashtags);
             }
-
-            newTags = request.getHashtags();
-            originalTags.removeAll(newTags); // A-B
-            if(originalHashTags != null){
-                for (PostTag tag : originalHashTags) {
-                    for(String tagName : originalTags){
-                        if(tag.getName().equals(tagName)) originalHashTags.remove(tag);
-                    }
-                }
-            }
-            postTagRepository.deleteAll(originalHashTags);
         }
         return new ApiResponse(Boolean.TRUE, "포스트 수정 성공");
     }
@@ -340,7 +334,8 @@ public class PostService {
         UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(post.getWriter());
 
         List<String> hashtags = new ArrayList<>();
-        if (post.getHashtags() != null) {
+        List<PostTag> hashtagList = postTagRepository.findAllByPost(post);
+        if (hashtagList != null) {
             for (PostTag tag : post.getHashtags())
                 hashtags.add(tag.getName());
         }
@@ -374,9 +369,9 @@ public class PostService {
         }
 
         int likeCount = 0;
-        if(post.getPostLikers() != null) likeCount = post.getPostLikers().size();
+        if (post.getPostLikers() != null) likeCount = post.getPostLikers().size();
         int commentCount = 0;
-        if(post.getComments() != null) commentCount = post.getComments().size();
+        if (post.getComments() != null) commentCount = post.getComments().size();
 
         Boolean isIlikeIt = isILikeIt(post, currentUser);
         PostDTO.PostResponse postResponse = PostDTO.PostResponse.builder()
@@ -407,13 +402,13 @@ public class PostService {
     // -------------------------------
     // 좋아요
     @Transactional
-    public ApiResponse likePost(Long postId, User currentUser){
+    public ApiResponse likePost(Long postId, User currentUser) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         // 좋아요 중복 x
-        if(postLikerRepository.findByPostAndUser(post,currentUser).isPresent())
-            throw new ResourceAlreadyExistsException("PostLiker","UserId",currentUser.getId());
+        if (postLikerRepository.findByPostAndUser(post, currentUser).isPresent())
+            throw new ResourceAlreadyExistsException("PostLiker", "UserId", currentUser.getId());
 
         PostLiker postLiker = PostLiker.builder()
                 .post(post)
@@ -438,13 +433,13 @@ public class PostService {
     }
 
     // 포스트 좋아요 목록 조회
-    public List<UserDTO.UserSimpleInfo> getPostLikerList(Long postId){
+    public List<UserDTO.UserSimpleInfo> getPostLikerList(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         List<PostLiker> postLikers = postLikerRepository.findAllByPost(post);
         List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
-        for(PostLiker postLiker : postLikers) {
+        for (PostLiker postLiker : postLikers) {
             UserDTO.UserSimpleInfo temp = new UserDTO.UserSimpleInfo(postLiker.getUser());
             response.add(temp);
         }
@@ -452,6 +447,6 @@ public class PostService {
     }
 
     public Boolean isILikeIt(Post post, User currentUser) {
-        return postLikerRepository.findByPostAndUser(post,currentUser).isPresent();
+        return postLikerRepository.findByPostAndUser(post, currentUser).isPresent();
     }
 }

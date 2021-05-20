@@ -14,4 +14,6 @@ import java.util.List;
 public interface PostTagRepository extends JpaRepository<PostTag, Long> {
     @Query("SELECT h.name FROM PostTag h WHERE h.post.project = :project GROUP BY h.name")
     public List<String> getHashTagsInProjectPosts(@Param("project") Project project);
+
+    public List<PostTag> findAllByPost(Post post);
 }

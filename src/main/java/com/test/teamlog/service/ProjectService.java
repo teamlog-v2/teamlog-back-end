@@ -41,7 +41,7 @@ public class ProjectService {
         if(isUserMemberOfProject(project, currentUser)) {
             return ProjectDTO.Relation.MEMBER;
         }
-        ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser).get();
+        ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
         if(join != null) {
             if(join.getIsAccepted() == true && join.getIsInvited() == false) {
                 return ProjectDTO.Relation.APPLIED;

@@ -107,10 +107,10 @@ public class PostController {
     @ApiOperation(value = "포스트 수정")
     @PutMapping("/posts/{id}")
     public ResponseEntity<PostDTO.PostResponse> updateProject(@PathVariable("id") long id,
-                                                     @ApiParam(value = "생성 리퀘스트 + deletedFileIdList 추가됨.\nList<Long> 타입이고 삭제할 파일 id를 모아서 보내주면됨\n(포스트 조회시 file, media 안에 id도 같이 보내도록 바꿈. 그걸 보내주면 될듯)") @RequestPart(value = "key", required = true) PostDTO.PostUpdateRequest request,
-                                                     @RequestPart(value = "media", required = false) MultipartFile[] media,
-                                                     @RequestPart(value = "files", required = false) MultipartFile[] files,
-                                                     @ApiIgnore @AuthenticationPrincipal User currentUser) {
+                                                              @ApiParam(value = "생성 리퀘스트 + deletedFileIdList 추가됨.\nList<Long> 타입이고 삭제할 파일 id를 모아서 보내주면됨\n(포스트 조회시 file, media 안에 id도 같이 보내도록 바꿈. 그걸 보내주면 될듯)") @RequestPart(value = "key", required = true) PostDTO.PostUpdateRequest request,
+                                                              @RequestPart(value = "media", required = false) MultipartFile[] media,
+                                                              @RequestPart(value = "files", required = false) MultipartFile[] files,
+                                                              @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = postService.updatePost(id, request, media, files, currentUser);
         PostDTO.PostResponse updatedPost = postService.getPost(id, currentUser);
         return new ResponseEntity<>(updatedPost, HttpStatus.OK);

@@ -56,4 +56,14 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true) // 애는 삭제할까말까..
     @BatchSize(size = 10)
     private List<PostLiker> postLikers = new ArrayList<PostLiker>();
+
+    public void addHashTags(List<PostTag> tags)
+    {
+        this.hashtags.addAll(tags);
+    }
+
+    public void removeHashTags(List<PostTag> tags)
+    {
+        this.hashtags.removeAll(tags);
+    }
 }
