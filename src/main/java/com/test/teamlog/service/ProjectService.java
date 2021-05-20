@@ -350,7 +350,7 @@ public class ProjectService {
     // ---------------------------
     // 마스터 검증
     public void validateUserIsMaster(Project project, User currentUser) {
-        if(project.getMaster().getId() != currentUser.getId())
+        if(!project.getMaster().getId().equals(currentUser.getId()))
             throw new ResourceForbiddenException("마스터 기능", currentUser.getId());
     }
 
