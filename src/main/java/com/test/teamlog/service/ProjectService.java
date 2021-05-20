@@ -153,10 +153,10 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         if(isUserMemberOfProject(project,user))
-            throw new ResourceAlreadyExistsException("Member of " + project.getName(), "UserId", userId);
+            throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
 
         if(isJoinAlreadyExist(project,user))
-            throw new ResourceAlreadyExistsException("Join of " + project.getName(), "UserId", userId);
+            throw new ResourceAlreadyExistsException("해당 프로젝트의 멤버 신청 혹은 초대가 존재합니다.");
 
         ProjectJoin projectJoin = ProjectJoin.builder()
                 .project(project)
@@ -176,10 +176,10 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
         if(isUserMemberOfProject(project,currentUser))
-            throw new ResourceAlreadyExistsException("Member of " + project.getName(), "UserId", currentUser.getId());
+            throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
 
         if(isJoinAlreadyExist(project,currentUser))
-            throw new ResourceAlreadyExistsException("Join of " + project.getName(), "UserId", currentUser.getId());
+            throw new ResourceAlreadyExistsException("이미 해당 프로젝트에 멤버 신청 혹은 초대가 존재합니다.");
 
         ProjectJoin projectJoin = ProjectJoin.builder()
                 .project(project)
@@ -351,7 +351,7 @@ public class ProjectService {
     // 마스터 검증
     public void validateUserIsMaster(Project project, User currentUser) {
         if(!project.getMaster().getId().equals(currentUser.getId()))
-            throw new ResourceForbiddenException("마스터 기능", currentUser.getId());
+            throw new ResourceForbiddenException("권한이 없습니다.");
     }
 
     // 이미 ProjectJoin 있을 경우

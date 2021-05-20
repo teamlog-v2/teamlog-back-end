@@ -118,10 +118,10 @@ public class TeamService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         if(isUserMemberOfTeam(team,user))
-            throw new ResourceAlreadyExistsException("Member of " + team.getName(), "UserId", userId);
+            throw new ResourceAlreadyExistsException("이미 해당 팀의 멤버입니다.");
 
         if(isJoinAlreadyExist(team,user))
-            throw new ResourceAlreadyExistsException("Join of " + team.getName(), "UserId", userId);
+            throw new ResourceAlreadyExistsException("이미 해당 팀에 멤버 신청 혹은 초대가 존재합니다.");
 
         TeamJoin teamJoin = TeamJoin.builder()
                 .team(team)
@@ -140,10 +140,10 @@ public class TeamService {
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
 
         if(isUserMemberOfTeam(team,currentUser))
-            throw new ResourceAlreadyExistsException("Member of " + team.getName(), "UserId", currentUser.getId());
+            throw new ResourceAlreadyExistsException("이미 해당 팀의 멤버입니다.");
 
         if(isJoinAlreadyExist(team,currentUser))
-            throw new ResourceAlreadyExistsException("Join of " + team.getName(), "UserId", currentUser.getId());
+            throw new ResourceAlreadyExistsException("이미 해당 팀에 멤버 신청 혹은 초대가 존재합니다.");
 
         TeamJoin teamJoin = TeamJoin.builder()
                 .team(team)
@@ -314,7 +314,7 @@ public class TeamService {
     // 마스터 검증
     private void validateUserIsMaster(Team team, User currentUser) {
         if (team.getMaster().getId() != currentUser.getId())
-            throw new ResourceForbiddenException("마스터 기능", currentUser.getId());
+            throw new ResourceForbiddenException("권한이 없습니다.");
     }
 //
     // 이미 TeamJoin 있을 경우

@@ -6,25 +6,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(value = HttpStatus.FORBIDDEN)
 public class ResourceForbiddenException extends RuntimeException{
-
     private ApiResponse apiResponse;
-
-    private String forbiddenResourceName;
-    private String userId;
-
-    public ResourceForbiddenException(String forbiddenResourceName, String userId) {
+    public ResourceForbiddenException(String message) {
         super();
-        this.forbiddenResourceName = forbiddenResourceName;
-        this.userId = userId;
-        setApiResponse();
+        setApiResponse(message);
     }
 
     public ApiResponse getApiResponse() {
         return apiResponse;
     }
 
-    private void setApiResponse() {
-        String message = String.format("%s is forbbiden for User : '%s'", forbiddenResourceName, userId);
+    private void setApiResponse(String message) {
         apiResponse = new ApiResponse(Boolean.FALSE, message);
     }
 }

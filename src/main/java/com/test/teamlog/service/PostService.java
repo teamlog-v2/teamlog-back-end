@@ -1,7 +1,6 @@
 package com.test.teamlog.service;
 
 import com.test.teamlog.entity.*;
-import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.*;
@@ -13,7 +12,6 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -436,7 +434,7 @@ public class PostService {
 
         // 좋아요 중복 x
         if (postLikerRepository.findByPostAndUser(post, currentUser).isPresent())
-            throw new ResourceAlreadyExistsException("PostLiker", "UserId", currentUser.getId());
+            throw new ResourceAlreadyExistsException("좋아요는 한번만 가능합니다.");
 
         PostLiker postLiker = PostLiker.builder()
                 .post(post)

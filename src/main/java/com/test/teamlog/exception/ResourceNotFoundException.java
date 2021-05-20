@@ -26,7 +26,7 @@ public class ResourceNotFoundException extends RuntimeException{
     }
 
     private void setApiResponse() {
-        String message = String.format("%s not found with %s: '%s'", resourceName, fieldName, fieldValue);
+        String message = String.format("%s가 '%s' 인 %s 를 찾을 수 없습니다.", fieldName, fieldValue, resourceName);
 
         apiResponse = new ApiResponse(Boolean.FALSE, message);
     }
