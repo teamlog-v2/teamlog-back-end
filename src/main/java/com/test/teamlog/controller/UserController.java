@@ -31,13 +31,13 @@ public class UserController {
 
     @ApiOperation(value = "로그인 된 사용자인지 검증")
     @GetMapping("/validate")
-    public ResponseEntity<ApiResponse> validateUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, currentUser.getId()), HttpStatus.OK);
+    public ResponseEntity<UserDTO.UserSimpleInfo> validateUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        return new ResponseEntity<>(new UserDTO.UserSimpleInfo(currentUser), HttpStatus.OK);
     }
 
     @ApiOperation(value = "로그인")
     @PostMapping("/sign-in")
-    public ResponseEntity<ApiResponse> signIn(@RequestBody UserDTO.SignInRequest userRequest,
+    public ResponseEntity<UserDTO.UserSimpleInfo> signIn(@RequestBody UserDTO.SignInRequest userRequest,
                                               HttpServletRequest req,
                                               HttpServletResponse res) {
         User user = userService.signIn(userRequest);
@@ -45,9 +45,9 @@ public class UserController {
             String token = jwtUtil.generateToken(user);
             Cookie accessToken = cookieUtil.createCookie(JwtUtil.ACCESS_TOKEN_NAME, token);
             res.addCookie(accessToken);
-            return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, user.getId()), HttpStatus.OK);
+            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(user), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(new ApiResponse(Boolean.FALSE, "로그인 실패"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
 
