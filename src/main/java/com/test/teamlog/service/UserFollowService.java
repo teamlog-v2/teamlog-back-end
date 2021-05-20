@@ -65,7 +65,7 @@ public class UserFollowService {
                 continue;
             }
             temp.setIsFollow(Boolean.FALSE);
-            if (currentUserFollowings.size() == 0) {
+            if (currentUserFollowings.size() > 0) {
                 for (UserFollow currentUserfollowing : currentUserFollowings) {
                     if (currentUserfollowing.getToUser().equals(following.getToUser())) {
                         temp.setIsFollow(Boolean.TRUE);
