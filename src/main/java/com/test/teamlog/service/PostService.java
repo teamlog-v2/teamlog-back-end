@@ -264,7 +264,7 @@ public class PostService {
         if (request.getDeletedFileIdList() != null) {
             List<Long> fileIdList = request.getDeletedFileIdList();
             for (Long fileId : fileIdList) {
-                fileStorageService.deleteFileById(id);
+                fileStorageService.deleteFileById(fileId);
             }
         }
         // 새로운 미디어 추가
@@ -306,9 +306,11 @@ public class PostService {
             }
 
             newHashTagNames.removeAll(maintainedHashTagNames); // new
+            System.out.println(request.getHashtags());
+            System.out.println(newHashTagNames);
             if(newHashTagNames.size() > 0){
                 List<PostTag> hashtags = new ArrayList<>();
-                for (String tagName : request.getHashtags()) {
+                for (String tagName : newHashTagNames) {
                     PostTag newTag = PostTag.builder()
                             .name(tagName)
                             .post(post)
