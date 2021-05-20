@@ -66,4 +66,12 @@ public class Post extends BaseTimeEntity {
     {
         this.hashtags.removeAll(tags);
     }
+
+    public void setProject(Project project) {
+        if(this.project != null) {
+            this.project.getPosts().remove(this);
+        }
+        this.project = project;
+        project.getPosts().add(this);
+    }
 }
