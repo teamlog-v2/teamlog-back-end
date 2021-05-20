@@ -31,6 +31,10 @@ public class UserFollowService {
         List<UserDTO.UserFollowInfo> responses = new ArrayList<>();
         for (UserFollow follower : followers) {
             UserDTO.UserFollowInfo temp = new UserDTO.UserFollowInfo(follower.getFromUser());
+            if(currentUserFollowings == null) {
+                temp.setIsFollow(Boolean.FALSE);
+                continue;
+            }
             for(UserFollow following : currentUserFollowings){
                 if(follower.getFromUser().getId().equals(currentUser.getId())) {
                     temp.setIsFollow(null);
@@ -57,6 +61,10 @@ public class UserFollowService {
         List<UserDTO.UserFollowInfo> responses = new ArrayList<>();
         for (UserFollow following : followings) {
             UserDTO.UserFollowInfo temp = new UserDTO.UserFollowInfo(following.getToUser());
+            if(currentUserFollowings == null) {
+                temp.setIsFollow(Boolean.FALSE);
+                continue;
+            }
             for(UserFollow currentUserfollowing : currentUserFollowings){
                 if(following.getToUser().getId().equals(currentUser.getId())) {
                     temp.setIsFollow(null);
