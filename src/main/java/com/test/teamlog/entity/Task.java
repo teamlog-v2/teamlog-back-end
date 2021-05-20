@@ -23,6 +23,9 @@ public class Task extends BaseTimeEntity{
     @Column(name = "task_name", nullable = false)
     private String taskName;
 
+//    @Column(nullable = false)
+//    private Integer priority;
+
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
     private TaskStatus status;
@@ -35,4 +38,12 @@ public class Task extends BaseTimeEntity{
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskPerformer> taskPerformers = new ArrayList<TaskPerformer>();
+
+    public void setProject(Project project) {
+        if(this.project != null) {
+            this.project.getTasks().remove(this);
+        }
+        this.project = project;
+        project.getTasks().add(this);
+    }
 }
