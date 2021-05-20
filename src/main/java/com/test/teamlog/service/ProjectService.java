@@ -161,6 +161,7 @@ public class ProjectService {
         ProjectJoin projectJoin = ProjectJoin.builder()
                 .project(project)
                 .user(user)
+                .isAccepted(Boolean.TRUE)
                 .isInvited(Boolean.TRUE)
                 .build();
         projectJoinRepository.save(projectJoin);
@@ -184,6 +185,7 @@ public class ProjectService {
                 .project(project)
                 .user(currentUser)
                 .isAccepted(Boolean.TRUE)
+                .isInvited(Boolean.FALSE)
                 .build();
         projectJoinRepository.save(projectJoin);
 
