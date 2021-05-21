@@ -17,6 +17,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,13 +46,14 @@ public class UserController {
         }
     }
 
-//    @ApiOperation(value = "로그아웃")
-//    @GetMapping("/sign-out")
-//    public ResponseEntity<ApiResponse> signOut(HttpServletRequest req, HttpServletResponse res) {
-//        Cookie accessToken = cookieUtil.createEmptyCookie(JwtUtil.ACCESS_TOKEN_NAME);
-//        res.addCookie(accessToken);
-//        return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "로그아웃 성공"), HttpStatus.OK);
-//    }
+    @ApiOperation(value = "회원 검색( query value 없으면 모든 회원 조회되도록 임시로 설정 )")
+    @GetMapping("/users")
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String id,
+                                                                    @RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                                    @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<UserDTO.UserSimpleInfo> response = userService.searchUser(id, name);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @ApiOperation(value = "회원 조회")
     @GetMapping("/users/{id}")

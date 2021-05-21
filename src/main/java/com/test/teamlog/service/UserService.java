@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -20,6 +23,15 @@ public class UserService {
     private final UserFollowService userFollowService;
 
     // TODO : 개인작성 이력 조회
+
+    public List<UserDTO.UserSimpleInfo> searchUser(String id, String name) {
+        List<User> userList = userRepository.searchUserByIdAndName(id,name);
+        List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
+        for(User user : userList) {
+            response.add(new UserDTO.UserSimpleInfo(user));
+        }
+        return response;
+    }
 
     public UserDTO.UserResponse getUser(String id, User currentUser) {
         UserDTO.UserResponse response = null;
@@ -118,7 +130,6 @@ public class UserService {
     //회원 탈퇴
     @Transactional
     public ApiResponse deleteUser(User currentUser) {
-        // TODO : 허가된 사용자인지 검증해야함..
         userRepository.delete(currentUser);
         return new ApiResponse(Boolean.TRUE, "회원 탈퇴 성공");
     }
