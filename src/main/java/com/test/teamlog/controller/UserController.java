@@ -3,10 +3,10 @@ package com.test.teamlog.controller;
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.PostDTO;
+import com.test.teamlog.payload.Token;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.security.JwtUtil;
 import com.test.teamlog.service.UserService;
-import com.test.teamlog.util.CookieUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -27,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
-    private final CookieUtil cookieUtil;
 
     @ApiOperation(value = "로그인 된 사용자인지 검증")
     @GetMapping("/validate")
@@ -37,27 +35,25 @@ public class UserController {
 
     @ApiOperation(value = "로그인")
     @PostMapping("/sign-in")
-    public ResponseEntity<UserDTO.UserSimpleInfo> signIn(@RequestBody UserDTO.SignInRequest userRequest,
+    public ResponseEntity<Token> signIn(@RequestBody UserDTO.SignInRequest userRequest,
                                               HttpServletRequest req,
                                               HttpServletResponse res) {
         User user = userService.signIn(userRequest);
         if (user != null) {
             String token = jwtUtil.generateToken(user);
-            Cookie accessToken = cookieUtil.createCookie(JwtUtil.ACCESS_TOKEN_NAME, token);
-            res.addCookie(accessToken);
-            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(user), HttpStatus.OK);
+            return new ResponseEntity<>(new Token(token), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
 
-    @ApiOperation(value = "로그아웃")
-    @GetMapping("/sign-out")
-    public ResponseEntity<ApiResponse> signOut(HttpServletRequest req, HttpServletResponse res) {
-        Cookie accessToken = cookieUtil.createEmptyCookie(JwtUtil.ACCESS_TOKEN_NAME);
-        res.addCookie(accessToken);
-        return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "로그아웃 성공"), HttpStatus.OK);
-    }
+//    @ApiOperation(value = "로그아웃")
+//    @GetMapping("/sign-out")
+//    public ResponseEntity<ApiResponse> signOut(HttpServletRequest req, HttpServletResponse res) {
+//        Cookie accessToken = cookieUtil.createEmptyCookie(JwtUtil.ACCESS_TOKEN_NAME);
+//        res.addCookie(accessToken);
+//        return new ResponseEntity<>(new ApiResponse(Boolean.TRUE, "로그아웃 성공"), HttpStatus.OK);
+//    }
 
     @ApiOperation(value = "회원 조회")
     @GetMapping("/users/{id}")
