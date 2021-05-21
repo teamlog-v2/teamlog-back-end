@@ -1,6 +1,7 @@
 package com.test.teamlog.service;
 
 import com.test.teamlog.entity.User;
+import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.UserDTO;
@@ -18,9 +19,11 @@ public class UserService {
     private final FileStorageService fileStorageService;
     private final UserFollowService userFollowService;
 
+    // TODO : 개인작성 이력 조회
+
     public UserDTO.UserResponse getUser(String id, User currentUser) {
         UserDTO.UserResponse response = null;
-        if(id.equals(currentUser.getId())) {
+        if (id.equals(currentUser.getId())) {
             response = new UserDTO.UserResponse(currentUser);
             response.setIsMe(Boolean.TRUE);
             response.setIsFollow(Boolean.FALSE);
@@ -47,7 +50,7 @@ public class UserService {
 
     // 회원 가입
     @Transactional
-    public UserDTO.UserResponse signUp(UserDTO.UserRequest userRequest) {
+    public UserDTO.UserSimpleInfo signUp(UserDTO.UserRequest userRequest) {
         validateDuplicateuId(userRequest.getId());
         User user = User.builder()
                 .id(userRequest.getId())
@@ -57,26 +60,25 @@ public class UserService {
                 .profileImgPath(userRequest.getProfileImgPath())
                 .build();
         userRepository.save(user);
-        return new UserDTO.UserResponse(user);
+        return new UserDTO.UserSimpleInfo(user);
     }
 
     // id 중복 체크
     private void validateDuplicateuId(String id) {
         if (userRepository.findById(id).isPresent()) {
-            // TODO : 다른 exception 만들어서 처리
-            throw new IllegalStateException("이미 존재하는 회원입니다.");
+            throw new ResourceAlreadyExistsException("이미 존재하는 회원입니다.");
         }
     }
 
     @Transactional
     public ApiResponse updateUser(UserDTO.UserUpdateRequest userRequest, MultipartFile image, User currentUser) {
-        if(userRequest.getDefaultImage()){
-            if(currentUser.getProfileImgPath() != null) {
+        if (userRequest.getDefaultImage()) {
+            if (currentUser.getProfileImgPath() != null) {
                 fileStorageService.deleteFile(currentUser.getProfileImgPath());
                 currentUser.setProfileImgPath(null);
             }
         } else {
-            if(image != null) {
+            if (image != null) {
                 if (currentUser.getProfileImgPath() != null) {
                     fileStorageService.deleteFile(currentUser.getProfileImgPath());
                     currentUser.setProfileImgPath(null);

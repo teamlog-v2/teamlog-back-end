@@ -2,12 +2,8 @@ package com.test.teamlog.entity;
 
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,8 +20,8 @@ public class Project extends BaseTimeEntity{
 
     private String introduction;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "access_modifier",nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "access_modifier",nullable = false, columnDefinition = "TINYINT(1)")
     private AccessModifier accessModifier;
 
     @ManyToOne
@@ -38,21 +34,21 @@ public class Project extends BaseTimeEntity{
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<Post> posts = new ArrayList<Post>();
+    private List<Post> posts;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<ProjectMember> projectMembers = new ArrayList<ProjectMember>();
+    private List<ProjectMember> projectMembers;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<ProjectFollower> projectFollowers = new ArrayList<ProjectFollower>();
+    private List<ProjectFollower> projectFollowers;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<ProjectJoin> projectJoins = new ArrayList<ProjectJoin>();
+    private List<ProjectJoin> projectJoins;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<Task> tasks = new ArrayList<Task>();
+    private List<Task> tasks;
 }

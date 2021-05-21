@@ -1,13 +1,9 @@
 package com.test.teamlog.entity;
 
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,11 +19,11 @@ public class Task extends BaseTimeEntity{
     @Column(name = "task_name", nullable = false)
     private String taskName;
 
-//    @Column(nullable = false)
-//    private Integer priority;
+    @Column(nullable = false)
+    private Integer priority;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
     private TaskStatus status;
 
     private LocalDateTime deadline;
@@ -37,7 +33,7 @@ public class Task extends BaseTimeEntity{
     private Project project;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TaskPerformer> taskPerformers = new ArrayList<TaskPerformer>();
+    private List<TaskPerformer> taskPerformers;
 
     public void setProject(Project project) {
         if(this.project != null) {
@@ -46,4 +42,15 @@ public class Task extends BaseTimeEntity{
         this.project = project;
         project.getTasks().add(this);
     }
+
+    public void addTaskPerformers(List<TaskPerformer> performers)
+    {
+        this.taskPerformers.addAll(performers);
+    }
+
+    public void removeTaskPerformers(List<TaskPerformer> performers)
+    {
+        this.taskPerformers.removeAll(performers);
+    }
+
 }

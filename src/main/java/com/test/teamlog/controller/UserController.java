@@ -2,7 +2,6 @@ package com.test.teamlog.controller;
 
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.payload.Token;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.security.JwtUtil;
@@ -18,7 +17,6 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,8 +34,8 @@ public class UserController {
     @ApiOperation(value = "로그인")
     @PostMapping("/sign-in")
     public ResponseEntity<Token> signIn(@RequestBody UserDTO.SignInRequest userRequest,
-                                              HttpServletRequest req,
-                                              HttpServletResponse res) {
+                                        HttpServletRequest req,
+                                        HttpServletResponse res) {
         User user = userService.signIn(userRequest);
         if (user != null) {
             String token = jwtUtil.generateToken(user);
@@ -65,8 +63,8 @@ public class UserController {
 
     @ApiOperation(value = "회원 가입")
     @PostMapping("/users")
-    public ResponseEntity<UserDTO.UserResponse> signUp(@Valid @RequestBody UserDTO.UserRequest userRequest) {
-        UserDTO.UserResponse userResponse = userService.signUp(userRequest);
+    public ResponseEntity<UserDTO.UserSimpleInfo> signUp(@Valid @RequestBody UserDTO.UserRequest userRequest) {
+        UserDTO.UserSimpleInfo userResponse = userService.signUp(userRequest);
         return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
     }
 

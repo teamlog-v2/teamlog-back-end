@@ -1,10 +1,12 @@
 package com.test.teamlog.payload;
 
 import com.test.teamlog.entity.Task;
+import com.test.teamlog.entity.TaskPerformer;
 import com.test.teamlog.entity.TaskStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TaskDTO {
@@ -30,7 +32,14 @@ public class TaskDTO {
             this.status = task.getStatus().getValue();
             this.updateTime = task.getUpdateTime();
             this.deadline = task.getDeadline();
-            this.performers = null;
+            List<UserDTO.UserSimpleInfo> performers = new ArrayList<>();
+            if(task.getTaskPerformers() !=null) {
+                for (TaskPerformer temp : task.getTaskPerformers()) {
+                    UserDTO.UserSimpleInfo userInfo = new UserDTO.UserSimpleInfo(temp.getUser());
+                    performers.add(userInfo);
+                }
+            }
+            this.performers = performers;
         }
     }
 }

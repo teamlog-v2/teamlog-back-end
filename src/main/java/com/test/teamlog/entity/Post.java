@@ -6,7 +6,6 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,12 +26,12 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "writer_user_id", nullable = false)
     private User writer;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "access_modifier", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "access_modifier",nullable = false, columnDefinition = "TINYINT(1)")
     private AccessModifier accessModifier;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "comment_modifier", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "comment_modifier",nullable = false, columnDefinition = "TINYINT(1)")
     private AccessModifier commentModifier;
 
     private Point location;
@@ -43,19 +42,19 @@ public class Post extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<PostMedia> media = new ArrayList<PostMedia>();
+    private List<PostMedia> media;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<PostTag> hashtags = new ArrayList<PostTag>();
+    private List<PostTag> hashtags;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<Comment> comments = new ArrayList<Comment>();
+    private List<Comment> comments;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true) // 애는 삭제할까말까..
     @BatchSize(size = 10)
-    private List<PostLiker> postLikers = new ArrayList<PostLiker>();
+    private List<PostLiker> postLikers;
 
     public void addHashTags(List<PostTag> tags)
     {
