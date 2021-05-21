@@ -12,8 +12,13 @@ public class CommentDTO {
     @Getter
     public static class CommentRequest {
         private Long parentCommentId;
-        private String writerId;
         private Long postId;
+        private String contents;
+        private List<String> commentMentions;
+    }
+
+    @Getter
+    public static class CommentUpdateRequest {
         private String contents;
         private List<String> commentMentions;
     }
@@ -32,6 +37,7 @@ public class CommentDTO {
     @Data
     @Builder
     public static class CommentInfo {
+        private Boolean isMyComment;
         private Long id;
         private String contents;
         private UserDTO.UserSimpleInfo writer;

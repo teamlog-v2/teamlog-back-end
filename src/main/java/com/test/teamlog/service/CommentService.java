@@ -27,8 +27,9 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
+
     // 게시물의 부모 댓글 조회
-    public PagedResponse<CommentDTO.CommentInfo> getParentComments(Long postId, int page, int size) {
+    public PagedResponse<CommentDTO.CommentInfo> getParentComments(Long postId, int page, int size, User currentUser) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
@@ -44,7 +45,11 @@ public class CommentService {
                 commentMentions.add(targetUSer.getTargetUser().getId());
             }
 
+            Boolean isMyComment = Boolean.FALSE;
+            if(comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.TRUE;
+
             CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
+                    .isMyComment(isMyComment)
                     .id(comment.getId())
                     .contents(comment.getContents())
                     .writer(writer)
@@ -59,7 +64,7 @@ public class CommentService {
     }
 
     // 대댓글 조회
-    public PagedResponse<CommentDTO.CommentInfo> getChildComments(Long parentCommentId, int page, int size) {
+    public PagedResponse<CommentDTO.CommentInfo> getChildComments(Long parentCommentId, int page, int size, User currentUser) {
         Comment comment = commentRepository.findById(parentCommentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", parentCommentId));
 
@@ -83,7 +88,11 @@ public class CommentService {
                 commentMentions.add(targetUSer.getTargetUser().getId());
             }
 
+            Boolean isMyComment = Boolean.FALSE;
+            if(comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.TRUE;
+
             CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
+                    .isMyComment(isMyComment)
                     .id(childComment.getId())
                     .contents(childComment.getContents())
                     .writer(writer)
@@ -185,10 +194,50 @@ public class CommentService {
 
     // 댓글 수정
     @Transactional
-    public ApiResponse updateComment(Long id, CommentDTO.CommentRequest request) {
+    public ApiResponse updateComment(Long id, CommentDTO.CommentUpdateRequest request) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
         comment.setContents(request.getContents());
+
+        List<CommentMention> originalCommentMentions = null;
+        if(comment.getCommentMentions() != null) {
+            originalCommentMentions = comment.getCommentMentions();
+        }
+
+        if(request.getCommentMentions() == null) {
+            if(originalCommentMentions != null) comment.removeCommentMentions(originalCommentMentions);
+        } else {
+            List<String> newCommentMentions = request.getCommentMentions();
+            List<String> maintainedCommentMentions = new ArrayList<>();
+            if(originalCommentMentions != null) {
+                List<CommentMention> deletedCommentMentions = new ArrayList<>();
+                for (CommentMention commentMention : originalCommentMentions) {
+                    if (newCommentMentions.contains(commentMention.getTargetUser().getId())) {
+                        maintainedCommentMentions.add(commentMention.getTargetUser().getId());
+                    }
+                    else {
+                        deletedCommentMentions.add(commentMention);
+                    }
+                }
+                comment.removeCommentMentions(deletedCommentMentions);
+            }
+
+            newCommentMentions.removeAll(maintainedCommentMentions); // new
+            if(newCommentMentions.size() > 0){
+                List<CommentMention> commentMentions = new ArrayList<>();
+                for (String targetId : newCommentMentions) {
+                    User target = userRepository.findById(targetId)
+                            .orElseThrow(() -> new ResourceNotFoundException("USER", "id", targetId));
+
+                    CommentMention commentMention = CommentMention.builder()
+                            .comment(comment)
+                            .targetUser(target)
+                            .build();
+                    commentMentions.add(commentMention);
+                }
+                comment.addCommentMentions(commentMentions);
+            }
+        }
         commentRepository.save(comment);
         return new ApiResponse(Boolean.TRUE, "댓글 수정 성공");
     }

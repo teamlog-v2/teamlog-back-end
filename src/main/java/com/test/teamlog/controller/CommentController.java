@@ -28,8 +28,9 @@ public class CommentController {
     @GetMapping("/posts/{postId}/parent-comments")
     public ResponseEntity<PagedResponse<CommentDTO.CommentInfo>> getParentCommentsByPost(@PathVariable("postId") long postId,
                                                                                          @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                                         @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-        PagedResponse<CommentDTO.CommentInfo> response = commentService.getParentComments(postId, page, size);
+                                                                                         @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+                                                                                         @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        PagedResponse<CommentDTO.CommentInfo> response = commentService.getParentComments(postId, page, size, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -37,9 +38,10 @@ public class CommentController {
     @GetMapping("/comments/{commentId}/child-comments")
     public ResponseEntity<PagedResponse<CommentDTO.CommentInfo>> getChildComments(@PathVariable("commentId") long commentId,
                                                                                   @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                                  @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+                                                                                  @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+                                                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
 
-        PagedResponse<CommentDTO.CommentInfo> response = commentService.getChildComments(commentId, page, size);
+        PagedResponse<CommentDTO.CommentInfo> response = commentService.getChildComments(commentId, page, size, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -61,7 +63,7 @@ public class CommentController {
     @ApiOperation(value = "댓글 수정")
     @PutMapping("/comments/{id}")
     public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
-                                                     @RequestBody CommentDTO.CommentRequest request,
+                                                     @RequestBody CommentDTO.CommentUpdateRequest request,
                                                      @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = commentService.updateComment(id, request);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

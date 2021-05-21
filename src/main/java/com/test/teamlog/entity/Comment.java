@@ -47,4 +47,15 @@ public class Comment extends BaseTimeEntity {
         this.post = post;
         post.getComments().add(this);
     }
+
+    public void addCommentMentions(List<CommentMention> mentions)
+    {
+        this.commentMentions.addAll(mentions);
+    }
+
+    public void removeCommentMentions(List<CommentMention> mentions)
+    {
+        this.commentMentions.removeAll(mentions);
+    }
+
 }
