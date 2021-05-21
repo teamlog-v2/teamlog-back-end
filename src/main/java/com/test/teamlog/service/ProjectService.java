@@ -35,17 +35,13 @@ public class ProjectService {
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
 
     public ProjectDTO.Relation getRelation(Project project, User currentUser) {
-        if (isUserMemberOfProject(project, currentUser)) {
-            return ProjectDTO.Relation.MEMBER;
-        }
+        if (project.getMaster().equals(currentUser)) return ProjectDTO.Relation.MASTER;
+        if (isUserMemberOfProject(project, currentUser)) return ProjectDTO.Relation.MEMBER;
+
         ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
         if (join != null) {
-            if (join.getIsAccepted() == true && join.getIsInvited() == false) {
-                return ProjectDTO.Relation.APPLIED;
-            }
-            if (join.getIsAccepted() == false && join.getIsInvited() == true) {
-                return ProjectDTO.Relation.INVITED;
-            }
+            if (join.getIsAccepted() == true && join.getIsInvited() == false) return ProjectDTO.Relation.APPLIED;
+            if (join.getIsAccepted() == false && join.getIsInvited() == true) return ProjectDTO.Relation.INVITED;
         }
         return ProjectDTO.Relation.NONE;
     }
@@ -74,7 +70,6 @@ public class ProjectService {
                     .path("/resources/")
                     .path(defaultProjectImages[project.getProject().getId().intValue() % 4])
                     .toUriString();
-            System.out.println(imgUri);
             ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
                     .id(project.getProject().getId())
                     .name(project.getProject().getName())
@@ -89,7 +84,7 @@ public class ProjectService {
 
     // 프로젝트 생성
     @Transactional
-    public ApiResponse createProject(ProjectDTO.ProjectRequest request, User currentUser) {
+    public ProjectDTO.ProjectResponse createProject(ProjectDTO.ProjectRequest request, User currentUser) {
         Project project = Project.builder()
                 .name(request.getName())
                 .introduction(request.getIntroduction())
@@ -103,13 +98,16 @@ public class ProjectService {
                 .project(project)
                 .build();
         projectMemberRepository.save(member);
+        project.getProjectMembers().add(member);
 
-        return new ApiResponse(Boolean.TRUE, "프로젝트 생성 성공");
+        ProjectDTO.ProjectResponse result = new ProjectDTO.ProjectResponse(project);
+        result.setRelation(ProjectDTO.Relation.MEMBER);
+        return result;
     }
 
     // 프로젝트 수정 ( 위임 일단 포함 )
     @Transactional
-    public ApiResponse updateProject(Long id, ProjectDTO.ProjectRequest request, User currentUser) {
+    public ProjectDTO.ProjectResponse updateProject(Long id, ProjectDTO.ProjectRequest request, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
         validateUserIsMaster(project, currentUser);
@@ -125,7 +123,9 @@ public class ProjectService {
         }
         projectRepository.save(project);
 
-        return new ApiResponse(Boolean.TRUE, "프로젝트 수정 성공");
+        ProjectDTO.ProjectResponse result = new ProjectDTO.ProjectResponse(project);
+        result.setRelation(ProjectDTO.Relation.MEMBER);
+        return result;
     }
 
     // 프로젝트 마스터 위임

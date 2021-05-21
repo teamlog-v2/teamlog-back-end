@@ -32,6 +32,6 @@ public class Team extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<TeamMember> teamMembers = new ArrayList<TeamMember>();
+    private List<TeamMember> teamMembers = new ArrayList<>();
 
 }

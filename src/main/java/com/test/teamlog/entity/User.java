@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,11 +32,11 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy="toUser", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<UserFollow> followers;
+    private List<UserFollow> followers = new ArrayList<>();
 
     @OneToMany(mappedBy="fromUser", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<UserFollow> following;
+    private List<UserFollow> following = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -33,7 +34,7 @@ public class Task extends BaseTimeEntity{
     private Project project;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TaskPerformer> taskPerformers;
+    private List<TaskPerformer> taskPerformers = new ArrayList<>();
 
     public void setProject(Project project) {
         if(this.project != null) {

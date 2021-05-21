@@ -18,7 +18,7 @@ public class ProjectDTO {
     }
 
     public enum Relation {
-        MEMBER,INVITED,APPLIED,NONE;
+        MASTER,MEMBER,INVITED,APPLIED,NONE;
     }
 
     @Data

@@ -38,19 +38,19 @@ public class ProjectController {
 
     @ApiOperation(value = "프로젝트 생성")
     @PostMapping
-    public ResponseEntity<ApiResponse> createProject(@RequestBody ProjectDTO.ProjectRequest request,
-                                                     @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = projectService.createProject(request, currentUser);
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    public ResponseEntity<ProjectDTO.ProjectResponse> createProject(@RequestBody ProjectDTO.ProjectRequest request,
+                                                                    @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        ProjectDTO.ProjectResponse response = projectService.createProject(request, currentUser);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "프로젝트 수정")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
+    public ResponseEntity<ProjectDTO.ProjectResponse> updateProject(@PathVariable("id") long id,
                                                      @RequestBody ProjectDTO.ProjectRequest request,
                                                      @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = projectService.updateProject(id, request, currentUser);
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        ProjectDTO.ProjectResponse response = projectService.updateProject(id, request, currentUser);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "프로젝트 마스터 위임")

@@ -3,6 +3,7 @@ package com.test.teamlog.entity;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -20,7 +21,7 @@ public class Comment extends BaseTimeEntity {
     private Comment parentComment;
 
     @OneToMany(mappedBy = "parentComment",orphanRemoval = true)
-    private List<Comment> childComments;
+    private List<Comment> childComments = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
@@ -34,7 +35,7 @@ public class Comment extends BaseTimeEntity {
     private User writer;
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentMention> commentMentions;
+    private List<CommentMention> commentMentions = new ArrayList<>();
 
     public void setPost(Post post) {
         if(this.post != null) {
