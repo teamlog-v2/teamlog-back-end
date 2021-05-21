@@ -36,10 +36,8 @@ public class ProjectService {
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
 
     public List<UserDTO.UserSimpleInfo> getUsersNotInProjectMember(Long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
 
-        List<User> userList = userRepository.getUsersNotInProjectMember(project);
+        List<User> userList = userRepository.getUsersNotInProjectMember(projectId);
         List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
         for(User user : userList) {
             response.add(new UserDTO.UserSimpleInfo(user));

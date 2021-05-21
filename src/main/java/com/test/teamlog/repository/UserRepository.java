@@ -17,7 +17,8 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query("SELECT u FROM User u WHERE u.id LIKE concat('%',:id,'%') AND u.name LIKE concat('%',:name,'%')")
     List<User> searchUserByIdAndName(@Param("id") String id, @Param("name") String name);
 
-    @Query("SELECT u FROM User u, ProjectMember m, ProjectJoin j WHERE m.project = :project and j.project = :project and m.user <> u and j.user <> u")
-    List<User> getUsersNotInProjectMember(@Param("project") Project project);
+    @Query("SELECT u FROM User u WHERE u.id not in (select m.user.id from ProjectMember m where m.project.id = :projectId)" +
+            "and u.id not in (select j.user.id from ProjectJoin j where j.project.id = :projectId)")
+    List<User> getUsersNotInProjectMember(@Param("projectId") Long projectId);
 
 }
