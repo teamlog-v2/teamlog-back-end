@@ -3,6 +3,7 @@ package com.test.teamlog.controller;
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.UserDTO;
+import com.test.teamlog.repository.UserRepository;
 import com.test.teamlog.service.ProjectService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,6 +23,13 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class ProjectMemberController {
     private final ProjectService projectService;
+
+    @ApiOperation(value = "프로젝트 멤버가 아닌 유저 조회")
+    @PostMapping("/project/{projectId}/not-members")
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> get(@PathVariable("projectId") Long projectId) {
+        List<UserDTO.UserSimpleInfo> response = projectService.getUsersNotInProjectMember(projectId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @ApiOperation(value = "프로젝트 초대 및 신청을 수락")
     @PostMapping("/project-joins/{joinId}")
