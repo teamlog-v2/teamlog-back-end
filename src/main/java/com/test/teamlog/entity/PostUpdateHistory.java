@@ -31,4 +31,11 @@ public class PostUpdateHistory {
     @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;
 
+    public void setPost(Post post) {
+        if(this.post != null) {
+            this.post.getPostUpdateHistories().remove(this);
+        }
+        this.post = post;
+        post.getPostUpdateHistories().add(this);
+    }
 }

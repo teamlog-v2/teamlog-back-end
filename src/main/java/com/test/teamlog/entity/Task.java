@@ -33,6 +33,7 @@ public class Task extends BaseTimeEntity{
     @JoinColumn(name = "project_id",nullable = false)
     private Project project;
 
+    @Builder.Default
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskPerformer> taskPerformers = new ArrayList<>();
 

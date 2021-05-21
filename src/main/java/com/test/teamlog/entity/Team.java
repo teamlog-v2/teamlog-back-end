@@ -30,6 +30,7 @@ public class Team extends BaseTimeEntity {
     @JoinColumn(name = "master_user_id", nullable = false) // master_user_id 때문에 nullable 문제 생기는 거 아니가?
     private User master;
 
+    @Builder.Default
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<TeamMember> teamMembers = new ArrayList<>();

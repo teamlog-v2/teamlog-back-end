@@ -41,21 +41,30 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<PostMedia> media = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<PostTag> hashtags = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true) // 애는 삭제할까말까..
+    @Builder.Default
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<PostLiker> postLikers = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
+    private List<PostUpdateHistory> postUpdateHistories = new ArrayList<>();
 
     public void addHashTags(List<PostTag> tags)
     {

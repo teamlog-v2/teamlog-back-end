@@ -34,6 +34,7 @@ public class Comment extends BaseTimeEntity {
     @JoinColumn(name = "writer_user_id", nullable = false)
     private User writer;
 
+    @Builder.Default
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentMention> commentMentions = new ArrayList<>();
 
