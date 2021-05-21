@@ -35,6 +35,18 @@ public class ProjectService {
             "20210504(171eb9ac-f7ce-4e30-b4c6-a19a28e45c75)",
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
 
+    public List<UserDTO.UserSimpleInfo> getUsersNotInProjectMember(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+
+        List<User> userList = userRepository.getUsersNotInProjectMember(project);
+        List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
+        for(User user : userList) {
+            response.add(new UserDTO.UserSimpleInfo(user));
+        }
+        return response;
+    }
+
     public ProjectDTO.Relation getRelation(Project project, User currentUser) {
         if (project.getMaster().getId().equals(currentUser.getId())) return ProjectDTO.Relation.MASTER;
         if (isUserMemberOfProject(project, currentUser)) return ProjectDTO.Relation.MEMBER;
@@ -60,8 +72,7 @@ public class ProjectService {
     public List<ProjectDTO.ProjectListResponse> getProjectsByUser(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
-        Sort sort = Sort.by(Sort.Direction.DESC, "updateTime");
-        List<ProjectMember> projectList = projectMemberRepository.findByUser(user,sort);
+        List<ProjectMember> projectList = projectMemberRepository.findByUser(user);
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
         for (ProjectMember project : projectList) {
