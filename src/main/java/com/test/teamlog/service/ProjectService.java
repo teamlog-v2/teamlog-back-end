@@ -35,7 +35,7 @@ public class ProjectService {
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
 
     public ProjectDTO.Relation getRelation(Project project, User currentUser) {
-        if (project.getMaster().equals(currentUser)) return ProjectDTO.Relation.MASTER;
+        if (project.getMaster().getId().equals(currentUser.getId())) return ProjectDTO.Relation.MASTER;
         if (isUserMemberOfProject(project, currentUser)) return ProjectDTO.Relation.MEMBER;
 
         ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
@@ -93,15 +93,15 @@ public class ProjectService {
                 .build();
         projectRepository.save(project);
 
+
         ProjectMember member = ProjectMember.builder()
                 .user(currentUser)
                 .project(project)
                 .build();
-        projectMemberRepository.save(member);
         project.getProjectMembers().add(member);
 
         ProjectDTO.ProjectResponse result = new ProjectDTO.ProjectResponse(project);
-        result.setRelation(ProjectDTO.Relation.MEMBER);
+        result.setRelation(ProjectDTO.Relation.MASTER);
         return result;
     }
 
@@ -124,7 +124,7 @@ public class ProjectService {
         projectRepository.save(project);
 
         ProjectDTO.ProjectResponse result = new ProjectDTO.ProjectResponse(project);
-        result.setRelation(ProjectDTO.Relation.MEMBER);
+        result.setRelation(ProjectDTO.Relation.MASTER);
         return result;
     }
 
