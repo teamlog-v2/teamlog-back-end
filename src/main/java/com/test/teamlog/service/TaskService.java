@@ -1,15 +1,10 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.entity.Project;
-import com.test.teamlog.entity.Task;
-import com.test.teamlog.entity.TaskPerformer;
-import com.test.teamlog.entity.User;
+import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TaskDTO;
-import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.repository.ProjectRepository;
-import com.test.teamlog.repository.TaskPerformerRepository;
 import com.test.teamlog.repository.TaskRepository;
 import com.test.teamlog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,36 +19,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
-    private final TaskPerformerRepository taskPerformerRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
 
     // 태스크 상세 조회
-    public TaskDTO.TaskResponse getTask(Long id){
+    public TaskDTO.TaskResponse getTask(Long id) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("Task","id",id));
-
-        List<UserDTO.UserSimpleInfo> performers = new ArrayList<>();
-        if(task.getTaskPerformers() !=null) {
-            for (TaskPerformer temp : task.getTaskPerformers()) {
-                UserDTO.UserSimpleInfo userInfo = new UserDTO.UserSimpleInfo(temp.getUser());
-                performers.add(userInfo);
-            }
-        }
-        TaskDTO.TaskResponse taskResponse = new TaskDTO.TaskResponse(task);
-        taskResponse.setPerformers(performers);
-        return taskResponse;
+                .orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
+        return new TaskDTO.TaskResponse(task);
     }
 
     // 프로젝트의 태스크들 조회
-    public List<TaskDTO.TaskResponse> getTasksByProject(Long id){
+    public List<TaskDTO.TaskResponse> getTasksByProject(Long id) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("PROJECT","id",id));
+                .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", id));
 
         List<Task> tasks = taskRepository.findByProject(project);
         List<TaskDTO.TaskResponse> responses = new ArrayList<>();
-        for(Task t : tasks)
-        {
+        for (Task t : tasks) {
             TaskDTO.TaskResponse taskResponse = new TaskDTO.TaskResponse(t);
             responses.add(taskResponse);
         }
@@ -62,79 +45,114 @@ public class TaskService {
 
     // 태스크 생성
     @Transactional
-    public Long createTask(Long projectId, TaskDTO.TaskRequest request){
+    public TaskDTO.TaskResponse createTask(Long projectId, TaskDTO.TaskRequest request) {
         // project memeber 인지 확인하는 것으로 대체 하자 위의 코드.
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(()-> new ResourceNotFoundException("PROJECT","id",projectId));
-
+                .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
+        // TODO : post status 비교 priority 주기.
         Task task = Task.builder()
                 .taskName(request.getTaskName())
                 .status(request.getStatus())
+                .priority(taskRepository.getCountByPostAndStatus(project, request.getStatus()))
                 .project(project)
                 .build();
-
-        Task result = taskRepository.save(task);
-
         List<TaskPerformer> performers = new ArrayList<>();
-        if(request.getPerformersId() !=null) {
+        if (request.getPerformersId() != null) {
             for (String userId : request.getPerformersId()) {
                 User tempUser = userRepository.findById(userId)
                         .orElseThrow(() -> new ResourceNotFoundException("USER", "id", userId));
-
                 TaskPerformer performer = TaskPerformer.builder()
                         .task(task)
                         .user(tempUser)
                         .build();
-
                 performers.add(performer);
             }
-            taskPerformerRepository.saveAll(performers);
+            task.setTaskPerformers(performers);
         }
+        Task result = taskRepository.save(task);
 
-        return result.getId();
+        return new TaskDTO.TaskResponse(result);
     }
 
     // 태스크 수정
     @Transactional
-    public void updateTask(Long taskId, TaskDTO.TaskRequest request){
+    public void updateTask(Long taskId, TaskDTO.TaskRequest request) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(()-> new ResourceNotFoundException("TASK","ID",taskId));
-        task.setStatus(request.getStatus());
+                .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", taskId));
+        // TODO : 마지막에다가 그냥 밀어 넣기
+        if (!request.getStatus().equals(task.getStatus())) {
+            task.setStatus(request.getStatus());
+            task.setPriority(taskRepository.getCountByPostAndStatus(task.getProject(), request.getStatus()));
+            // TODO : 기존 꺼는 밀기
+        }
+
         task.setDeadline(request.getDeadline());
         task.setTaskName(request.getTaskName());
 
-        // 비교해서 없어진 것은 지워야함.
-        List<TaskPerformer> performers = new ArrayList<>();
-        for(String userId : request.getPerformersId()) {
-            User tempUser = userRepository.findById(userId)
-                    .orElseThrow(()-> new ResourceNotFoundException("USER","id",userId));
-
-            TaskPerformer performer = TaskPerformer.builder()
-                    .task(task)
-                    .user(tempUser)
-                    .build();
-
-            performers.add(performer);
+        List<TaskPerformer> originalTaskPerformer = null;
+        if (task.getTaskPerformers() != null) {
+            originalTaskPerformer = task.getTaskPerformers();
         }
-        taskPerformerRepository.saveAll(performers);
+
+        if (request.getPerformersId() == null) {
+            if (originalTaskPerformer != null) task.removeTaskPerformers(originalTaskPerformer);
+        } else {
+            List<String> newTaskPerformersId = request.getPerformersId();
+            List<String> maintainedTaskPerformersId = new ArrayList<>();
+            if (originalTaskPerformer != null) {
+                List<TaskPerformer> deletedTaskPerformers = new ArrayList<>();
+                for (TaskPerformer taskPerformer : originalTaskPerformer) {
+                    if (newTaskPerformersId.contains(taskPerformer.getUser().getId())) {
+                        maintainedTaskPerformersId.add(taskPerformer.getUser().getId());
+                    } else {
+                        deletedTaskPerformers.add(taskPerformer);
+                    }
+                }
+                task.removeTaskPerformers(deletedTaskPerformers);
+            }
+
+            newTaskPerformersId.removeAll(maintainedTaskPerformersId); // new
+            if (newTaskPerformersId.size() > 0) {
+                List<TaskPerformer> taskPerformers = new ArrayList<>();
+                for (String performerId : newTaskPerformersId) {
+                    User performer = userRepository.findById(performerId)
+                            .orElseThrow(() -> new ResourceNotFoundException("USER", "id", performerId));
+                    TaskPerformer newPerformer = TaskPerformer.builder()
+                            .task(task)
+                            .user(performer)
+                            .build();
+                    taskPerformers.add(newPerformer);
+                }
+                task.addTaskPerformers(taskPerformers);
+            }
+        }
+
         taskRepository.save(task);
     }
 
+    // TODO : query value 값 받아서 뭐든 하는 걸로 바꾸자
     // 태스크 상태 업데이트
     @Transactional
     public void updateTaskStatus(Long id, TaskDTO.TaskRequest request) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("TASK","ID",id));
+                .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
+        if (request.getStatus().equals(task.getStatus())) {
+            // TODO : priority 값만 받고 민다.
+        } else {
+            // TODO : priority 값과 status값을 받고 민다.
+        }
         task.setStatus(request.getStatus());
         taskRepository.save(task);
     }
+
     // 태스크 삭제
     @Transactional
-    public ApiResponse deleteTask(Long id){
+    public ApiResponse deleteTask(Long id) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(()-> new ResourceNotFoundException("TASK","ID",id));
+                .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
         // TODO : 허가된 사용자인지 검증해야함..
+        // TODO : validateUser
         taskRepository.delete(task);
-        return new ApiResponse(Boolean.TRUE,"task 삭제 성공");
+        return new ApiResponse(Boolean.TRUE, "task 삭제 성공");
     }
 }

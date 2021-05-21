@@ -38,13 +38,12 @@ public class TaskController {
     @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<TaskDTO.TaskResponse> createTask(@PathVariable("projectId") Long projectId,
                                                            @Valid @RequestBody TaskDTO.TaskRequest taskRequest,
-                                                           @ApiIgnore  @AuthenticationPrincipal User currentUser) {
-        Long taskId = taskService.createTask(projectId, taskRequest);
-        TaskDTO.TaskResponse taskResponse = taskService.getTask(taskId);
+                                                           @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        TaskDTO.TaskResponse taskResponse = taskService.createTask(projectId, taskRequest);
         return new ResponseEntity<>(taskResponse, HttpStatus.CREATED);
     }
 
-    @PutMapping("/tasks/{id}")
+    @PutMapping("/tasks/{id}/location")
     public ResponseEntity<TaskDTO.TaskResponse> updateTaskStatus(@PathVariable("id") Long id,
                                                                  @Valid @RequestBody TaskDTO.TaskRequest request,
                                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
@@ -53,13 +52,13 @@ public class TaskController {
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
     }
 
-//    //Update
-//    @PutMapping("/tasks/{id}")
-//    public ResponseEntity<TaskDTO.TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO.TaskRequest request) {
-//        taskService.updateTask(id, request);
-//        TaskDTO.TaskResponse taskResponse = taskService.getTask(id);
-//        return new ResponseEntity<>(taskResponse, HttpStatus.OK);
-//    }
+    //Update
+    @PutMapping("/tasks/{id}")
+    public ResponseEntity<TaskDTO.TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO.TaskRequest request) {
+        taskService.updateTask(id, request);
+        TaskDTO.TaskResponse taskResponse = taskService.getTask(id);
+        return new ResponseEntity<>(taskResponse, HttpStatus.OK);
+    }
 
     // Delete
     @DeleteMapping("/tasks/{id}")
