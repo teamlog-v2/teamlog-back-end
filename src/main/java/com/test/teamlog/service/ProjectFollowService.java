@@ -1,6 +1,7 @@
 package com.test.teamlog.service;
 
 import com.test.teamlog.entity.*;
+import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
@@ -66,6 +67,9 @@ public class ProjectFollowService {
     public ApiResponse followProject(Long projectId, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+
+        if(projectFollowerRepository.findByProjectAndUser(project, currentUser).isPresent())
+            throw new ResourceAlreadyExistsException("이미 해당 프로젝트를 팔로우 하고 있습니다.");
 
         ProjectFollower newFollow = ProjectFollower.builder()
                 .project(project)
