@@ -34,6 +34,8 @@ public class PostService {
     private final FileStorageService fileStorageService;
     private final ProjectService projectService;
 
+    // TODO : 게시물 해시태그 추천
+
     // 단일 포스트 조회
     public PostDTO.PostResponse getPost(Long id, User currentUser) {
         Post post = postRepository.findById(id)
@@ -183,7 +185,7 @@ public class PostService {
     public Long createPost(PostDTO.PostRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", request.getProjectId()));
-//        projectService.validateUserIsMemberOfProject(project,currentUser);
+        projectService.validateUserIsMemberOfProject(project,currentUser);
 
         Point point = null;
         if (request.getLatitude() != null && request.getLongitude() != null) {
@@ -246,7 +248,7 @@ public class PostService {
     public ApiResponse updatePost(Long id, PostDTO.PostUpdateRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-//        projectService.validateUserIsMemberOfProject(post.getProject(),currentUser);
+        projectService.validateUserIsMemberOfProject(post.getProject(),currentUser);
 
         post.setContents(request.getContents());
         post.setAccessModifier(request.getAccessModifier());
@@ -335,7 +337,7 @@ public class PostService {
     public ApiResponse deletePost(Long id, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-//        projectService.validateUserIsMemberOfProject(post.getProject(),currentUser);
+        projectService.validateUserIsMemberOfProject(post.getProject(),currentUser);
 
         fileStorageService.deleteFilesByPost(post);
         postRepository.delete(post);
