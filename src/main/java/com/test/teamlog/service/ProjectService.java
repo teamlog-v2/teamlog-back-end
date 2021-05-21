@@ -13,6 +13,7 @@ import com.test.teamlog.payload.ProjectJoinDTO;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -59,8 +60,8 @@ public class ProjectService {
     public List<ProjectDTO.ProjectListResponse> getProjectsByUser(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
-
-        List<ProjectMember> projectList = projectMemberRepository.findByUser(user);
+        Sort sort = Sort.by(Sort.Direction.DESC, "updateTime");
+        List<ProjectMember> projectList = projectMemberRepository.findByUser(user,sort);
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
         for (ProjectMember project : projectList) {
