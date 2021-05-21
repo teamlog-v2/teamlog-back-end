@@ -1,11 +1,7 @@
 package com.test.teamlog.payload;
 
-import com.test.teamlog.entity.Project;
-import com.test.teamlog.entity.User;
 import lombok.Builder;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 public class ProjectJoinDTO {
     @Data

@@ -4,11 +4,9 @@ import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.CommentDTO;
 import com.test.teamlog.payload.PagedResponse;
-import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.service.CommentService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequiredArgsConstructor

@@ -9,7 +9,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,11 +25,10 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
 
-
     @ApiOperation(value = "포스트 수정 내역 조회")
     @GetMapping("/posts/{id}/historys")
     public ResponseEntity<List<PostDTO.PostHistoryInfo>> getPostUpdateHistory(@PathVariable("id") long id,
-                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
+                                                                              @ApiIgnore @AuthenticationPrincipal User currentUser) {
 
         List<PostDTO.PostHistoryInfo> response = postService.getPostUpdateHistory(id);
         return new ResponseEntity<>(response, HttpStatus.OK);

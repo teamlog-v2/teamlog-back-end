@@ -1,7 +1,6 @@
 package com.test.teamlog.payload;
 
 import com.test.teamlog.entity.User;
-import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;

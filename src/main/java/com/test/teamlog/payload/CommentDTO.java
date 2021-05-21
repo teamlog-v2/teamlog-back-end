@@ -1,6 +1,5 @@
 package com.test.teamlog.payload;
 
-import com.test.teamlog.entity.TaskStatus;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;

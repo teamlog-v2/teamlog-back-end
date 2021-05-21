@@ -26,9 +26,9 @@ public class ProjectFollowService {
     private final ProjectFollowerRepository projectFollowerRepository;
 
     // 유저가 팔로우하는 프로젝트 목록 조회
-    public List<ProjectDTO.ProjectListResponse> getProjectListByProjectFollower(String userId){
+    public List<ProjectDTO.ProjectListResponse> getProjectListByProjectFollower(String userId) {
         User user = userRepository.findById(userId)
-                    .orElseThrow(()-> new ResourceNotFoundException("User","ID",userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<ProjectFollower> projectFollowers = projectFollowerRepository.findAllByUser(user);
 
         List<ProjectDTO.ProjectListResponse> projectList = new ArrayList<>();
@@ -48,9 +48,9 @@ public class ProjectFollowService {
     }
 
     // 해당 프로젝트를 팔로우하는 사용자 목록 조회
-    public List<UserDTO.UserSimpleInfo> getProjectFollowerList(Long projectId){
+    public List<UserDTO.UserSimpleInfo> getProjectFollowerList(Long projectId) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(()-> new ResourceNotFoundException("Project","ID",projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
 
         List<ProjectFollower> projectFollowers = projectFollowerRepository.findAllByProject(project);
 
@@ -63,9 +63,9 @@ public class ProjectFollowService {
 
     // 프로젝트 팔로우
     @Transactional
-    public ApiResponse followProject(Long projectId, User currentUser){
+    public ApiResponse followProject(Long projectId, User currentUser) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(()-> new ResourceNotFoundException("Project","ID",projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
 
         ProjectFollower newFollow = ProjectFollower.builder()
                 .project(project)
@@ -80,9 +80,9 @@ public class ProjectFollowService {
     @Transactional
     public ApiResponse unfollowProject(Long projectId, User currentUser) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(()-> new ResourceNotFoundException("Project","ID",projectId));
-        ProjectFollower projectFollower = projectFollowerRepository.findByProjectAndUser(project,currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectFollwer","UserId", currentUser.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+        ProjectFollower projectFollower = projectFollowerRepository.findByProjectAndUser(project, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectFollwer", "UserId", currentUser.getId()));
         projectFollowerRepository.delete(projectFollower);
         return new ApiResponse(Boolean.TRUE, "프로젝트 언팔로우 성공");
     }

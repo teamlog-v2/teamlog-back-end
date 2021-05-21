@@ -1,7 +1,6 @@
 package com.test.teamlog.entity;
 
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 

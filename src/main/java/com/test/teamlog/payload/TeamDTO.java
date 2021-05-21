@@ -1,7 +1,6 @@
 package com.test.teamlog.payload;
 
 import com.test.teamlog.entity.AccessModifier;
-import com.test.teamlog.entity.Project;
 import com.test.teamlog.entity.Team;
 import lombok.Builder;
 import lombok.Data;

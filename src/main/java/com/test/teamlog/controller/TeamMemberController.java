@@ -2,7 +2,6 @@ package com.test.teamlog.controller;
 
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.TeamJoinDTO;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.TeamService;
 import io.swagger.annotations.Api;

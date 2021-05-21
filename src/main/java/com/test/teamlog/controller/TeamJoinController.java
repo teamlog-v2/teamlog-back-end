@@ -26,8 +26,8 @@ public class TeamJoinController {
     @ApiOperation(value = "팀 멤버 초대(userId 필요) 및 신청")
     @PostMapping("/teams/{teamId}/joins")
     public ResponseEntity<ApiResponse> inviteUserForTeam(@PathVariable("teamId") long teamId,
-                                                            @RequestParam(value = "userId", required = false) String userId,
-                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
+                                                         @RequestParam(value = "userId", required = false) String userId,
+                                                         @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = null;
         // userId 있으면 초대, 없으면 신청
         if (userId != null) {

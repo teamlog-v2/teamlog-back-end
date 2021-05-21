@@ -2,7 +2,6 @@ package com.test.teamlog.controller;
 
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.ProjectJoinDTO;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.ProjectService;
 import io.swagger.annotations.Api;
@@ -35,10 +34,10 @@ public class ProjectMemberController {
     @DeleteMapping("/projects/{projectId}/members")
     public ResponseEntity<ApiResponse> leaveProject(@PathVariable("projectId") long projectId,
                                                     @RequestParam(value = "userId", required = false) String userId,
-                                                    @ApiIgnore  @AuthenticationPrincipal User currentUser) {
+                                                    @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = null;
         // userId 없으면 탈퇴 있으면 추방
-        if(userId == null) {
+        if (userId == null) {
             apiResponse = projectService.leaveProject(projectId, currentUser);
         } else {
             apiResponse = projectService.expelMember(projectId, userId, currentUser);

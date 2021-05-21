@@ -57,8 +57,8 @@ public class TeamController {
     @ApiOperation(value = "팀 마스터 위임")
     @PutMapping("/{id}/master")
     public ResponseEntity<ApiResponse> delegateTeamMaster(@PathVariable("id") long id,
-                                                             @RequestParam(value = "new-master", required = true) String newMasterId,
-                                                             @ApiIgnore @AuthenticationPrincipal User currentUser) {
+                                                          @RequestParam(value = "new-master", required = true) String newMasterId,
+                                                          @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = teamService.delegateTeamMaster(id, newMasterId, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

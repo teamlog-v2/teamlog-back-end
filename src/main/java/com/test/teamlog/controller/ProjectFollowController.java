@@ -5,7 +5,6 @@ import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.ProjectFollowService;
-import com.test.teamlog.service.UserFollowService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;

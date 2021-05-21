@@ -1,11 +1,8 @@
 package com.test.teamlog.entity;
 
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Builder
@@ -27,7 +24,7 @@ public class TeamJoin extends BaseTimeEntity {
     private User user;
 
     @Column(name = "is_accepted",nullable = false)
-    private boolean isAccepted = false;
+    private boolean isAccepted;
 
     @Column(name = "is_invited",nullable = false)
     private boolean isInvited;

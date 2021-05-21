@@ -27,7 +27,6 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-
     // 게시물의 부모 댓글 조회
     public PagedResponse<CommentDTO.CommentInfo> getParentComments(Long postId, int page, int size, User currentUser) {
         Post post = postRepository.findById(postId)
@@ -46,7 +45,7 @@ public class CommentService {
             }
 
             Boolean isMyComment = Boolean.FALSE;
-            if(comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.TRUE;
+            if (comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.TRUE;
 
             CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
                     .isMyComment(isMyComment)
@@ -70,7 +69,7 @@ public class CommentService {
 
         List<CommentDTO.CommentInfo> responses = new ArrayList<>();
 
-        if(size == 0) {
+        if (size == 0) {
             Pageable pageable = PageRequest.of(page, 1, Sort.Direction.DESC, "createTime");
             Page<Comment> childComments = commentRepository.getChildCommentsByParentComment(comment, pageable);
             return new PagedResponse<>(responses, 0, 0,
@@ -89,7 +88,7 @@ public class CommentService {
             }
 
             Boolean isMyComment = Boolean.FALSE;
-            if(comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.TRUE;
+            if (comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.TRUE;
 
             CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
                     .isMyComment(isMyComment)
@@ -200,22 +199,21 @@ public class CommentService {
         comment.setContents(request.getContents());
 
         List<CommentMention> originalCommentMentions = null;
-        if(comment.getCommentMentions() != null) {
+        if (comment.getCommentMentions() != null) {
             originalCommentMentions = comment.getCommentMentions();
         }
 
-        if(request.getCommentMentions() == null) {
-            if(originalCommentMentions != null) comment.removeCommentMentions(originalCommentMentions);
+        if (request.getCommentMentions() == null) {
+            if (originalCommentMentions != null) comment.removeCommentMentions(originalCommentMentions);
         } else {
             List<String> newCommentMentions = request.getCommentMentions();
             List<String> maintainedCommentMentions = new ArrayList<>();
-            if(originalCommentMentions != null) {
+            if (originalCommentMentions != null) {
                 List<CommentMention> deletedCommentMentions = new ArrayList<>();
                 for (CommentMention commentMention : originalCommentMentions) {
                     if (newCommentMentions.contains(commentMention.getTargetUser().getId())) {
                         maintainedCommentMentions.add(commentMention.getTargetUser().getId());
-                    }
-                    else {
+                    } else {
                         deletedCommentMentions.add(commentMention);
                     }
                 }
@@ -223,7 +221,7 @@ public class CommentService {
             }
 
             newCommentMentions.removeAll(maintainedCommentMentions); // new
-            if(newCommentMentions.size() > 0){
+            if (newCommentMentions.size() > 0) {
                 List<CommentMention> commentMentions = new ArrayList<>();
                 for (String targetId : newCommentMentions) {
                     User target = userRepository.findById(targetId)

@@ -8,7 +8,6 @@ import com.test.teamlog.exception.MyFileNotFoundException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.FileDTO;
 import com.test.teamlog.repository.PostMediaRepository;
-import com.test.teamlog.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -17,11 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,7 +49,7 @@ public class FileStorageService {
     }
 
     @Transactional
-    public String storeFile(MultipartFile file, Post post, Boolean isMedia){
+    public String storeFile(MultipartFile file, Post post, Boolean isMedia) {
         String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
         String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
         UUID uuid = UUID.randomUUID();
@@ -70,7 +67,7 @@ public class FileStorageService {
         } catch (IOException ex) {
             throw new FileStorageException("Could not store file " + originalFileName + ". Please try again!", ex);
         }
-        if(post !=null){
+        if (post != null) {
             PostMedia newPostMedia = PostMedia.builder()
                     .fileName(originalFileName) // Normalize file name
                     .storedFileName(storedFileName)
@@ -92,7 +89,7 @@ public class FileStorageService {
             Path filePath = this.fileStorageLocation.resolve(storedFileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
             if (resource.exists()) {
-                if(media == null) {
+                if (media == null) {
                     FileDTO.FileResourceInfo fileResource = FileDTO.FileResourceInfo.builder()
                             .fileName(storedFileName)
                             .contentType("image/jpeg")
@@ -136,7 +133,7 @@ public class FileStorageService {
         File file = new File(mediaPath.toString());
         if (file.exists()) {
             if (file.delete()) {
-                System.out.println("파일-"+ storedFileName + " 삭제 성공");
+                System.out.println("파일-" + storedFileName + " 삭제 성공");
             }
         } else throw new MyFileNotFoundException("File not found " + storedFileName);
     }

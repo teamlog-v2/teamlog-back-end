@@ -1,11 +1,8 @@
 package com.test.teamlog.entity;
 
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Builder
@@ -27,10 +24,10 @@ public class ProjectJoin extends BaseTimeEntity {
     private User user;
 
     @Column(name = "is_accepted",nullable = false)
-    private Boolean isAccepted = false;
+    private Boolean isAccepted;
 
     @Column(name = "is_invited",nullable = false)
-    private Boolean isInvited = false;
+    private Boolean isInvited;
 
     public void setProject(Project project) {
         if(this.project != null) {

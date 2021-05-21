@@ -25,7 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/resources/**")
-                .addResourceLocations("file:/home/ubuntu/teamlog-storage/","file:src/resources/static")
+                .addResourceLocations("file:/home/ubuntu/teamlog-storage/", "file:src/resources/static")
                 .setCacheControl(CacheControl.maxAge(10800, TimeUnit.SECONDS).mustRevalidate());
         registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");

@@ -5,11 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 
-import org.locationtech.jts.geom.Point;
-
-import javax.persistence.PostUpdate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class PostDTO {
@@ -52,8 +48,8 @@ public class PostDTO {
         private int commentCount;
         private LocalDateTime writeTime;
         private List<String> hashtags;
-        private List<FileDTO.FileInfo> media = new ArrayList<FileDTO.FileInfo>();
-        private List<FileDTO.FileInfo> files = new ArrayList<FileDTO.FileInfo>();
+        private List<FileDTO.FileInfo> media;
+        private List<FileDTO.FileInfo> files;
     }
 
     @Getter

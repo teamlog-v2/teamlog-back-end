@@ -13,13 +13,10 @@ import com.test.teamlog.payload.ProjectJoinDTO;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.ListIndexBase;
-import org.hibernate.engine.jdbc.connections.internal.UserSuppliedConnectionProviderImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.persistence.Enumerated;
 import java.util.ArrayList;
 import java.util.List;
 

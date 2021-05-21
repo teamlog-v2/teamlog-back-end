@@ -9,7 +9,6 @@ import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,10 +130,10 @@ public class TeamService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        if(isUserMemberOfTeam(team,user))
+        if (isUserMemberOfTeam(team, user))
             throw new ResourceAlreadyExistsException("이미 해당 팀의 멤버입니다.");
 
-        if(isJoinAlreadyExist(team,user))
+        if (isJoinAlreadyExist(team, user))
             throw new ResourceAlreadyExistsException("이미 해당 팀에 멤버 신청 혹은 초대가 존재합니다.");
 
         TeamJoin teamJoin = TeamJoin.builder()
@@ -153,10 +152,10 @@ public class TeamService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
 
-        if(isUserMemberOfTeam(team,currentUser))
+        if (isUserMemberOfTeam(team, currentUser))
             throw new ResourceAlreadyExistsException("이미 해당 팀의 멤버입니다.");
 
-        if(isJoinAlreadyExist(team,currentUser))
+        if (isJoinAlreadyExist(team, currentUser))
             throw new ResourceAlreadyExistsException("이미 해당 팀에 멤버 신청 혹은 초대가 존재합니다.");
 
         TeamJoin teamJoin = TeamJoin.builder()
@@ -188,7 +187,7 @@ public class TeamService {
         List<TeamJoin> teamJoins = teamJoinRepository.findAllByTeamAndIsAcceptedTrueAndIsInvitedFalse(team);
 
         List<TeamJoinDTO.TeamJoinForTeam> response = new ArrayList<>();
-        for(TeamJoin join : teamJoins) {
+        for (TeamJoin join : teamJoins) {
             UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
             TeamJoinDTO.TeamJoinForTeam temp = TeamJoinDTO.TeamJoinForTeam.builder()
                     .id(join.getId())
@@ -208,7 +207,7 @@ public class TeamService {
         List<TeamJoin> teamJoins = teamJoinRepository.findAllByTeamAndIsAcceptedFalseAndIsInvitedTrue(team);
 
         List<TeamJoinDTO.TeamJoinForTeam> response = new ArrayList<>();
-        for(TeamJoin join : teamJoins) {
+        for (TeamJoin join : teamJoins) {
             UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
             TeamJoinDTO.TeamJoinForTeam temp = TeamJoinDTO.TeamJoinForTeam.builder()
                     .id(join.getId())
@@ -226,7 +225,7 @@ public class TeamService {
         List<TeamJoin> teamJoins = teamJoinRepository.findAllByUserAndIsAcceptedTrueAndIsInvitedFalse(currentUser);
 
         List<TeamJoinDTO.TeamJoinForUser> response = new ArrayList<>();
-        for(TeamJoin join : teamJoins) {
+        for (TeamJoin join : teamJoins) {
             TeamJoinDTO.TeamJoinForUser temp = TeamJoinDTO.TeamJoinForUser.builder()
                     .id(join.getId())
                     .teamName(join.getTeam().getName())
@@ -241,7 +240,7 @@ public class TeamService {
         List<TeamJoin> teamJoins = teamJoinRepository.findAllByUserAndIsAcceptedFalseAndIsInvitedTrue(currentUser);
 
         List<TeamJoinDTO.TeamJoinForUser> response = new ArrayList<>();
-        for(TeamJoin join : teamJoins) {
+        for (TeamJoin join : teamJoins) {
             TeamJoinDTO.TeamJoinForUser temp = TeamJoinDTO.TeamJoinForUser.builder()
                     .id(join.getId())
                     .teamName(join.getTeam().getName())
@@ -301,7 +300,7 @@ public class TeamService {
 
     // 마스터 - 팀 멤버 삭제
     @Transactional
-    public ApiResponse expelMember(Long teamId, String userId,User currentUser) {
+    public ApiResponse expelMember(Long teamId, String userId, User currentUser) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
         User user = userRepository.findById(userId)
@@ -330,7 +329,8 @@ public class TeamService {
         if (team.getMaster().getId() != currentUser.getId())
             throw new ResourceForbiddenException("권한이 없습니다.");
     }
-//
+
+    //
     // 이미 TeamJoin 있을 경우
     public Boolean isJoinAlreadyExist(Team team, User currentUser) {
         return teamJoinRepository.findByTeamAndUser(team, currentUser).isPresent();
