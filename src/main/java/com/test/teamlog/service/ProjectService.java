@@ -36,7 +36,8 @@ public class ProjectService {
     // 유저가 팔로우 중인 프로젝트
     public List<ProjectDTO.ProjectListResponse> getUserFollowingProjects(String id, User currentUser) {
         User user = null;
-        if(currentUser.getId().equals(id)){
+        boolean isMyProjectList = currentUser.getId().equals(id);
+        if(isMyProjectList){
             user = currentUser;
         } else {
             user = userRepository.findById(id)
@@ -44,10 +45,16 @@ public class ProjectService {
         }
         List<ProjectFollower> userFollowingProjects = projectFollowerRepository.findAllByUser(user);
 
+
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
         for (ProjectFollower userFollowingProject : userFollowingProjects) {
             Project project = userFollowingProject.getProject();
-            long postCount = project.getPosts().size();
+            if(!isMyProjectList) {
+                // 팀멤버도 아니고 private면 x
+                if(!isUserMemberOfProject(project,currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE) continue;
+            }
+
+            long postcount = postRepository.getPostsCount(project);
 
             String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/resources/")
@@ -56,12 +63,13 @@ public class ProjectService {
             ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
                     .id(project.getId())
                     .name(project.getName())
-                    .postCount(postCount)
+                    .postCount(postcount)
                     .updateTime(project.getUpdateTime())
                     .thumbnail(imgUri)
                     .build();
             projects.add(item);
         }
+
         return projects;
     }
 
@@ -72,6 +80,8 @@ public class ProjectService {
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
         for (Project project : projectList) {
+
+            // TODO : private 거르기
             long postCount = project.getPosts().size();
 
             String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -122,24 +132,36 @@ public class ProjectService {
     }
 
     // 사용자 프로젝트 리스트 조회
-    public List<ProjectDTO.ProjectListResponse> getProjectsByUser(String id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
-        List<ProjectMember> projectList = projectMemberRepository.findByUser(user);
+    public List<ProjectDTO.ProjectListResponse> getProjectsByUser(String id, User currentUser) {
+        User user = null;
+        boolean isMyProjectList = currentUser.getId().equals(id);
+        if(isMyProjectList){
+            user = currentUser;
+        } else {
+            user = userRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+        }
+        List<ProjectMember> userProjectList = projectMemberRepository.findByUser(user);
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
-        for (ProjectMember project : projectList) {
-            long postcount = postRepository.getPostsCount(project.getProject());
+        for (ProjectMember projectMember : userProjectList) {
+            Project project = projectMember.getProject();
+            if(!isMyProjectList) {
+                // 팀멤버도 아니고 private면 x
+                if(!isUserMemberOfProject(project,currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE) continue;
+            }
+
+            long postcount = postRepository.getPostsCount(project);
 
             String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/resources/")
-                    .path(defaultProjectImages[project.getProject().getId().intValue() % 4])
+                    .path(defaultProjectImages[project.getId().intValue() % 4])
                     .toUriString();
             ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
-                    .id(project.getProject().getId())
-                    .name(project.getProject().getName())
+                    .id(project.getId())
+                    .name(project.getName())
                     .postCount(postcount)
-                    .updateTime(project.getProject().getUpdateTime())
+                    .updateTime(project.getUpdateTime())
                     .thumbnail(imgUri)
                     .build();
             projects.add(item);
@@ -238,7 +260,7 @@ public class ProjectService {
         ProjectJoin projectJoin = ProjectJoin.builder()
                 .project(project)
                 .user(user)
-                .isAccepted(Boolean.TRUE)
+                .isAccepted(Boolean.FALSE)
                 .isInvited(Boolean.TRUE)
                 .build();
         projectJoinRepository.save(projectJoin);
