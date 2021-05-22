@@ -24,6 +24,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectService projectService;
 
     // 태스크 상세 조회
     public TaskDTO.TaskResponse getTask(Long id) {
@@ -49,9 +50,12 @@ public class TaskService {
 
     // 태스크 생성
     @Transactional
-    public TaskDTO.TaskResponse createTask(Long projectId, TaskDTO.TaskRequest request) {
+    public TaskDTO.TaskResponse createTask(Long projectId, TaskDTO.TaskRequest request, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
+
+        // 멤버만 가능
+        projectService.validateUserIsMemberOfProject(project, currentUser);
 
         Task task = Task.builder()
                 .taskName(request.getTaskName())
@@ -81,9 +85,12 @@ public class TaskService {
     // 태스크 수정
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Transactional
-    public void updateTask(Long taskId, TaskDTO.TaskRequest request) {
+    public void updateTask(Long taskId, TaskDTO.TaskRequest request, User currentUser) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", taskId));
+
+        // 멤버만 가능
+        projectService.validateUserIsMemberOfProject(task.getProject(), currentUser);
 
         task.setDeadline(request.getDeadline());
         task.setTaskName(request.getTaskName());
@@ -139,9 +146,13 @@ public class TaskService {
     // 태스크 상태 업데이트
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Transactional
-    public void updateTaskStatus(Long id, TaskDTO.TaskDropLocation request) {
+    public void updateTaskStatus(Long id, TaskDTO.TaskDropLocation request, User currentUser) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
+
+        // 멤버만 가능
+        projectService.validateUserIsMemberOfProject(task.getProject(), currentUser);
+
         if (request.getStatus().equals(task.getStatus())) {
             if(request.getPriority() == task.getPriority()) return ;
             if (request.getPriority() > task.getPriority()) {
@@ -149,24 +160,25 @@ public class TaskService {
             } else {
                 taskRepository.reorderFrontInSameStatus(task.getProject(),task.getStatus(),task.getPriority(),request.getPriority());
             }
-            task.setPriority(request.getPriority());
         } else {
             taskRepository.reorderInPreviousStatus(task.getProject(),task.getStatus(),task.getPriority()); // 기존 status 정리
             taskRepository.reorderInNewStatus(task.getProject(),request.getStatus(),request.getPriority()); // 기존 status 정리
             task.setStatus(request.getStatus());
-            task.setPriority(request.getPriority());
         }
+        task.setPriority(request.getPriority());
         taskRepository.save(task);
     }
 
     // 태스크 삭제
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Transactional
-    public ApiResponse deleteTask(Long id) {
+    public ApiResponse deleteTask(Long id, User currentUser) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
-        // TODO : 허가된 사용자인지 검증해야함..
-        // TODO : validateUser
+
+        // 멤버만 가능
+        projectService.validateUserIsMemberOfProject(task.getProject(), currentUser);
+
         taskRepository.reorderInPreviousStatus(task.getProject(),task.getStatus(),task.getPriority()); // 기존 status 정리
         taskRepository.delete(task);
         return new ApiResponse(Boolean.TRUE, "task 삭제 성공");

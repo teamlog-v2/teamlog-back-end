@@ -1,15 +1,12 @@
 package com.test.teamlog.controller;
 
 import com.test.teamlog.entity.User;
-import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TaskDTO;
 import com.test.teamlog.service.TaskService;
-import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -42,7 +39,7 @@ public class TaskController {
     public ResponseEntity<TaskDTO.TaskResponse> createTask(@PathVariable("projectId") Long projectId,
                                                            @Valid @RequestBody TaskDTO.TaskRequest taskRequest,
                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        TaskDTO.TaskResponse taskResponse = taskService.createTask(projectId, taskRequest);
+        TaskDTO.TaskResponse taskResponse = taskService.createTask(projectId, taskRequest, currentUser);
         return new ResponseEntity<>(taskResponse, HttpStatus.CREATED);
     }
 
@@ -50,15 +47,16 @@ public class TaskController {
     public ResponseEntity<TaskDTO.TaskResponse> updateTaskStatus(@PathVariable("id") Long id,
                                                                  @Valid @RequestBody TaskDTO.TaskDropLocation request,
                                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        taskService.updateTaskStatus(id, request);
+        taskService.updateTaskStatus(id, request, currentUser);
         TaskDTO.TaskResponse taskResponse = taskService.getTask(id);
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
     }
 
     //Update
     @PutMapping("/tasks/{id}")
-    public ResponseEntity<TaskDTO.TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO.TaskRequest request) {
-        taskService.updateTask(id, request);
+    public ResponseEntity<TaskDTO.TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO.TaskRequest request,
+                                                           @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        taskService.updateTask(id, request, currentUser);
         TaskDTO.TaskResponse taskResponse = taskService.getTask(id);
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
     }
@@ -67,7 +65,7 @@ public class TaskController {
     @DeleteMapping("/tasks/{id}")
     public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
                                                   @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = taskService.deleteTask(id);
+        ApiResponse apiResponse = taskService.deleteTask(id, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
