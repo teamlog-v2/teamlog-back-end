@@ -23,27 +23,41 @@ public class TeamService {
     private final TeamJoinRepository teamJoinRepository;
 
     // 팀 조회
-    public TeamDTO.TeamResponse getTeam(Long id) {
+    public TeamDTO.TeamResponse getTeam(Long id, User currentUser) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
+        // Private 시 검증
+        if(team.getAccessModifier() == AccessModifier.PRIVATE) {
+            validateUserIsMemberOfTeam(team, currentUser);
+        }
         TeamDTO.TeamResponse response = new TeamDTO.TeamResponse(team);
         return response;
     }
 
     // 사용자 팀 리스트 조회
-    public List<TeamDTO.TeamListResponse> getTeamsByUser(String id) {
-        // TODO : currentUser 들어올 경우 분기 ( 이는 사용자 프로젝트 리스트 조회도 동일 )
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
-
+    public List<TeamDTO.TeamListResponse> getTeamsByUser(String id, User currentUser) {
+        User user = null;
+        boolean isMyTeamList = currentUser.getId().equals(id);
+        if(isMyTeamList){
+            user = currentUser;
+        } else {
+            user = userRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+        }
         List<TeamMember> teams = teamMemberRepository.findByUser(user);
 
         List<TeamDTO.TeamListResponse> teamList = new ArrayList<>();
-        for (TeamMember team : teams) {
+        for (TeamMember temp : teams) {
+            Team team = temp.getTeam();
+            if(!isMyTeamList) {
+                // 팀 멤버도 아니고 private면 x
+                if(!isUserMemberOfTeam(team,currentUser) && team.getAccessModifier() == AccessModifier.PRIVATE) continue;
+            }
+
             TeamDTO.TeamListResponse item = TeamDTO.TeamListResponse.builder()
-                    .id(team.getTeam().getId())
-                    .name(team.getTeam().getName())
-                    .updateTime(team.getTeam().getUpdateTime())
+                    .id(team.getId())
+                    .name(team.getName())
+                    .updateTime(team.getUpdateTime())
                     .build();
             teamList.add(item);
         }
@@ -327,7 +341,7 @@ public class TeamService {
     // 마스터 검증
     private void validateUserIsMaster(Team team, User currentUser) {
         if (team.getMaster().getId() != currentUser.getId())
-            throw new ResourceForbiddenException("권한이 없습니다.");
+            throw new ResourceForbiddenException("권한이 없습니다.( 팀 마스터 아님 )");
     }
 
     //
@@ -344,7 +358,7 @@ public class TeamService {
     // 팀 멤버 검증
     public void validateUserIsMemberOfTeam(Team team, User currentUser) {
         teamMemberRepository.findByTeamAndUser(team, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("member of " + team.getName(), "userId", currentUser));
+                .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다. ( 팀 멤버 아님 )"));
     }
 
 }

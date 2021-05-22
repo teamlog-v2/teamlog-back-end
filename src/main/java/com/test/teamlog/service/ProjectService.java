@@ -102,7 +102,6 @@ public class ProjectService {
     }
 
     public List<UserDTO.UserSimpleInfo> getUsersNotInProjectMember(Long projectId) {
-
         List<User> userList = userRepository.getUsersNotInProjectMember(projectId);
         List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
         for(User user : userList) {
@@ -128,6 +127,10 @@ public class ProjectService {
     public ProjectDTO.ProjectResponse getProject(Long id, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
+        // Private 시 검증
+        if(project.getAccessModifier() == AccessModifier.PRIVATE) {
+            validateUserIsMemberOfProject(project, currentUser);
+        }
         ProjectDTO.ProjectResponse projectResponse = new ProjectDTO.ProjectResponse(project);
         projectResponse.setRelation(getRelation(project, currentUser));
         return projectResponse;
@@ -467,7 +470,7 @@ public class ProjectService {
     // 마스터 검증
     public void validateUserIsMaster(Project project, User currentUser) {
         if (!project.getMaster().getId().equals(currentUser.getId()))
-            throw new ResourceForbiddenException("권한이 없습니다.");
+            throw new ResourceForbiddenException("권한이 없습니다. ( 프로젝트 마스터 아님 )");
     }
 
     // 이미 ProjectJoin 있을 경우
@@ -483,7 +486,7 @@ public class ProjectService {
     // 프로젝트 멤버 검증
     public void validateUserIsMemberOfProject(Project project, User currentUser) {
         projectMemberRepository.findByProjectAndUser(project, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("member of " + project.getName(), "userId", currentUser));
+                .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다. ( 프로젝트 멤버 아님 )"));
     }
 
 }

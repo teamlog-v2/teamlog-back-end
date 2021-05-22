@@ -25,15 +25,17 @@ public class TeamController {
 
     @ApiOperation(value = "단일 팀 조회")
     @GetMapping("/{id}")
-    public ResponseEntity<TeamDTO.TeamResponse> getTeamById(@PathVariable("id") long id) {
-        TeamDTO.TeamResponse response = teamService.getTeam(id);
+    public ResponseEntity<TeamDTO.TeamResponse> getTeamById(@PathVariable("id") long id,
+                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        TeamDTO.TeamResponse response = teamService.getTeam(id, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "유저 팀 리스트 조회")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<TeamDTO.TeamListResponse>> getTeamsByUser(@PathVariable("userId") String userId) {
-        List<TeamDTO.TeamListResponse> response = teamService.getTeamsByUser(userId);
+    public ResponseEntity<List<TeamDTO.TeamListResponse>> getTeamsByUser(@PathVariable("userId") String userId,
+                                                                         @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<TeamDTO.TeamListResponse> response = teamService.getTeamsByUser(userId, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
