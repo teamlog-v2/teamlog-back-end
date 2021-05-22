@@ -37,6 +37,8 @@ public class Post extends BaseTimeEntity {
 
     private Point location;
 
+    private String address;
+
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
