@@ -16,6 +16,7 @@ public class PostDTO {
         private AccessModifier commentModifier;
         private Double latitude;
         private Double longitude;
+        private String address;
         private Long projectId;
         private List<String> hashtags;
     }
@@ -27,6 +28,7 @@ public class PostDTO {
         private AccessModifier commentModifier;
         private Double latitude;
         private Double longitude;
+        private String address;
         private Long projectId;
         private List<String> hashtags;
         private List<Long> deletedFileIdList;
@@ -44,6 +46,7 @@ public class PostDTO {
         private String contents;
         private Double latitude;
         private Double longitude;
+        private String address;
         private int likeCount;
         private int commentCount;
         private LocalDateTime writeTime;

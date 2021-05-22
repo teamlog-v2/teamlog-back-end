@@ -185,7 +185,7 @@ public class PostService {
     public Long createPost(PostDTO.PostRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", request.getProjectId()));
-        projectService.validateUserIsMemberOfProject(project,currentUser);
+        projectService.validateUserIsMemberOfProject(project, currentUser);
 
         Point point = null;
         if (request.getLatitude() != null && request.getLongitude() != null) {
@@ -198,6 +198,7 @@ public class PostService {
                 .accessModifier(request.getAccessModifier())
                 .commentModifier(request.getCommentModifier())
                 .location(point)
+                .address(request.getAddress())
                 .writer(currentUser)
                 .project(project)
                 .build();
@@ -248,7 +249,7 @@ public class PostService {
     public ApiResponse updatePost(Long id, PostDTO.PostUpdateRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-        projectService.validateUserIsMemberOfProject(post.getProject(),currentUser);
+        projectService.validateUserIsMemberOfProject(post.getProject(), currentUser);
 
         post.setContents(request.getContents());
         post.setAccessModifier(request.getAccessModifier());
@@ -259,6 +260,7 @@ public class PostService {
             point = geometryFactory.createPoint(new Coordinate(request.getLatitude(), request.getLongitude()));
         }
         post.setLocation(point);
+        post.setAddress(request.getAddress());
 
         postRepository.save(post);
 
@@ -289,18 +291,17 @@ public class PostService {
             originalHashTags = post.getHashtags();
         }
 
-        if(request.getHashtags() == null) {
-            if(originalHashTags != null) post.removeHashTags(originalHashTags);
+        if (request.getHashtags() == null) {
+            if (originalHashTags != null) post.removeHashTags(originalHashTags);
         } else {
             List<String> newHashTagNames = request.getHashtags();
             List<String> maintainedHashTagNames = new ArrayList<>();
-            if(originalHashTags != null) {
+            if (originalHashTags != null) {
                 List<PostTag> deletedHashTags = new ArrayList<>();
                 for (PostTag tag : originalHashTags) {
                     if (newHashTagNames.contains(tag.getName())) {
                         maintainedHashTagNames.add(tag.getName());
-                    }
-                    else {
+                    } else {
                         deletedHashTags.add(tag);
                     }
                 }
@@ -310,7 +311,7 @@ public class PostService {
             newHashTagNames.removeAll(maintainedHashTagNames); // new
             System.out.println(request.getHashtags());
             System.out.println(newHashTagNames);
-            if(newHashTagNames.size() > 0){
+            if (newHashTagNames.size() > 0) {
                 List<PostTag> hashtags = new ArrayList<>();
                 for (String tagName : newHashTagNames) {
                     PostTag newTag = PostTag.builder()
@@ -337,7 +338,7 @@ public class PostService {
     public ApiResponse deletePost(Long id, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-        projectService.validateUserIsMemberOfProject(post.getProject(),currentUser);
+        projectService.validateUserIsMemberOfProject(post.getProject(), currentUser);
 
         fileStorageService.deleteFilesByPost(post);
         postRepository.delete(post);
@@ -407,6 +408,7 @@ public class PostService {
         if (post.getLocation() != null) {
             postResponse.setLatitude(post.getLocation().getX());
             postResponse.setLongitude(post.getLocation().getY());
+            postResponse.setAddress(post.getAddress());
         }
 
         return postResponse;
@@ -418,16 +420,16 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
-        List<PostUpdateHistory> historyList = postUpdateHistoryRepository.findAllByPost(post,sort);
+        List<PostUpdateHistory> historyList = postUpdateHistoryRepository.findAllByPost(post, sort);
         List<PostDTO.PostHistoryInfo> historyResponse = new ArrayList<>();
-        for(PostUpdateHistory history : historyList) {
+        for (PostUpdateHistory history : historyList) {
             historyResponse.add(new PostDTO.PostHistoryInfo(history));
         }
         return historyResponse;
     }
 
 
-        // -------------------------------
+    // -------------------------------
     // ------- 포스트 좋아요 관리 -------
     // -------------------------------
     // 좋아요
