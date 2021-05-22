@@ -18,6 +18,12 @@ public class TaskDTO {
         private List<String> performersId;
     }
 
+    @Getter
+    public static class TaskDropLocation {
+        private TaskStatus status;
+        private Integer priority;
+    }
+
     @Data
     public static class TaskResponse {
         private Long id;

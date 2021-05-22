@@ -8,9 +8,12 @@ import com.test.teamlog.repository.ProjectRepository;
 import com.test.teamlog.repository.TaskRepository;
 import com.test.teamlog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.LockModeType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +37,8 @@ public class TaskService {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", id));
 
-        List<Task> tasks = taskRepository.findByProject(project);
+        Sort sort = Sort.by(Sort.Direction.ASC, "priority");
+        List<Task> tasks = taskRepository.findByProject(project, sort);
         List<TaskDTO.TaskResponse> responses = new ArrayList<>();
         for (Task t : tasks) {
             TaskDTO.TaskResponse taskResponse = new TaskDTO.TaskResponse(t);
@@ -46,14 +50,12 @@ public class TaskService {
     // 태스크 생성
     @Transactional
     public TaskDTO.TaskResponse createTask(Long projectId, TaskDTO.TaskRequest request) {
-        // project memeber 인지 확인하는 것으로 대체 하자 위의 코드.
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
-        // TODO : post status 비교 priority 주기.
+
         Task task = Task.builder()
                 .taskName(request.getTaskName())
                 .status(request.getStatus())
-                .priority(taskRepository.getCountByPostAndStatus(project, request.getStatus()))
                 .project(project)
                 .build();
         List<TaskPerformer> performers = new ArrayList<>();
@@ -69,22 +71,19 @@ public class TaskService {
             }
             task.setTaskPerformers(performers);
         }
+        task.setPriority(taskRepository.getCountByPostAndStatus(project, request.getStatus()));
         Task result = taskRepository.save(task);
 
         return new TaskDTO.TaskResponse(result);
     }
 
+
     // 태스크 수정
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Transactional
     public void updateTask(Long taskId, TaskDTO.TaskRequest request) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", taskId));
-        // TODO : 마지막에다가 그냥 밀어 넣기
-        if (!request.getStatus().equals(task.getStatus())) {
-            task.setStatus(request.getStatus());
-            task.setPriority(taskRepository.getCountByPostAndStatus(task.getProject(), request.getStatus()));
-            // TODO : 기존 꺼는 밀기
-        }
 
         task.setDeadline(request.getDeadline());
         task.setTaskName(request.getTaskName());
@@ -127,31 +126,48 @@ public class TaskService {
             }
         }
 
+        // status 변경 시 그냥 마지막으로 밀어넣기
+        if (!request.getStatus().equals(task.getStatus())) {
+            taskRepository.reorderInPreviousStatus(task.getProject(),task.getStatus(),task.getPriority()); // 기존 status 정리
+            task.setStatus(request.getStatus());
+            task.setPriority(taskRepository.getCountByPostAndStatus(task.getProject(), request.getStatus()));
+        }
+
         taskRepository.save(task);
     }
 
-    // TODO : query value 값 받아서 뭐든 하는 걸로 바꾸자
     // 태스크 상태 업데이트
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Transactional
-    public void updateTaskStatus(Long id, TaskDTO.TaskRequest request) {
+    public void updateTaskStatus(Long id, TaskDTO.TaskDropLocation request) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
         if (request.getStatus().equals(task.getStatus())) {
-            // TODO : priority 값만 받고 민다.
+            if(request.getPriority() == task.getPriority()) return ;
+            if (request.getPriority() > task.getPriority()) {
+                taskRepository.reorderBackInSameStatus(task.getProject(),task.getStatus(),task.getPriority(),request.getPriority());
+            } else {
+                taskRepository.reorderFrontInSameStatus(task.getProject(),task.getStatus(),task.getPriority(),request.getPriority());
+            }
+            task.setPriority(request.getPriority());
         } else {
-            // TODO : priority 값과 status값을 받고 민다.
+            taskRepository.reorderInPreviousStatus(task.getProject(),task.getStatus(),task.getPriority()); // 기존 status 정리
+            taskRepository.reorderInNewStatus(task.getProject(),request.getStatus(),request.getPriority()); // 기존 status 정리
+            task.setStatus(request.getStatus());
+            task.setPriority(request.getPriority());
         }
-        task.setStatus(request.getStatus());
         taskRepository.save(task);
     }
 
     // 태스크 삭제
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Transactional
     public ApiResponse deleteTask(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
         // TODO : 허가된 사용자인지 검증해야함..
         // TODO : validateUser
+        taskRepository.reorderInPreviousStatus(task.getProject(),task.getStatus(),task.getPriority()); // 기존 status 정리
         taskRepository.delete(task);
         return new ApiResponse(Boolean.TRUE, "task 삭제 성공");
     }

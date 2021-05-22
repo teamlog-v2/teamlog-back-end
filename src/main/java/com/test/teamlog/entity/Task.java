@@ -1,6 +1,7 @@
 package com.test.teamlog.entity;
 
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -21,7 +22,7 @@ public class Task extends BaseTimeEntity{
     private String taskName;
 
     @Column(nullable = false)
-    private Integer priority;
+    private int priority;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
@@ -35,6 +36,7 @@ public class Task extends BaseTimeEntity{
 
     @Builder.Default
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
     private List<TaskPerformer> taskPerformers = new ArrayList<>();
 
     public void setProject(Project project) {

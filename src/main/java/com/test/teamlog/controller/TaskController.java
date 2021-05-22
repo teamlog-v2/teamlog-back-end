@@ -1,12 +1,15 @@
 package com.test.teamlog.controller;
 
 import com.test.teamlog.entity.User;
+import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TaskDTO;
 import com.test.teamlog.service.TaskService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -45,7 +48,7 @@ public class TaskController {
 
     @PutMapping("/tasks/{id}/location")
     public ResponseEntity<TaskDTO.TaskResponse> updateTaskStatus(@PathVariable("id") Long id,
-                                                                 @Valid @RequestBody TaskDTO.TaskRequest request,
+                                                                 @Valid @RequestBody TaskDTO.TaskDropLocation request,
                                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
         taskService.updateTaskStatus(id, request);
         TaskDTO.TaskResponse taskResponse = taskService.getTask(id);

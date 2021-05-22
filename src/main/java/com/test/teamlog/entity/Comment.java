@@ -20,6 +20,7 @@ public class Comment extends BaseTimeEntity {
     @JoinColumn(name = "parent_comment_id")
     private Comment parentComment;
 
+    @Builder.Default
     @OneToMany(mappedBy = "parentComment",orphanRemoval = true)
     private List<Comment> childComments = new ArrayList<>();
 
