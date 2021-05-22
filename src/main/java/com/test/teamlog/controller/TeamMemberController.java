@@ -23,6 +23,13 @@ import java.util.List;
 public class TeamMemberController {
     private final TeamService teamService;
 
+    @ApiOperation(value = "팀 멤버가 아닌 유저 조회")
+    @GetMapping("/teams/{teamId}/not-members")
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getUsersNotInTeamMember(@PathVariable("teamId") Long teamId) {
+        List<UserDTO.UserSimpleInfo> response = teamService.getUsersNotInTeamMember(teamId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "팀 초대 및 신청을 수락")
     @PostMapping("/team-joins/{joinId}")
     public ResponseEntity<ApiResponse> acceptTeamInvitation(@PathVariable("joinId") Long joinId) {

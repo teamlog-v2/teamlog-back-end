@@ -22,6 +22,16 @@ public class TeamService {
     private final TeamMemberRepository teamMemberRepository;
     private final TeamJoinRepository teamJoinRepository;
 
+    // 프로젝트 멤버 아닌 유저 리스트
+    public List<UserDTO.UserSimpleInfo> getUsersNotInTeamMember(Long teamId) {
+        List<User> userList = userRepository.getUsersNotInTeamMember(teamId);
+        List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
+        for(User user : userList) {
+            response.add(new UserDTO.UserSimpleInfo(user));
+        }
+        return response;
+    }
+
     // 팀 조회
     public TeamDTO.TeamResponse getTeam(Long id, User currentUser) {
         Team team = teamRepository.findById(id)

@@ -11,7 +11,6 @@ import com.test.teamlog.payload.ProjectJoinDTO;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -101,6 +100,7 @@ public class ProjectService {
         return projects;
     }
 
+    // 프로젝트 멤버 아닌 유저 리스트
     public List<UserDTO.UserSimpleInfo> getUsersNotInProjectMember(Long projectId) {
         List<User> userList = userRepository.getUsersNotInProjectMember(projectId);
         List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
