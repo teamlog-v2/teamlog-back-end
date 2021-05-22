@@ -31,6 +31,14 @@ public class ProjectMemberController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "프로젝트 초대 수락 ( 메인용 )")
+    @PostMapping("/projects/{projectId}/members")
+    public ResponseEntity<ApiResponse> createProjectMember(@PathVariable("projectId") Long projectId,
+                                                               @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = projectService.createProjectMember(projectId, currentUser);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
     @ApiOperation(value = "프로젝트 초대 및 신청을 수락")
     @PostMapping("/project-joins/{joinId}")
     public ResponseEntity<ApiResponse> acceptProjectInvitation(@PathVariable("joinId") Long joinId) {

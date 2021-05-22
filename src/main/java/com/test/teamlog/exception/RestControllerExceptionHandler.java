@@ -19,19 +19,19 @@ public class RestControllerExceptionHandler {
     @ExceptionHandler(ResourceForbiddenException.class)
     public ResponseEntity<ApiResponse> resolveException(ResourceForbiddenException exception) {
         ApiResponse apiResponse = exception.getApiResponse();
-        return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(apiResponse, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<ApiResponse> resolveException(ResourceAlreadyExistsException exception) {
         ApiResponse apiResponse = exception.getApiResponse();
-        return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiResponse> resolveException(BadRequestException exception) {
         ApiResponse apiResponse = exception.getApiResponse();
-        return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

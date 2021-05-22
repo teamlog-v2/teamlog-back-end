@@ -1,6 +1,7 @@
 package com.test.teamlog.service;
 
 import com.test.teamlog.entity.*;
+import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
@@ -110,6 +111,7 @@ public class ProjectService {
         return response;
     }
 
+    // 프로젝트와의 관계
     public ProjectDTO.Relation getRelation(Project project, User currentUser) {
         if (project.getMaster().getId().equals(currentUser.getId())) return ProjectDTO.Relation.MASTER;
         if (isUserMemberOfProject(project, currentUser)) return ProjectDTO.Relation.MEMBER;
@@ -375,6 +377,24 @@ public class ProjectService {
     // ---------------------------
     // ----- 프로젝트 멤버 관리 -----
     // ---------------------------
+    // 프로젝트 멤버 추가 ( 초대 수락 )
+    @Transactional
+    public ApiResponse createProjectMember(Long projectId, User currentUser) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+        ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation", "ID", currentUser.getId()));
+        if(join.getIsInvited() != true || join.getIsAccepted() != false) throw new BadRequestException("잘못된 요청입니다.");
+        projectJoinRepository.delete(join);
+
+        ProjectMember newMember = ProjectMember.builder()
+                .project(join.getProject())
+                .user(join.getUser())
+                .build();
+        projectMemberRepository.save(newMember);
+        return new ApiResponse(Boolean.TRUE, "프로젝트 멤버 가입 됨");
+    }
+
     // 프로젝트 멤버 추가
     @Transactional
     public ApiResponse acceptProjectInvitation(Long id) {

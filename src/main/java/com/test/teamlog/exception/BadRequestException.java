@@ -8,20 +8,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class BadRequestException extends RuntimeException {
     private ApiResponse apiResponse;
 
-    public BadRequestException(ApiResponse apiResponse) {
-        super();
-        this.apiResponse = apiResponse;
-    }
-
     public BadRequestException(String message) {
-        super(message);
-    }
-
-    public BadRequestException(String message, Throwable cause) {
-        super(message, cause);
+        super();
+        setApiResponse(message);
     }
 
     public ApiResponse getApiResponse() {
         return apiResponse;
+    }
+
+    private void setApiResponse(String message) {
+        apiResponse = new ApiResponse(Boolean.FALSE, message);
     }
 }
