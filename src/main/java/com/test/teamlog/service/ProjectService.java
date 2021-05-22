@@ -1,9 +1,6 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.entity.Project;
-import com.test.teamlog.entity.ProjectJoin;
-import com.test.teamlog.entity.ProjectMember;
-import com.test.teamlog.entity.User;
+import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
@@ -28,12 +25,70 @@ public class ProjectService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
+    private final ProjectFollowerRepository projectFollowerRepository;
     private final ProjectJoinRepository projectJoinRepository;
     private final PostRepository postRepository;
     private String[] defaultProjectImages = new String[]{"20210504(81931d0a-14c3-43bd-912d-c4bd687c31ea)",
             "20210504(97a31008-24f4-4dc0-98bd-c83cf8d57b95)",
             "20210504(171eb9ac-f7ce-4e30-b4c6-a19a28e45c75)",
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
+
+    // 유저가 팔로우 중인 프로젝트
+    public List<ProjectDTO.ProjectListResponse> getUserFollowingProjects(String id, User currentUser) {
+        User user = null;
+        if(currentUser.getId().equals(id)){
+            user = currentUser;
+        } else {
+            user = userRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+        }
+        List<ProjectFollower> userFollowingProjects = projectFollowerRepository.findAllByUser(user);
+
+        List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
+        for (ProjectFollower userFollowingProject : userFollowingProjects) {
+            Project project = userFollowingProject.getProject();
+            long postCount = project.getPosts().size();
+
+            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/resources/")
+                    .path(defaultProjectImages[project.getId().intValue() % 4])
+                    .toUriString();
+            ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
+                    .id(project.getId())
+                    .name(project.getName())
+                    .postCount(postCount)
+                    .updateTime(project.getUpdateTime())
+                    .thumbnail(imgUri)
+                    .build();
+            projects.add(item);
+        }
+        return projects;
+    }
+
+
+    // 프로젝트 검색
+    public List<ProjectDTO.ProjectListResponse> searchProject(String name) {
+        List<Project> projectList = projectRepository.searchProjectByName(name);
+
+        List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
+        for (Project project : projectList) {
+            long postCount = project.getPosts().size();
+
+            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/resources/")
+                    .path(defaultProjectImages[project.getId().intValue() % 4])
+                    .toUriString();
+            ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
+                    .id(project.getId())
+                    .name(project.getName())
+                    .postCount(postCount)
+                    .updateTime(project.getUpdateTime())
+                    .thumbnail(imgUri)
+                    .build();
+            projects.add(item);
+        }
+        return projects;
+    }
 
     public List<UserDTO.UserSimpleInfo> getUsersNotInProjectMember(Long projectId) {
 
