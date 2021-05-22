@@ -47,9 +47,9 @@ public class ProjectController {
 
     @ApiOperation(value = "유저 프로젝트 리스트 조회")
     @GetMapping("/projects/user/{userId}")
-    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByUser(@PathVariable("userId") String
-                                                                                          userId) {
-        List<ProjectDTO.ProjectListResponse> response = projectService.getProjectsByUser(userId);
+    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByUser(@PathVariable("userId") String userId,
+                                                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<ProjectDTO.ProjectListResponse> response = projectService.getProjectsByUser(userId, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
