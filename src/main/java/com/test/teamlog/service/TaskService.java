@@ -61,6 +61,7 @@ public class TaskService {
                 .taskName(request.getTaskName())
                 .status(request.getStatus())
                 .project(project)
+                .deadline(request.getDeadline())
                 .build();
         List<TaskPerformer> performers = new ArrayList<>();
         if (request.getPerformersId() != null) {
