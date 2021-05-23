@@ -22,4 +22,12 @@ public class TeamFollower {
     @ManyToOne
     @JoinColumn(name = "team_id",nullable = false)
     private Team team;
+
+    public void setTeam(Team team) {
+        if(this.team != null) {
+            this.team.getTeamFollowers().remove(this);
+        }
+        this.team = team;
+        team.getTeamFollowers().add(this);
+    }
 }

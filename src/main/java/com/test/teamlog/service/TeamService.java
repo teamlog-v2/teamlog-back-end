@@ -1,6 +1,7 @@
 package com.test.teamlog.service;
 
 import com.test.teamlog.entity.*;
+import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
@@ -22,6 +23,19 @@ public class TeamService {
     private final TeamMemberRepository teamMemberRepository;
     private final TeamJoinRepository teamJoinRepository;
 
+    // 팀과의 관계
+    public Relation getRelation(Team team, User currentUser) {
+        if (team.getMaster().getId().equals(currentUser.getId())) return Relation.MASTER;
+        if (isUserMemberOfTeam(team, currentUser)) return Relation.MEMBER;
+
+        TeamJoin join = teamJoinRepository.findByTeamAndUser(team, currentUser).orElse(null);
+        if (join != null) {
+            if (join.getIsAccepted() == true && join.getIsInvited() == false) return Relation.APPLIED;
+            if (join.getIsAccepted() == false && join.getIsInvited() == true) return Relation.INVITED;
+        }
+        return Relation.NONE;
+    }
+
     // 팀 멤버 아닌 유저 리스트
     public List<UserDTO.UserSimpleInfo> getUsersNotInTeamMember(Long teamId) {
         List<User> userList = userRepository.getUsersNotInTeamMember(teamId);
@@ -41,6 +55,7 @@ public class TeamService {
             validateUserIsMemberOfTeam(team, currentUser);
         }
         TeamDTO.TeamResponse response = new TeamDTO.TeamResponse(team);
+        response.setRelation(getRelation(team, currentUser));
         return response;
     }
 
@@ -277,24 +292,41 @@ public class TeamService {
     // ---------------------------
     // ----- 팀 멤버 관리 -----
     // ---------------------------
-    // 팀 멤버 추가
+    // 팀 멤버 추가 (초대 수락)
     @Transactional
-    public ApiResponse acceptTeamInvitation(Long id) {
-        TeamJoin join = teamJoinRepository.findById(id)
+    public ApiResponse createTeamMember(Long id, User currentUser) {
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
+        TeamJoin join = teamJoinRepository.findByTeamAndUser(team, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("TeamInvitation", "ID", id));
-        // TODO : join 삭제 할지 말지 ( 프로젝트도 ... )
-        join.setAccepted(Boolean.TRUE);
-        join.setInvited(Boolean.TRUE);
-
-        teamJoinRepository.save(join);
+        if(join.getIsInvited() != true || join.getIsAccepted() != false) throw new BadRequestException("잘못된 요청입니다.");
+        teamJoinRepository.delete(join);
 
         TeamMember newMember = TeamMember.builder()
                 .team(join.getTeam())
                 .user(join.getUser())
                 .build();
         teamMemberRepository.save(newMember);
-        return new ApiResponse(Boolean.TRUE, "팀 멤버 추가");
+        return new ApiResponse(Boolean.TRUE, "팀 멤버 가입 됨");
     }
+
+    // 팀 멤버 추가
+    @Transactional
+    public ApiResponse acceptTeamInvitation(Long id) {
+        TeamJoin join = teamJoinRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation", "ID", id));
+        // TODO : join 삭제 할지 말지?
+        // TODO : 수락하는 사람이 마스터이냐 사용자이냐에 따라 구분해야함.
+        teamJoinRepository.delete(join);
+
+        TeamMember newMember = TeamMember.builder()
+                .team(join.getTeam())
+                .user(join.getUser())
+                .build();
+        teamMemberRepository.save(newMember);
+        return new ApiResponse(Boolean.TRUE, "팀 멤버 추가 됨");
+    }
+
 
     // 팀 멤버 조회
     public List<UserDTO.UserSimpleInfo> getTeamMemberList(Long id) {
@@ -351,7 +383,7 @@ public class TeamService {
     // 마스터 검증
     private void validateUserIsMaster(Team team, User currentUser) {
         if (currentUser.getId().equals(team.getMaster().getId()))
-            throw new ResourceForbiddenException("권한이 없습니다.( 팀 마스터 아님 )");
+            throw new ResourceForbiddenException("권한이 없습니다. ( 프로젝트 마스터 아님 )");
     }
 
     //

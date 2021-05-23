@@ -24,8 +24,16 @@ public class TeamJoin extends BaseTimeEntity {
     private User user;
 
     @Column(name = "is_accepted",nullable = false)
-    private boolean isAccepted;
+    private Boolean isAccepted;
 
     @Column(name = "is_invited",nullable = false)
-    private boolean isInvited;
+    private Boolean isInvited;
+
+    public void setTeam(Team team) {
+        if(this.team != null) {
+            this.team.getTeamJoins().remove(this);
+        }
+        this.team = team;
+        team.getTeamJoins().add(this);
+    }
 }

@@ -17,10 +17,6 @@ public class ProjectDTO {
         private String masterId;
     }
 
-    public enum Relation {
-        MASTER,MEMBER,INVITED,APPLIED,NONE;
-    }
-
     @Data
     public static class ProjectResponse {
         private Relation relation;

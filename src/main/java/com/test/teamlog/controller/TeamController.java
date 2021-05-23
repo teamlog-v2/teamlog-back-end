@@ -2,7 +2,9 @@ package com.test.teamlog.controller;
 
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.payload.TeamDTO;
+import com.test.teamlog.service.ProjectService;
 import com.test.teamlog.service.TeamService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,6 +24,15 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class TeamController {
     private final TeamService teamService;
+    private final ProjectService projectService;
+
+    @ApiOperation(value = "팀 내 프로젝트 조회")
+    @GetMapping("/{id}/projects")
+    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByTeam(@PathVariable("id") long id,
+                                                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<ProjectDTO.ProjectListResponse> response = projectService.getProjectsByTeam(id);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
     @ApiOperation(value = "단일 팀 조회")
     @GetMapping("/{id}")

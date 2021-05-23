@@ -5,10 +5,7 @@ import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.ProjectDTO;
-import com.test.teamlog.payload.ProjectJoinDTO;
-import com.test.teamlog.payload.UserDTO;
+import com.test.teamlog.payload.*;
 import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +21,7 @@ import java.util.List;
 public class ProjectService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final TeamRepository teamRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final ProjectFollowerRepository projectFollowerRepository;
     private final ProjectJoinRepository projectJoinRepository;
@@ -32,6 +30,33 @@ public class ProjectService {
             "20210504(97a31008-24f4-4dc0-98bd-c83cf8d57b95)",
             "20210504(171eb9ac-f7ce-4e30-b4c6-a19a28e45c75)",
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
+
+    // 팀 내 프로젝트 리스트 조회
+    public List<ProjectDTO.ProjectListResponse> getProjectsByTeam(Long teamId) {
+        User user = null;
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new ResourceNotFoundException("Team","id",teamId));
+        List<Project> teamProjectList = projectRepository.findAllByTeam(team);
+
+        List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
+        for (Project project : teamProjectList) {
+            long postcount = postRepository.getPostsCount(project);
+
+            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/resources/")
+                    .path(defaultProjectImages[project.getId().intValue() % 4])
+                    .toUriString();
+            ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
+                    .id(project.getId())
+                    .name(project.getName())
+                    .postCount(postcount)
+                    .updateTime(project.getUpdateTime())
+                    .thumbnail(imgUri)
+                    .build();
+            projects.add(item);
+        }
+        return projects;
+    }
 
     // 유저가 팔로우 중인 프로젝트
     public List<ProjectDTO.ProjectListResponse> getUserFollowingProjects(String id, User currentUser) {
@@ -111,16 +136,16 @@ public class ProjectService {
     }
 
     // 프로젝트와의 관계
-    public ProjectDTO.Relation getRelation(Project project, User currentUser) {
-        if (project.getMaster().getId().equals(currentUser.getId())) return ProjectDTO.Relation.MASTER;
-        if (isUserMemberOfProject(project, currentUser)) return ProjectDTO.Relation.MEMBER;
+    public Relation getRelation(Project project, User currentUser) {
+        if (project.getMaster().getId().equals(currentUser.getId())) return Relation.MASTER;
+        if (isUserMemberOfProject(project, currentUser)) return Relation.MEMBER;
 
         ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
         if (join != null) {
-            if (join.getIsAccepted() == true && join.getIsInvited() == false) return ProjectDTO.Relation.APPLIED;
-            if (join.getIsAccepted() == false && join.getIsInvited() == true) return ProjectDTO.Relation.INVITED;
+            if (join.getIsAccepted() == true && join.getIsInvited() == false) return Relation.APPLIED;
+            if (join.getIsAccepted() == false && join.getIsInvited() == true) return Relation.INVITED;
         }
-        return ProjectDTO.Relation.NONE;
+        return Relation.NONE;
     }
 
     // 단일 프로젝트 조회
@@ -193,7 +218,7 @@ public class ProjectService {
         project.getProjectMembers().add(member);
 
         ProjectDTO.ProjectResponse result = new ProjectDTO.ProjectResponse(project);
-        result.setRelation(ProjectDTO.Relation.MASTER);
+        result.setRelation(Relation.MASTER);
         return result;
     }
 
@@ -216,7 +241,7 @@ public class ProjectService {
         projectRepository.save(project);
 
         ProjectDTO.ProjectResponse result = new ProjectDTO.ProjectResponse(project);
-        result.setRelation(ProjectDTO.Relation.MASTER);
+        result.setRelation(Relation.MASTER);
         return result;
     }
 

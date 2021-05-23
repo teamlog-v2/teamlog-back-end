@@ -19,6 +19,7 @@ public class TeamDTO {
 
     @Data
     public static class TeamResponse {
+        private Relation relation;
         private Long id;
         private String name;
         private String introduction;
@@ -42,7 +43,7 @@ public class TeamDTO {
     public static class TeamListResponse {
         private Long id;
         private String name;
-//        private long projectCount;
+        private long projectCount;
         private LocalDateTime updateTime;
     }
 
