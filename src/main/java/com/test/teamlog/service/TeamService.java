@@ -350,7 +350,7 @@ public class TeamService {
     // ---------------------------
     // 마스터 검증
     private void validateUserIsMaster(Team team, User currentUser) {
-        if (team.getMaster().getId() != currentUser.getId())
+        if (currentUser.getId().equals(team.getMaster().getId()))
             throw new ResourceForbiddenException("권한이 없습니다.( 팀 마스터 아님 )");
     }
 
