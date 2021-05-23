@@ -179,6 +179,7 @@ public class TeamService {
                 .team(team)
                 .user(user)
                 .isInvited(Boolean.TRUE)
+                .isAccepted(Boolean.FALSE)
                 .build();
         teamJoinRepository.save(teamJoin);
 
@@ -201,6 +202,7 @@ public class TeamService {
                 .team(team)
                 .user(currentUser)
                 .isAccepted(Boolean.TRUE)
+                .isInvited(Boolean.FALSE)
                 .build();
         teamJoinRepository.save(teamJoin);
 
