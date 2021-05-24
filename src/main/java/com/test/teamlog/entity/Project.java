@@ -60,4 +60,12 @@ public class Project extends BaseTimeEntity{
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<Task> tasks = new ArrayList<Task>();
+
+    public void setTeam(Team team) {
+        if(this.team != null) {
+            this.team.getProjects().remove(this);
+        }
+        this.team = team;
+        team.getProjects().add(this);
+    }
 }

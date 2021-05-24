@@ -40,10 +40,13 @@ public class Team extends BaseTimeEntity {
     @BatchSize(size = 10)
     private List<TeamFollower> teamFollowers = new ArrayList<TeamFollower>();
 
-
     @Builder.Default
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<TeamJoin> teamJoins = new ArrayList<TeamJoin>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
+    private List<Project> projects = new ArrayList<Project>();
 }
