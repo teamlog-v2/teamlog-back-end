@@ -51,6 +51,7 @@ public class ProjectService {
                     .name(project.getName())
                     .postCount(postcount)
                     .updateTime(project.getUpdateTime())
+                    .updateTimeStr(project.getUpdateTime().toString())
                     .thumbnail(imgUri)
                     .build();
             projects.add(item);
@@ -202,11 +203,17 @@ public class ProjectService {
     // 프로젝트 생성
     @Transactional
     public ProjectDTO.ProjectResponse createProject(ProjectDTO.ProjectRequest request, User currentUser) {
+        Team team = null;
+        if(request.getTeamId() != null) {
+            team = teamRepository.findById(request.getTeamId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Team","id", request.getTeamId()));
+        }
         Project project = Project.builder()
                 .name(request.getName())
                 .introduction(request.getIntroduction())
                 .accessModifier(request.getAccessModifier())
                 .master(currentUser)
+                .team(team)
                 .build();
         projectRepository.save(project);
 
@@ -380,6 +387,7 @@ public class ProjectService {
         for (ProjectJoin join : projectJoins) {
             ProjectJoinDTO.ProjectJoinForUser temp = ProjectJoinDTO.ProjectJoinForUser.builder()
                     .id(join.getId())
+                    .projectId(join.getProject().getId())
                     .projectName(join.getProject().getName())
                     .build();
             response.add(temp);

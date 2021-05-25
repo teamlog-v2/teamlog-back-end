@@ -40,6 +40,9 @@ public class PostService {
     public PostDTO.PostResponse getPost(Long id, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+        if(post.getAccessModifier() == AccessModifier.PRIVATE) {
+            projectService.validateUserIsMemberOfProject(post.getProject(), currentUser);
+        }
         return convertToPostResponse(post, currentUser);
     }
 
@@ -117,11 +120,16 @@ public class PostService {
                                                                                        User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project,currentUser);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
 
         Slice<Post> posts = null;
         if (cursor == null) {
-            posts = postRepository.searchPostsInProjectByHashtagAndKeyword(project, names, keyword, pageable);
+            if(isUserMemberOfProject)
+                posts = postRepository.searchPostsInProjectByHashtagAndKeyword(project, names, keyword, pageable);
+            else
+                posts = postRepository.searchPublicPostsInProjectByHashtagAndKeyword(project, names, keyword, pageable); 
+            //TODO : 값 넣다가 말음
         } else {
             posts = postRepository.searchPostsInProjectByHashtagAndKeywordAndCursor(project, cursor, names,
                     keyword, cop, pageable);
@@ -389,7 +397,8 @@ public class PostService {
         int commentCount = 0;
         if (post.getComments() != null) commentCount = post.getComments().size();
 
-        Boolean isIlikeIt = isILikeIt(post, currentUser);
+        Boolean isIlikeIt = Boolean.FALSE;
+        if(currentUser != null) isIlikeIt = isILikeIt(post, currentUser);
         PostDTO.PostResponse postResponse = PostDTO.PostResponse.builder()
                 .isILikeIt(isIlikeIt)
                 .id(post.getId())
@@ -404,6 +413,7 @@ public class PostService {
                 .likeCount(likeCount)
                 .commentCount(commentCount)
                 .writeTime(post.getCreateTime())
+                .writeTimeStr(post.getCreateTime().toString())
                 .build();
         if (post.getLocation() != null) {
             postResponse.setLatitude(post.getLocation().getX());

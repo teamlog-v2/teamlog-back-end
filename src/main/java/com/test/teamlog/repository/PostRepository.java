@@ -61,6 +61,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     public Slice<Post> searchPostsInProjectByHashtagAndKeyword(@Param("project") Project project, @Param("names") List<String> names,
                                                               @Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT p FROM Post p, PostTag h WHERE h.post = p and h.name IN (:names) AND (p.contents LIKE concat('%',:keyword,'%') AND p.project = :project) GROUP BY p.id")
+    public Slice<Post> searchPublicPostsInProjectByHashtagAndKeyword(@Param("project") Project project, @Param("names") List<String> names,
+                                                               @Param("keyword") String keyword, Pageable pageable);
+
     @Query("SELECT p FROM Post p, PostTag h WHERE p.project = :project AND ((:cop = '<' and  p.id < :cursor) or (:cop = '>' and  p.id > :cursor)) " +
             "AND h.post = p AND h.name IN (:names) AND (p.contents LIKE concat('%',:keyword,'%')) GROUP BY p.id")
     public Slice<Post> searchPostsInProjectByHashtagAndKeywordAndCursor(@Param("project") Project project, @Param("cursor") Long cursor,

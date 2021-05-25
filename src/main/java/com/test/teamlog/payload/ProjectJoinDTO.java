@@ -16,6 +16,7 @@ public class ProjectJoinDTO {
     @Builder
     public static class ProjectJoinForUser {
         private Long id;
+        private Long projectId;
         private String projectName;
     }
 }

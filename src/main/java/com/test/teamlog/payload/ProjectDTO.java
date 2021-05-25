@@ -15,6 +15,7 @@ public class ProjectDTO {
         private String introduction;
         private AccessModifier accessModifier;
         private String masterId;
+        private Long teamId;
     }
 
     @Data
@@ -47,6 +48,7 @@ public class ProjectDTO {
         private String name;
         private long postCount;
         private LocalDateTime updateTime; // 마지막 활동 시간
+        private String updateTimeStr;
         private String thumbnail; // 대표 이미지
     }
 

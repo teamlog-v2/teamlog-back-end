@@ -16,6 +16,7 @@ public class TeamJoinDTO {
     @Builder
     public static class TeamJoinForUser {
         private Long id;
+        private Long teamId;
         private String teamName;
     }
 }

@@ -50,6 +50,7 @@ public class PostDTO {
         private int likeCount;
         private int commentCount;
         private LocalDateTime writeTime;
+        private String writeTimeStr;
         private List<String> hashtags;
         private List<FileDTO.FileInfo> media;
         private List<FileDTO.FileInfo> files;

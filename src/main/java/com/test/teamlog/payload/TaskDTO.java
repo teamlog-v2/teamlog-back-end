@@ -31,12 +31,14 @@ public class TaskDTO {
         private int status;
         private LocalDateTime deadline;
         private LocalDateTime updateTime;
+        private String updateTimeStr;
         private List<UserDTO.UserSimpleInfo> performers;
         public TaskResponse(Task task) {
             this.id = task.getId();
             this.taskName = task.getTaskName();
             this.status = task.getStatus().getValue();
             this.updateTime = task.getUpdateTime();
+            this.updateTimeStr = task.getUpdateTime().toString();
             this.deadline = task.getDeadline();
             List<UserDTO.UserSimpleInfo> performers = new ArrayList<>();
             if(task.getTaskPerformers() !=null) {
