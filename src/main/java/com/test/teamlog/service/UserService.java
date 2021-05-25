@@ -35,16 +35,16 @@ public class UserService {
 
     public UserDTO.UserResponse getUser(String id, User currentUser) {
         UserDTO.UserResponse response = null;
-        if (id.equals(currentUser.getId())) {
-            response = new UserDTO.UserResponse(currentUser);
-            response.setIsMe(Boolean.TRUE);
-            response.setIsFollow(Boolean.FALSE);
-        } else {
+        if(currentUser == null || id.equals(currentUser.getId())) {
             User user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
             response = new UserDTO.UserResponse(user);
             response.setIsMe(Boolean.FALSE);
             response.setIsFollow(userFollowService.isFollow(currentUser, user));
+        } else {
+            response = new UserDTO.UserResponse(currentUser);
+            response.setIsMe(Boolean.TRUE);
+            response.setIsFollow(Boolean.FALSE);
         }
         return response;
     }
