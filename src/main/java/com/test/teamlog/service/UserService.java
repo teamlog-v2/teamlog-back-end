@@ -35,7 +35,7 @@ public class UserService {
 
     public UserDTO.UserResponse getUser(String id, User currentUser) {
         UserDTO.UserResponse response = null;
-        if(currentUser == null || id.equals(currentUser.getId())) {
+        if(currentUser == null || !id.equals(currentUser.getId())) {
             User user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
             response = new UserDTO.UserResponse(user);
