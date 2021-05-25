@@ -45,6 +45,9 @@ public class UserService {
             response = new UserDTO.UserResponse(currentUser);
             response.setIsMe(Boolean.TRUE);
             response.setIsFollow(Boolean.FALSE);
+            if(id.equals(currentUser.getId())) {
+                response.setIsFollow(Boolean.TRUE);
+            }
         }
         return response;
     }
