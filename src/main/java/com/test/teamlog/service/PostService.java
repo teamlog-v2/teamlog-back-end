@@ -31,10 +31,25 @@ public class PostService {
     private final PostLikerRepository postLikerRepository;
     private final PostUpdateHistoryRepository postUpdateHistoryRepository;
     private final ProjectRepository projectRepository;
+    private final UserFollowRepository userFollowRepository;
     private final FileStorageService fileStorageService;
     private final ProjectService projectService;
 
-    // TODO : 게시물 해시태그 추천
+    public List<PostDTO.PostResponse> getPostsByFollowingUser(User currentUser) {
+        List<UserFollow> userFollowingList = userFollowRepository.findByFromUser(currentUser);
+        List<User> userFollowings = new ArrayList<>();
+        for(UserFollow userFollow : userFollowingList) {
+            userFollowings.add(userFollow.getToUser());
+        }
+        List<Post> posts = postRepository.findAllByWriters(userFollowings);
+
+        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        for (Post post : posts) {
+            responses.add(convertToPostResponse(post, currentUser));
+        }
+
+        return responses;
+    }
 
     // 단일 포스트 조회
     public PostDTO.PostResponse getPost(Long id, User currentUser) {

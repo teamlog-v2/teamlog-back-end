@@ -25,6 +25,14 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
 
+    @ApiOperation(value = "유저가 팔로우하는 사람들의 게시물 조회")
+    @GetMapping("/following-users/posts ")
+    public ResponseEntity<List<PostDTO.PostResponse>> getPostsByFollowingUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<PostDTO.PostResponse> response = postService.getPostsByFollowingUser(currentUser);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    // TODO: 프로젝트 멤버만?
     @ApiOperation(value = "포스트 수정 내역 조회")
     @GetMapping("/posts/{id}/historys")
     public ResponseEntity<List<PostDTO.PostHistoryInfo>> getPostUpdateHistory(@PathVariable("id") long id,
