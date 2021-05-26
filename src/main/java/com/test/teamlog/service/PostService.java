@@ -37,13 +37,15 @@ public class PostService {
 
     public List<PostDTO.PostResponse> getPostsByFollowingUser(User currentUser) {
         List<UserFollow> userFollowingList = userFollowRepository.findByFromUser(currentUser);
+        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        if(userFollowingList == null) return responses;
+
         List<User> userFollowings = new ArrayList<>();
         for(UserFollow userFollow : userFollowingList) {
             userFollowings.add(userFollow.getToUser());
         }
         List<Post> posts = postRepository.findAllByWriters(userFollowings);
 
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
             responses.add(convertToPostResponse(post, currentUser));
         }
@@ -80,12 +82,19 @@ public class PostService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         Pageable pageable = PageRequest.of(0, size, sort, "id");
+        Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project,currentUser);
 
         Slice<Post> posts = null;
         if (cursor == null) {
-            posts = postRepository.findAllByProject(project, pageable);
+            if(isUserMemberOfProject)
+                posts = postRepository.findAllByProject(project, pageable);
+            else
+                posts = postRepository.findAllByProject(project, AccessModifier.PUBLIC, pageable);
         } else {
-            posts = postRepository.findAllByProjectAndCursor(project, cursor, cop, pageable);
+            if(isUserMemberOfProject)
+                posts = postRepository.findAllByProjectAndCursor(project, cursor, cop, pageable);
+            else
+                posts = postRepository.findAllByProjectAndCursor(project, cursor, cop, AccessModifier.PUBLIC, pageable);
         }
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
@@ -93,7 +102,12 @@ public class PostService {
             responses.add(convertToPostResponse(post, currentUser));
         }
 
-        long totalElements = postRepository.getPostsCount(project);
+        long totalElements = 0;
+
+        if(isUserMemberOfProject)
+            totalElements = postRepository.getPostsCount(project);
+        else
+            totalElements = postRepository.getPostsCount(project, AccessModifier.PUBLIC);
 
         return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
                 0, posts.isLast());
@@ -104,21 +118,31 @@ public class PostService {
                                                                     String cop, Long cursor, int size, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-
+        Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project,currentUser);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
 
         Slice<Post> posts = null;
         if (cursor == null) {
-            posts = postRepository.searchPostsInProject(project, keyword, pageable);
+            if(isUserMemberOfProject)
+                posts = postRepository.searchPostsInProject(project, keyword, pageable);
+            else
+                posts = postRepository.searchPostsInProject(project, keyword, AccessModifier.PUBLIC, pageable);
         } else {
-            posts = postRepository.searchPostsInProjectByCursor(project, cursor, keyword, cop, pageable);
+            if(isUserMemberOfProject)
+                posts = postRepository.searchPostsInProjectByCursor(project, cursor, keyword, cop, pageable);
+            else
+                posts = postRepository.searchPostsInProjectByCursor(project, cursor, keyword, cop, AccessModifier.PUBLIC, pageable);
         }
 
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
             responses.add(convertToPostResponse(post, currentUser));
         }
-        long totalElements = postRepository.getPostsCountByKeyword(project, keyword);
+        long totalElements = 0;
+        if(isUserMemberOfProject)
+            totalElements = postRepository.getPostsCountByKeyword(project, keyword);
+        else
+            totalElements = postRepository.getPostsCountByKeyword(project, keyword, AccessModifier.PUBLIC);
 
         return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
                 0, posts.isLast());
@@ -143,17 +167,25 @@ public class PostService {
             if(isUserMemberOfProject)
                 posts = postRepository.searchPostsInProjectByHashtagAndKeyword(project, names, keyword, pageable);
             else
-                posts = postRepository.searchPublicPostsInProjectByHashtagAndKeyword(project, names, keyword, pageable); 
-            //TODO : 값 넣다가 말음
+                posts = postRepository.searchPublicPostsInProjectByHashtagAndKeyword(project, names, keyword, AccessModifier.PUBLIC, pageable);
         } else {
-            posts = postRepository.searchPostsInProjectByHashtagAndKeywordAndCursor(project, cursor, names,
-                    keyword, cop, pageable);
+            if(isUserMemberOfProject)
+                posts = postRepository.searchPostsInProjectByHashtagAndKeywordAndCursor(project, cursor, names,
+                        keyword, cop, pageable);
+            else
+                posts = postRepository.searchPublicPostsInProjectByHashtagAndKeywordAndCursor(project, cursor, names,
+                        keyword, cop, AccessModifier.PUBLIC, pageable);
         }
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
             responses.add(convertToPostResponse(post, currentUser));
         }
-        long totalElements = postRepository.getPostsCountByHashtagAndKeyword(project, names, keyword, pageable).getTotalElements();
+        long totalElements = 0;
+        if(isUserMemberOfProject){
+            postRepository.getPostsCountByHashtagAndKeyword(project, names, keyword, pageable).getTotalElements();
+        } else {
+            postRepository.getPostsCountByHashtagAndKeyword(project, names, keyword, AccessModifier.PUBLIC, pageable).getTotalElements();
+        }
 
         return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
                 0, posts.isLast());
@@ -165,18 +197,30 @@ public class PostService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         Pageable pageable = PageRequest.of(0, size, sort, "id");
+        Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project,currentUser);
 
         Slice<Post> posts = null;
         if (cursor == null) {
-            posts = postRepository.getPostsInProjectByHashTag(project, names, pageable);
+            if(isUserMemberOfProject)
+                posts = postRepository.getPostsInProjectByHashTag(project, names, pageable);
+            else
+                posts = postRepository.getPostsInProjectByHashTag(project, names, AccessModifier.PUBLIC, pageable);
         } else {
-            posts = postRepository.getPostsInProjectByHashTagAndCursor(project, cursor, names, cop, pageable);
+            if(isUserMemberOfProject)
+                posts = postRepository.getPostsInProjectByHashTagAndCursor(project, cursor, names, cop, pageable);
+            else
+                posts = postRepository.getPostsInProjectByHashTagAndCursor(project, cursor, names, cop, AccessModifier.PUBLIC, pageable);
         }
         List<PostDTO.PostResponse> responses = new ArrayList<>();
         for (Post post : posts) {
             responses.add(convertToPostResponse(post, currentUser));
         }
-        long totalElements = postRepository.getPostsCountByHashTag(project, names, pageable).getTotalElements();
+        long totalElements = 0;
+        if(isUserMemberOfProject)
+            totalElements = postRepository.getPostsCountByHashTag(project, names, pageable).getTotalElements();
+        else
+            totalElements = postRepository.getPostsCountByHashTag(project, names, AccessModifier.PUBLIC, pageable).getTotalElements();
+
 
         return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
                 0, posts.isLast());
@@ -440,9 +484,10 @@ public class PostService {
     }
 
     @Transactional
-    public List<PostDTO.PostHistoryInfo> getPostUpdateHistory(Long postId) {
+    public List<PostDTO.PostHistoryInfo> getPostUpdateHistory(Long postId,User currentUser) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+        projectService.validateUserIsMemberOfProject(post.getProject(),currentUser);
 
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
         List<PostUpdateHistory> historyList = postUpdateHistoryRepository.findAllByPost(post, sort);

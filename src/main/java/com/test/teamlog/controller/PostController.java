@@ -37,8 +37,7 @@ public class PostController {
     @GetMapping("/posts/{id}/historys")
     public ResponseEntity<List<PostDTO.PostHistoryInfo>> getPostUpdateHistory(@PathVariable("id") long id,
                                                                               @ApiIgnore @AuthenticationPrincipal User currentUser) {
-
-        List<PostDTO.PostHistoryInfo> response = postService.getPostUpdateHistory(id);
+        List<PostDTO.PostHistoryInfo> response = postService.getPostUpdateHistory(id, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
