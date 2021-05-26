@@ -40,6 +40,7 @@ public class UserService {
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
             response = new UserDTO.UserResponse(user);
             response.setIsMe(Boolean.FALSE);
+            if(currentUser==null) response.setIsMe(null);
             response.setIsFollow(userFollowService.isFollow(currentUser, user));
         } else {
             response = new UserDTO.UserResponse(currentUser);
