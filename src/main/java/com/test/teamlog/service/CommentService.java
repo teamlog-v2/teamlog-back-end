@@ -26,6 +26,38 @@ public class CommentService {
     private final CommentMentionRepository commentMentionRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    //-----------------------
+    //--- 알림을 위한 메소드 ---
+    //-----------------------
+    // 내 게시물에 달린 댓글 알림
+//    public List<CommentDTO.CommentNotification> getCommentsByMyPosts(User currentUser) {
+//        List<Post> posts = postRepository.findAllByWriter(currentUser);
+//        if(posts == null) throw new ResourceNotFoundException("Post","userId", currentUser.getId());
+//
+//        List<Comment> comments = commentRepository.findAllByPosts(posts);
+//        List<CommentDTO.CommentNotification> commentList = new ArrayList<>();
+//        for(Comment comment : comments) {
+//            commentList.add(new CommentDTO.CommentNotification(comment));
+//        }
+//
+//        return commentList;
+//    }
+//
+//    // 나를 언급한 댓글 알림 조회
+//    public List<CommentDTO.CommentNotification> getCommentsByMyCommentMention(User currentUser) {
+//        List<CommentMention> commentMentions = commentMentionRepository.findAllByTargetUser(currentUser);
+//        if(commentMentions == null) throw new ResourceNotFoundException("CommentMention","userId", currentUser.getId());
+//
+//        List<CommentDTO.CommentNotification> commentList = new ArrayList<>();
+//        for(CommentMention commentMention : commentMentions) {
+//            commentList.add(new CommentDTO.CommentNotification(commentMention.getComment()));
+//        }
+//        return commentList;
+//    }
+
+    //-----------------------
+    //-----------------------
+    //-----------------------
 
     // 게시물의 부모 댓글 조회
     public PagedResponse<CommentDTO.CommentInfo> getParentComments(Long postId, int page, int size, User currentUser) {
@@ -44,8 +76,8 @@ public class CommentService {
                 commentMentions.add(targetUSer.getTargetUser().getId());
             }
 
-            Boolean isMyComment = Boolean.FALSE;
-            if (comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.TRUE;
+            Boolean isMyComment = Boolean.TRUE;
+            if (currentUser==null || !comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.FALSE;
 
             CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
                     .isMyComment(isMyComment)
@@ -87,8 +119,8 @@ public class CommentService {
                 commentMentions.add(targetUSer.getTargetUser().getId());
             }
 
-            Boolean isMyComment = Boolean.FALSE;
-            if (comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.TRUE;
+            Boolean isMyComment = Boolean.TRUE;
+            if (currentUser==null || !comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.FALSE;
 
             CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
                     .isMyComment(isMyComment)
