@@ -62,12 +62,17 @@ public class TeamService {
     // 사용자 팀 리스트 조회
     public List<TeamDTO.TeamListResponse> getTeamsByUser(String id, User currentUser) {
         User user = null;
-        boolean isMyTeamList = currentUser.getId().equals(id);
-        if(isMyTeamList){
-            user = currentUser;
-        } else {
+        boolean isMyTeamList = false;
+        if (currentUser == null) {
             user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+        } else {
+            isMyTeamList = currentUser.getId().equals(id);
+            if (isMyTeamList)
+                user = currentUser;
+            else
+                user = userRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         }
         List<TeamMember> teams = teamMemberRepository.findByUser(user);
 
@@ -402,6 +407,7 @@ public class TeamService {
 
     // 팀 멤버 검증
     public void validateUserIsMemberOfTeam(Team team, User currentUser) {
+        if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다. 로그인 해주세요.");
         teamMemberRepository.findByTeamAndUser(team, currentUser)
                 .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다. ( 팀 멤버 아님 )"));
     }
