@@ -32,8 +32,9 @@ public class ProjectController {
 
     @ApiOperation(value = "프로젝트 검색")
     @GetMapping("/projects")
-    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> searchProject(@RequestParam(value = "name", required = false, defaultValue = "") String name) {
-        List<ProjectDTO.ProjectListResponse> response = projectService.searchProject(name);
+    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> searchProject(@RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                                              @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<ProjectDTO.ProjectListResponse> response = projectService.searchProject(name, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

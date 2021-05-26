@@ -32,10 +32,11 @@ public class ProjectService {
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
 
     // 팀 내 프로젝트 리스트 조회
+    // TODO : 팀 내는 다 보여주지만 private/public 여부도 줘서 뭔가 다른 효과를 보여주는게 좋을 것 같음. 아니면 팀 멤버는 다 볼 수 있나?
     public List<ProjectDTO.ProjectListResponse> getProjectsByTeam(Long teamId) {
         User user = null;
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team","id",teamId));
+                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
         List<Project> teamProjectList = projectRepository.findAllByTeam(team);
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
@@ -62,22 +63,27 @@ public class ProjectService {
     // 유저가 팔로우 중인 프로젝트
     public List<ProjectDTO.ProjectListResponse> getUserFollowingProjects(String id, User currentUser) {
         User user = null;
-        boolean isMyProjectList = currentUser.getId().equals(id);
-        if(isMyProjectList){
-            user = currentUser;
-        } else {
+        boolean isMyProjectList = false;
+        if (currentUser == null) {
             user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+        } else {
+            isMyProjectList = currentUser.getId().equals(id);
+            if (isMyProjectList)
+                user = currentUser;
+            else
+                user = userRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         }
         List<ProjectFollower> userFollowingProjects = projectFollowerRepository.findAllByUser(user);
-
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
         for (ProjectFollower userFollowingProject : userFollowingProjects) {
             Project project = userFollowingProject.getProject();
-            if(!isMyProjectList) {
+            if (!isMyProjectList) {
                 // 팀멤버도 아니고 private면 x
-                if(!isUserMemberOfProject(project,currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE) continue;
+                if (!isUserMemberOfProject(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
+                    continue;
             }
 
             long postcount = postRepository.getPostsCount(project);
@@ -99,15 +105,15 @@ public class ProjectService {
         return projects;
     }
 
-
     // 프로젝트 검색
-    public List<ProjectDTO.ProjectListResponse> searchProject(String name) {
+    public List<ProjectDTO.ProjectListResponse> searchProject(String name, User currentUser) {
         List<Project> projectList = projectRepository.searchProjectByName(name);
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
         for (Project project : projectList) {
+            if (!isUserMemberOfProject(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
+                continue;
 
-            // TODO : private 거르기
             long postCount = project.getPosts().size();
 
             String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -130,7 +136,7 @@ public class ProjectService {
     public List<UserDTO.UserSimpleInfo> getUsersNotInProjectMember(Long projectId) {
         List<User> userList = userRepository.getUsersNotInProjectMember(projectId);
         List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
-        for(User user : userList) {
+        for (User user : userList) {
             response.add(new UserDTO.UserSimpleInfo(user));
         }
         return response;
@@ -138,6 +144,7 @@ public class ProjectService {
 
     // 프로젝트와의 관계
     public Relation getRelation(Project project, User currentUser) {
+        if (currentUser == null) return Relation.NONE;
         if (project.getMaster().getId().equals(currentUser.getId())) return Relation.MASTER;
         if (isUserMemberOfProject(project, currentUser)) return Relation.MEMBER;
 
@@ -154,7 +161,7 @@ public class ProjectService {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
         // Private 시 검증
-        if(project.getAccessModifier() == AccessModifier.PRIVATE) {
+        if (project.getAccessModifier() == AccessModifier.PRIVATE) {
             validateUserIsMemberOfProject(project, currentUser);
         }
         ProjectDTO.ProjectResponse projectResponse = new ProjectDTO.ProjectResponse(project);
@@ -165,21 +172,27 @@ public class ProjectService {
     // 사용자 프로젝트 리스트 조회
     public List<ProjectDTO.ProjectListResponse> getProjectsByUser(String id, User currentUser) {
         User user = null;
-        boolean isMyProjectList = currentUser.getId().equals(id);
-        if(isMyProjectList){
-            user = currentUser;
-        } else {
+        boolean isMyProjectList = false;
+        if (currentUser == null) {
             user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+        } else {
+            isMyProjectList = currentUser.getId().equals(id);
+            if (isMyProjectList)
+                user = currentUser;
+            else
+                user = userRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         }
         List<ProjectMember> userProjectList = projectMemberRepository.findByUser(user);
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
         for (ProjectMember projectMember : userProjectList) {
             Project project = projectMember.getProject();
-            if(!isMyProjectList) {
+            if (!isMyProjectList) {
                 // 팀멤버도 아니고 private면 x
-                if(!isUserMemberOfProject(project,currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE) continue;
+                if (!isUserMemberOfProject(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
+                    continue;
             }
 
             long postcount = postRepository.getPostsCount(project);
@@ -204,9 +217,9 @@ public class ProjectService {
     @Transactional
     public ProjectDTO.ProjectResponse createProject(ProjectDTO.ProjectRequest request, User currentUser) {
         Team team = null;
-        if(request.getTeamId() != null) {
+        if (request.getTeamId() != null) {
             team = teamRepository.findById(request.getTeamId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Team","id", request.getTeamId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Team", "id", request.getTeamId()));
         }
         Project project = Project.builder()
                 .name(request.getName())
@@ -420,7 +433,7 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
         ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation", "ID", currentUser.getId()));
-        if(join.getIsInvited() != true || join.getIsAccepted() != false) throw new BadRequestException("잘못된 요청입니다.");
+        if (join.getIsInvited() != true || join.getIsAccepted() != false) throw new BadRequestException("잘못된 요청입니다.");
         projectJoinRepository.delete(join);
 
         ProjectMember newMember = ProjectMember.builder()
@@ -518,8 +531,8 @@ public class ProjectService {
 
     // 프로젝트 멤버 검증
     public void validateUserIsMemberOfProject(Project project, User currentUser) {
+        if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다. 로그인 해주세요.");
         projectMemberRepository.findByProjectAndUser(project, currentUser)
                 .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다. ( 프로젝트 멤버 아님 )"));
     }
-
 }
