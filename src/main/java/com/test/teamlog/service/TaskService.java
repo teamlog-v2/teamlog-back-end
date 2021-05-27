@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.LockModeType;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +37,7 @@ public class TaskService {
     }
 
     // 프로젝트의 태스크들 조회
+    @Transactional
     public List<TaskDTO.TaskResponse> getTasksByProject(Long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", id));
@@ -42,10 +46,23 @@ public class TaskService {
         List<Task> tasks = taskRepository.findByProject(project, sort);
         List<TaskDTO.TaskResponse> responses = new ArrayList<>();
         for (Task t : tasks) {
+            if(t.getDeadline() !=null) {
+                if(t.getDeadline().isBefore(LocalDateTime.now()) && (t.getStatus() == TaskStatus.IN_PROGRESS || t.getStatus() == TaskStatus.NOT_STARTED)) {
+                    setTaskStatusFailed(t);
+                }
+            }
             TaskDTO.TaskResponse taskResponse = new TaskDTO.TaskResponse(t);
             responses.add(taskResponse);
         }
         return responses;
+    }
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Transactional
+    public void setTaskStatusFailed(Task task) {
+        taskRepository.reorderInPreviousStatus(task.getProject(),task.getStatus(),task.getPriority()); // 기존 status 정리
+        task.setStatus(TaskStatus.FAILED);
+        task.setPriority(taskRepository.getCountByPostAndStatus(task.getProject(),TaskStatus.FAILED));
     }
 
     // 태스크 생성
@@ -53,7 +70,8 @@ public class TaskService {
     public TaskDTO.TaskResponse createTask(Long projectId, TaskDTO.TaskRequest request, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
-
+        System.out.println(request.getDeadline().withZoneSameInstant(ZoneId.of("Asia/Seoul")));
+        System.out.println(request.getDeadline().withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime());
         // 멤버만 가능
         projectService.validateUserIsMemberOfProject(project, currentUser);
 
@@ -61,7 +79,7 @@ public class TaskService {
                 .taskName(request.getTaskName())
                 .status(request.getStatus())
                 .project(project)
-                .deadline(request.getDeadline())
+                .deadline(request.getDeadline().withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime())
                 .build();
         List<TaskPerformer> performers = new ArrayList<>();
         if (request.getPerformersId() != null) {
@@ -93,7 +111,7 @@ public class TaskService {
         // 멤버만 가능
         projectService.validateUserIsMemberOfProject(task.getProject(), currentUser);
 
-        task.setDeadline(request.getDeadline());
+        task.setDeadline(request.getDeadline().withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime());
         task.setTaskName(request.getTaskName());
 
         List<TaskPerformer> originalTaskPerformer = null;

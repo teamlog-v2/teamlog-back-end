@@ -6,6 +6,7 @@ import com.test.teamlog.entity.TaskStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class TaskDTO {
     public static class TaskRequest {
         private String taskName;
         private TaskStatus status;
-        private LocalDateTime deadline;
+        private ZonedDateTime deadline;
         private List<String> performersId;
     }
 
