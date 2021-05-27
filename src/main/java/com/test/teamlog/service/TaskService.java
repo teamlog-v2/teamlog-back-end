@@ -70,8 +70,6 @@ public class TaskService {
     public TaskDTO.TaskResponse createTask(Long projectId, TaskDTO.TaskRequest request, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
-        System.out.println(request.getDeadline().withZoneSameInstant(ZoneId.of("Asia/Seoul")));
-        System.out.println(request.getDeadline().withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime());
         // 멤버만 가능
         projectService.validateUserIsMemberOfProject(project, currentUser);
 
@@ -79,8 +77,13 @@ public class TaskService {
                 .taskName(request.getTaskName())
                 .status(request.getStatus())
                 .project(project)
-                .deadline(request.getDeadline().withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime())
                 .build();
+        projectService.validateUserIsMemberOfProject(task.getProject(), currentUser);
+        if(request.getDeadline() == null)
+            task.setDeadline(null);
+        else
+            task.setDeadline(request.getDeadline().withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime());
+
         List<TaskPerformer> performers = new ArrayList<>();
         if (request.getPerformersId() != null) {
             for (String userId : request.getPerformersId()) {
@@ -110,8 +113,10 @@ public class TaskService {
 
         // 멤버만 가능
         projectService.validateUserIsMemberOfProject(task.getProject(), currentUser);
-
-        task.setDeadline(request.getDeadline().withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime());
+        if(request.getDeadline() == null)
+            task.setDeadline(null);
+        else
+            task.setDeadline(request.getDeadline().withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime());
         task.setTaskName(request.getTaskName());
 
         List<TaskPerformer> originalTaskPerformer = null;
