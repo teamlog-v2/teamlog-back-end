@@ -25,6 +25,7 @@ public class TeamService {
 
     // 팀과의 관계
     public Relation getRelation(Team team, User currentUser) {
+        if (currentUser == null) return Relation.NONE;
         if (team.getMaster().getId().equals(currentUser.getId())) return Relation.MASTER;
         if (isUserMemberOfTeam(team, currentUser)) return Relation.MEMBER;
 
