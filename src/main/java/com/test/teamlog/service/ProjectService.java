@@ -10,6 +10,7 @@ import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
@@ -26,10 +27,37 @@ public class ProjectService {
     private final ProjectFollowerRepository projectFollowerRepository;
     private final ProjectJoinRepository projectJoinRepository;
     private final PostRepository postRepository;
+    private final FileStorageService fileStorageService;
     private String[] defaultProjectImages = new String[]{"20210504(81931d0a-14c3-43bd-912d-c4bd687c31ea)",
             "20210504(97a31008-24f4-4dc0-98bd-c83cf8d57b95)",
             "20210504(171eb9ac-f7ce-4e30-b4c6-a19a28e45c75)",
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
+
+    @Transactional
+    public ApiResponse updateProjectThumbnail(Long projectId, MultipartFile image, User currentUser) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        if (project.getThumbnail() != null) {
+            fileStorageService.deleteFile(project.getThumbnail());
+            project.setThumbnail(null);
+        }
+        String thumbnailPath = fileStorageService.storeFile(image, null, null);
+        project.setThumbnail(thumbnailPath);
+        projectRepository.save(project);
+        return new ApiResponse(Boolean.TRUE, "프로젝트 썸네일 수정 성공");
+    }
+
+    @Transactional
+    public ApiResponse deleteProjectThumbnail(Long projectId, User currentUser) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        if (project.getThumbnail() != null) {
+            fileStorageService.deleteFile(project.getThumbnail());
+            project.setThumbnail(null);
+        }
+        projectRepository.save(project);
+        return new ApiResponse(Boolean.TRUE, "프로젝트 썸네일 삭제 성공");
+    }
 
     // 팀 내 프로젝트 리스트 조회
     // TODO : 팀 내는 다 보여주지만 private/public 여부도 줘서 뭔가 다른 효과를 보여주는게 좋을 것 같음. 아니면 팀 멤버는 다 볼 수 있나?
@@ -43,10 +71,17 @@ public class ProjectService {
         for (Project project : teamProjectList) {
             long postcount = postRepository.getPostsCount(project);
 
+            String path = null;
+            if (project.getThumbnail() == null) {
+                path = defaultProjectImages[project.getId().intValue() % 4];
+            } else {
+                path = project.getThumbnail();
+            }
             String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/resources/")
-                    .path(defaultProjectImages[project.getId().intValue() % 4])
+                    .path(path)
                     .toUriString();
+
             ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
                     .id(project.getId())
                     .name(project.getName())
@@ -88,9 +123,15 @@ public class ProjectService {
 
             long postcount = postRepository.getPostsCount(project);
 
+            String path = null;
+            if (project.getThumbnail() == null) {
+                path = defaultProjectImages[project.getId().intValue() % 4];
+            } else {
+                path = project.getThumbnail();
+            }
             String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/resources/")
-                    .path(defaultProjectImages[project.getId().intValue() % 4])
+                    .path(path)
                     .toUriString();
             ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
                     .id(project.getId())
@@ -116,9 +157,15 @@ public class ProjectService {
 
             long postCount = project.getPosts().size();
 
+            String path = null;
+            if (project.getThumbnail() == null) {
+                path = defaultProjectImages[project.getId().intValue() % 4];
+            } else {
+                path = project.getThumbnail();
+            }
             String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/resources/")
-                    .path(defaultProjectImages[project.getId().intValue() % 4])
+                    .path(path)
                     .toUriString();
             ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
                     .id(project.getId())
@@ -187,9 +234,15 @@ public class ProjectService {
 
             long postcount = postRepository.getPostsCount(project);
 
+            String path = null;
+            if (project.getThumbnail() == null) {
+                path = defaultProjectImages[project.getId().intValue() % 4];
+            } else {
+                path = project.getThumbnail();
+            }
             String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/resources/")
-                    .path(defaultProjectImages[project.getId().intValue() % 4])
+                    .path(path)
                     .toUriString();
             ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
                     .id(project.getId())
@@ -198,7 +251,7 @@ public class ProjectService {
                     .updateTime(project.getUpdateTime())
                     .thumbnail(imgUri)
                     .build();
-            if(project.getTeam() !=null){
+            if (project.getTeam() != null) {
                 item.setTeam(project.getTeam());
             }
             projects.add(item);

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
@@ -21,6 +22,23 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class ProjectController {
     private final ProjectService projectService;
+
+    @ApiOperation(value = "프로젝트 썸네일 변경")
+    @PutMapping("/projects/{projectId}/thumbnail")
+    public ResponseEntity<ApiResponse> updateUserProfileImage(@PathVariable("projectId") Long projectId,
+                                                              @RequestPart(value = "thumbnail", required = true) MultipartFile image,
+                                                              @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = projectService.updateProjectThumbnail(projectId, image, currentUser);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "프로젝트 썸네일 삭제")
+    @DeleteMapping("/projects/{projectId}/thumbnail")
+    public ResponseEntity<ApiResponse> deleteUserProfileImage(@PathVariable("projectId") Long projectId,
+                                                              @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = projectService.deleteProjectThumbnail(projectId, currentUser);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
 
     @ApiOperation(value = "유저가 팔로잉 중인 프로젝트")
     @GetMapping("/users/{id}/following-projects")

@@ -36,6 +36,8 @@ public class Project extends BaseTimeEntity{
     @JoinColumn(name = "team_id")
     private Team team;
 
+    private String thumbnail;
+
     @Builder.Default
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
