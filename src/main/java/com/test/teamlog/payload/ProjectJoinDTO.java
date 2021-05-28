@@ -17,6 +17,7 @@ public class ProjectJoinDTO {
     public static class ProjectJoinForUser {
         private Long id;
         private Long projectId;
+        private String thumbnail; // 대표 이미지
         private String projectName;
     }
 }

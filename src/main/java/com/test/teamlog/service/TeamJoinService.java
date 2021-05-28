@@ -137,6 +137,7 @@ public class TeamJoinService {
         for (TeamJoin join : teamJoins) {
             TeamJoinDTO.TeamJoinForUser temp = TeamJoinDTO.TeamJoinForUser.builder()
                     .id(join.getId())
+                    .teamId(join.getTeam().getId())
                     .teamName(join.getTeam().getName())
                     .build();
             response.add(temp);

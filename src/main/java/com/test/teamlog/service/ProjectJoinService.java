@@ -23,6 +23,10 @@ public class ProjectJoinService {
     private final ProjectRepository projectRepository;
     private final ProjectJoinRepository projectJoinRepository;
     private final ProjectService projectService;
+    private String[] defaultProjectImages = new String[]{"20210504(81931d0a-14c3-43bd-912d-c4bd687c31ea)",
+            "20210504(97a31008-24f4-4dc0-98bd-c83cf8d57b95)",
+            "20210504(171eb9ac-f7ce-4e30-b4c6-a19a28e45c75)",
+            "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
 
     // -------------------------------
     // ----- 프로젝트 멤버 신청 관리 -----
@@ -137,6 +141,11 @@ public class ProjectJoinService {
                     .projectId(join.getProject().getId())
                     .projectName(join.getProject().getName())
                     .build();
+            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/resources/")
+                    .path(defaultProjectImages[join.getProject().getId().intValue() % 4])
+                    .toUriString();
+            temp.setThumbnail(imgUri);
             response.add(temp);
         }
         return response;
@@ -150,8 +159,14 @@ public class ProjectJoinService {
         for (ProjectJoin join : projectJoins) {
             ProjectJoinDTO.ProjectJoinForUser temp = ProjectJoinDTO.ProjectJoinForUser.builder()
                     .id(join.getId())
+                    .projectId(join.getProject().getId())
                     .projectName(join.getProject().getName())
                     .build();
+            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/resources/")
+                    .path(defaultProjectImages[join.getProject().getId().intValue() % 4])
+                    .toUriString();
+            temp.setThumbnail(imgUri);
             response.add(temp);
         }
         return response;
