@@ -306,9 +306,15 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
         validateUserIsMaster(project, currentUser);
 
-        project.setName(request.getName());
-        project.setIntroduction(request.getIntroduction());
-        project.setAccessModifier(request.getAccessModifier());
+        if(request.getName() != null) {
+            project.setName(request.getName());
+        }
+        if(request.getAccessModifier() != null) {
+            project.setAccessModifier(request.getAccessModifier());
+        }
+        if(request.getIntroduction() != null) {
+            project.setIntroduction(request.getIntroduction());
+        }
 
         if (request.getMasterId() != null) {
             User newMaster = userRepository.findById(request.getMasterId())
