@@ -202,6 +202,17 @@ public class ProjectService {
             validateUserIsMemberOfProject(project, currentUser);
         }
         ProjectDTO.ProjectResponse projectResponse = new ProjectDTO.ProjectResponse(project);
+        String path = null;
+        if (project.getThumbnail() == null) {
+            path = defaultProjectImages[project.getId().intValue() % 4];
+        } else {
+            path = project.getThumbnail();
+        }
+        String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/resources/")
+                .path(path)
+                .toUriString();
+        projectResponse.setThumbnail(imgUri);
         projectResponse.setRelation(getRelation(project, currentUser));
         return projectResponse;
     }

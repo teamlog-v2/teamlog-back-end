@@ -26,6 +26,7 @@ public class ProjectDTO {
         private TeamDTO.TeamSimpleInfo team;
         private String name;
         private String introduction;
+        private String thumbnail;
         private AccessModifier accessModifier;
         private LocalDateTime createTime;
         private String masterId;
