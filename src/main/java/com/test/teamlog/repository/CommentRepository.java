@@ -13,6 +13,9 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByPostAndParentCommentIsNull(Post post);
 
+    @Query("SELECT c FROM Comment c WHERE c.post in (:posts)")
+    List<Comment> findAllByPosts(@Param("posts") List<Post> post);
+
     @Query("SELECT c FROM Comment c WHERE c.post = :post AND c.parentComment is null")
     Page<Comment> getParentCommentsByPost(@Param("post") Post post, Pageable pageable);
 

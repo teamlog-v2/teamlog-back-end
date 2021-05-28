@@ -3,6 +3,7 @@ package com.test.teamlog.controller;
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TeamJoinDTO;
+import com.test.teamlog.service.TeamJoinService;
 import com.test.teamlog.service.TeamService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +22,7 @@ import java.util.List;
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class TeamJoinController {
-    private final TeamService teamService;
+    private final TeamJoinService teamJoinService;
 
     @ApiOperation(value = "팀 멤버 초대(userId 필요) 및 신청")
     @PostMapping("/teams/{teamId}/joins")
@@ -31,9 +32,9 @@ public class TeamJoinController {
         ApiResponse apiResponse = null;
         // userId 있으면 초대, 없으면 신청
         if (userId != null) {
-            apiResponse = teamService.inviteUserForTeam(teamId, userId);
+            apiResponse = teamJoinService.inviteUserForTeam(teamId, userId);
         } else {
-            apiResponse = teamService.applyForTeam(teamId, currentUser);
+            apiResponse = teamJoinService.applyForTeam(teamId, currentUser);
         }
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -41,35 +42,35 @@ public class TeamJoinController {
     @ApiOperation(value = "팀 멤버 신청 삭제")
     @DeleteMapping("/team-joins/{joinId}")
     public ResponseEntity<ApiResponse> deleteTeamJoin(@PathVariable("joinId") Long joinId) {
-        ApiResponse apiResponse = teamService.deleteTeamJoin(joinId);
+        ApiResponse apiResponse = teamJoinService.deleteTeamJoin(joinId);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @ApiOperation(value = "팀 멤버 신청자 목록 조회 (팀 관리)")
     @GetMapping("/teams/{id}/joins/apply")
     public ResponseEntity<List<TeamJoinDTO.TeamJoinForTeam>> getTeamApplyListForTeam(@PathVariable("id") Long id) {
-        List<TeamJoinDTO.TeamJoinForTeam> response = teamService.getTeamApplyListForTeam(id);
+        List<TeamJoinDTO.TeamJoinForTeam> response = teamJoinService.getTeamApplyListForTeam(id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "팀 멤버로 초대한 사용자 목록 조회 (팀 관리)")
     @GetMapping("/teams/{id}/joins/invitation")
     public ResponseEntity<List<TeamJoinDTO.TeamJoinForTeam>> getTeamInvitationListForTeam(@PathVariable("id") Long id) {
-        List<TeamJoinDTO.TeamJoinForTeam> response = teamService.getTeamInvitationListForTeam(id);
+        List<TeamJoinDTO.TeamJoinForTeam> response = teamJoinService.getTeamInvitationListForTeam(id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "유저가 받은 팀 초대 조회")
     @GetMapping("users/team-invitation")
     public ResponseEntity<List<TeamJoinDTO.TeamJoinForUser>> getTeamInvitationListForUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        List<TeamJoinDTO.TeamJoinForUser> response = teamService.getTeamInvitationListForUser(currentUser);
+        List<TeamJoinDTO.TeamJoinForUser> response = teamJoinService.getTeamInvitationListForUser(currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "유저가 가입 신청한 팀 조회")
     @GetMapping("users/team-apply")
     public ResponseEntity<List<TeamJoinDTO.TeamJoinForUser>> getTeamApplyListForUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        List<TeamJoinDTO.TeamJoinForUser> response = teamService.getTeamApplyListForUser(currentUser);
+        List<TeamJoinDTO.TeamJoinForUser> response = teamJoinService.getTeamApplyListForUser(currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -10,6 +10,7 @@ import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,28 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamJoinRepository teamJoinRepository;
+
+    // 팀 검색
+    public List<TeamDTO.TeamListResponse> searchTeam(String name, User currentUser) {
+        List<Team> teamList = teamRepository.searchTeamByName(name);
+
+        List<TeamDTO.TeamListResponse> teams = new ArrayList<>();
+        for (Team team : teamList) {
+            if (!isUserMemberOfTeam(team, currentUser) && team.getAccessModifier() == AccessModifier.PRIVATE)
+                continue;
+
+            long projectCount = team.getProjects().size();
+
+            TeamDTO.TeamListResponse item = TeamDTO.TeamListResponse.builder()
+                    .id(team.getId())
+                    .name(team.getName())
+                    .projectCount(projectCount)
+                    .updateTime(team.getUpdateTime())
+                    .build();
+            teams.add(item);
+        }
+        return teams;
+    }
 
     // 팀과의 관계
     public Relation getRelation(Team team, User currentUser) {
@@ -37,15 +60,6 @@ public class TeamService {
         return Relation.NONE;
     }
 
-    // 팀 멤버 아닌 유저 리스트
-    public List<UserDTO.UserSimpleInfo> getUsersNotInTeamMember(Long teamId) {
-        List<User> userList = userRepository.getUsersNotInTeamMember(teamId);
-        List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
-        for(User user : userList) {
-            response.add(new UserDTO.UserSimpleInfo(user));
-        }
-        return response;
-    }
 
     // 팀 조회
     public TeamDTO.TeamResponse getTeam(Long id, User currentUser) {
@@ -163,234 +177,11 @@ public class TeamService {
         return new ApiResponse(Boolean.TRUE, "팀 삭제 성공");
     }
 
-
-    // -------------------------------
-    // ------- 팀 멤버 신청 관리 -------
-    // -------------------------------
-    // 팀 멤버 초대
-    @Transactional
-    public ApiResponse inviteUserForTeam(Long teamId, String userId) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-
-        if (isUserMemberOfTeam(team, user))
-            throw new ResourceAlreadyExistsException("이미 해당 팀의 멤버입니다.");
-
-        if (isJoinAlreadyExist(team, user))
-            throw new ResourceAlreadyExistsException("이미 해당 팀에 멤버 신청 혹은 초대가 존재합니다.");
-
-        TeamJoin teamJoin = TeamJoin.builder()
-                .team(team)
-                .user(user)
-                .isInvited(Boolean.TRUE)
-                .isAccepted(Boolean.FALSE)
-                .build();
-        teamJoinRepository.save(teamJoin);
-
-        return new ApiResponse(Boolean.TRUE, "유저 : " + user.getName() + " 초대 완료");
-    }
-
-    // 팀 멤버 신청
-    @Transactional
-    public ApiResponse applyForTeam(Long teamId, User currentUser) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
-
-        if (isUserMemberOfTeam(team, currentUser))
-            throw new ResourceAlreadyExistsException("이미 해당 팀의 멤버입니다.");
-
-        if (isJoinAlreadyExist(team, currentUser))
-            throw new ResourceAlreadyExistsException("이미 해당 팀에 멤버 신청 혹은 초대가 존재합니다.");
-
-        TeamJoin teamJoin = TeamJoin.builder()
-                .team(team)
-                .user(currentUser)
-                .isAccepted(Boolean.TRUE)
-                .isInvited(Boolean.FALSE)
-                .build();
-        teamJoinRepository.save(teamJoin);
-
-        return new ApiResponse(Boolean.TRUE, "팀 멤버 신청 완료");
-    }
-
-    // 팀 멤버 신청 삭제
-    @Transactional
-    public ApiResponse deleteTeamJoin(Long teamJoinId) {
-        TeamJoin teamJoin = teamJoinRepository.findById(teamJoinId)
-                .orElseThrow(() -> new ResourceNotFoundException("TeamJoin", "id", teamJoinId));
-
-        teamJoinRepository.delete(teamJoin);
-
-        return new ApiResponse(Boolean.TRUE, "팀 멤버 신청 삭제 완료");
-    }
-
-    // 팀 멤버 신청자 목록 조회
-    public List<TeamJoinDTO.TeamJoinForTeam> getTeamApplyListForTeam(Long teamId) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
-
-        List<TeamJoin> teamJoins = teamJoinRepository.findAllByTeamAndIsAcceptedTrueAndIsInvitedFalse(team);
-
-        List<TeamJoinDTO.TeamJoinForTeam> response = new ArrayList<>();
-        for (TeamJoin join : teamJoins) {
-            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
-            TeamJoinDTO.TeamJoinForTeam temp = TeamJoinDTO.TeamJoinForTeam.builder()
-                    .id(join.getId())
-                    .teamName(join.getTeam().getName())
-                    .user(user)
-                    .build();
-            response.add(temp);
-        }
-        return response;
-    }
-
-    // 팀 멤버로 초대한 사용자 목록 조회
-    public List<TeamJoinDTO.TeamJoinForTeam> getTeamInvitationListForTeam(Long teamId) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
-
-        List<TeamJoin> teamJoins = teamJoinRepository.findAllByTeamAndIsAcceptedFalseAndIsInvitedTrue(team);
-
-        List<TeamJoinDTO.TeamJoinForTeam> response = new ArrayList<>();
-        for (TeamJoin join : teamJoins) {
-            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
-            TeamJoinDTO.TeamJoinForTeam temp = TeamJoinDTO.TeamJoinForTeam.builder()
-                    .id(join.getId())
-                    .teamName(join.getTeam().getName())
-                    .user(user)
-                    .build();
-            response.add(temp);
-        }
-        return response;
-    }
-
-
-    // 유저가 가입 신청한 팀 목록 조회
-    public List<TeamJoinDTO.TeamJoinForUser> getTeamApplyListForUser(User currentUser) {
-        List<TeamJoin> teamJoins = teamJoinRepository.findAllByUserAndIsAcceptedTrueAndIsInvitedFalse(currentUser);
-
-        List<TeamJoinDTO.TeamJoinForUser> response = new ArrayList<>();
-        for (TeamJoin join : teamJoins) {
-            TeamJoinDTO.TeamJoinForUser temp = TeamJoinDTO.TeamJoinForUser.builder()
-                    .id(join.getId())
-                    .teamName(join.getTeam().getName())
-                    .build();
-            response.add(temp);
-        }
-        return response;
-    }
-
-    // 유저가 받은 팀 초대 조회
-    public List<TeamJoinDTO.TeamJoinForUser> getTeamInvitationListForUser(User currentUser) {
-        List<TeamJoin> teamJoins = teamJoinRepository.findAllByUserAndIsAcceptedFalseAndIsInvitedTrue(currentUser);
-
-        List<TeamJoinDTO.TeamJoinForUser> response = new ArrayList<>();
-        for (TeamJoin join : teamJoins) {
-            TeamJoinDTO.TeamJoinForUser temp = TeamJoinDTO.TeamJoinForUser.builder()
-                    .id(join.getId())
-                    .teamId(join.getTeam().getId())
-                    .teamName(join.getTeam().getName())
-                    .build();
-            response.add(temp);
-        }
-        return response;
-    }
-
-    // ---------------------------
-    // ----- 팀 멤버 관리 -----
-    // ---------------------------
-    // 팀 멤버 추가 (초대 수락)
-    @Transactional
-    public ApiResponse createTeamMember(Long id, User currentUser) {
-        Team team = teamRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
-        TeamJoin join = teamJoinRepository.findByTeamAndUser(team, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("TeamInvitation", "ID", id));
-        if(join.getIsInvited() != true || join.getIsAccepted() != false) throw new BadRequestException("잘못된 요청입니다.");
-        teamJoinRepository.delete(join);
-
-        TeamMember newMember = TeamMember.builder()
-                .team(join.getTeam())
-                .user(join.getUser())
-                .build();
-        teamMemberRepository.save(newMember);
-        return new ApiResponse(Boolean.TRUE, "팀 멤버 가입 됨");
-    }
-
-    // 팀 멤버 추가
-    @Transactional
-    public ApiResponse acceptTeamInvitation(Long id) {
-        TeamJoin join = teamJoinRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation", "ID", id));
-        // TODO : join 삭제 할지 말지?
-        // TODO : 수락하는 사람이 마스터이냐 사용자이냐에 따라 구분해야함.
-        teamJoinRepository.delete(join);
-
-        TeamMember newMember = TeamMember.builder()
-                .team(join.getTeam())
-                .user(join.getUser())
-                .build();
-        teamMemberRepository.save(newMember);
-        return new ApiResponse(Boolean.TRUE, "팀 멤버 추가 됨");
-    }
-
-
-    // 팀 멤버 조회
-    public List<UserDTO.UserSimpleInfo> getTeamMemberList(Long id) {
-        Team team = teamRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
-        List<TeamMember> members = teamMemberRepository.findByTeam(team);
-
-        List<UserDTO.UserSimpleInfo> memberList = new ArrayList<>();
-        for (TeamMember member : members) {
-            memberList.add(new UserDTO.UserSimpleInfo(member.getUser()));
-        }
-
-        return memberList;
-    }
-
-    // 팀 나가기
-    @Transactional
-    public ApiResponse leaveTeam(Long teamId, User currentUser) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
-        // TODO : 자기자신이 마스터면 나갈 수 없어야함.
-        TeamMember member = teamMemberRepository.findByTeamAndUser(team, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("TeamMemeber", "UserId", currentUser.getId()));
-        teamMemberRepository.delete(member);
-        return new ApiResponse(Boolean.TRUE, "팀 탈퇴 완료");
-    }
-
-    // 마스터 - 팀 멤버 삭제
-    @Transactional
-    public ApiResponse expelMember(Long teamId, String userId, User currentUser) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-        validateUserIsMaster(team, currentUser);
-        TeamMember member = teamMemberRepository.findByTeamAndUser(team, user)
-                .orElseThrow(() -> new ResourceNotFoundException("TeamMemeber", "UserId", userId));
-        teamMemberRepository.delete(member);
-        return new ApiResponse(Boolean.TRUE, "팀 멤버 삭제 완료");
-    }
-
-    // member pk 까지 준다면 (마스터)
-    @Transactional
-    public ApiResponse deleteTeamMemeber(Long id) {
-        TeamMember member = teamMemberRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("TeamMemeber", "id", id));
-        teamMemberRepository.delete(member);
-        return new ApiResponse(Boolean.TRUE, "팀 멤버 삭제 완료");
-    }
-
     // ---------------------------
     // -------- 검증 메소드 --------
     // ---------------------------
     // 마스터 검증
-    private void validateUserIsMaster(Team team, User currentUser) {
+    public void validateUserIsMaster(Team team, User currentUser) {
         if (!currentUser.getId().equals(team.getMaster().getId()))
             throw new ResourceForbiddenException("권한이 없습니다. ( 프로젝트 마스터 아님 )");
     }

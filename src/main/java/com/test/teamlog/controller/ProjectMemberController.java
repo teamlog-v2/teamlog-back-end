@@ -3,8 +3,7 @@ package com.test.teamlog.controller;
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.UserDTO;
-import com.test.teamlog.repository.UserRepository;
-import com.test.teamlog.service.ProjectService;
+import com.test.teamlog.service.ProjectMemberService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +21,12 @@ import java.util.List;
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class ProjectMemberController {
-    private final ProjectService projectService;
+    private final ProjectMemberService projectMemberService;
 
     @ApiOperation(value = "프로젝트 멤버가 아닌 유저 조회")
     @GetMapping("/projects/{projectId}/not-members")
     public ResponseEntity<List<UserDTO.UserSimpleInfo>> get(@PathVariable("projectId") Long projectId) {
-        List<UserDTO.UserSimpleInfo> response = projectService.getUsersNotInProjectMember(projectId);
+        List<UserDTO.UserSimpleInfo> response = projectMemberService.getUsersNotInProjectMember(projectId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -35,14 +34,14 @@ public class ProjectMemberController {
     @PostMapping("/projects/{projectId}/members")
     public ResponseEntity<ApiResponse> createProjectMember(@PathVariable("projectId") Long projectId,
                                                                @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = projectService.createProjectMember(projectId, currentUser);
+        ApiResponse apiResponse = projectMemberService.createProjectMember(projectId, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "프로젝트 초대 및 신청을 수락")
     @PostMapping("/project-joins/{joinId}")
     public ResponseEntity<ApiResponse> acceptProjectInvitation(@PathVariable("joinId") Long joinId) {
-        ApiResponse apiResponse = projectService.acceptProjectInvitation(joinId);
+        ApiResponse apiResponse = projectMemberService.acceptProjectInvitation(joinId);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
@@ -54,9 +53,9 @@ public class ProjectMemberController {
         ApiResponse apiResponse = null;
         // userId 없으면 탈퇴 있으면 추방
         if (userId == null) {
-            apiResponse = projectService.leaveProject(projectId, currentUser);
+            apiResponse = projectMemberService.leaveProject(projectId, currentUser);
         } else {
-            apiResponse = projectService.expelMember(projectId, userId, currentUser);
+            apiResponse = projectMemberService.expelMember(projectId, userId, currentUser);
         }
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -64,14 +63,14 @@ public class ProjectMemberController {
     @ApiOperation(value = "프로젝트 멤버 삭제 By ProjectMember key")
     @DeleteMapping("/project-members/{id}")
     public ResponseEntity<ApiResponse> leaveProject(@PathVariable("id") long id) {
-        ApiResponse apiResponse = projectService.deleteProjectMemeber(id);
+        ApiResponse apiResponse = projectMemberService.deleteProjectMemeber(id);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @ApiOperation(value = "프로젝트 멤버 조회")
     @GetMapping("/projects/{projectId}/members")
     public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectMemberList(@PathVariable("projectId") Long projectId) {
-        List<UserDTO.UserSimpleInfo> response = projectService.getProjectMemberList(projectId);
+        List<UserDTO.UserSimpleInfo> response = projectMemberService.getProjectMemberList(projectId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

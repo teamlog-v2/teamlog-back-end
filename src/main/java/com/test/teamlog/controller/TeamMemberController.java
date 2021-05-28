@@ -3,6 +3,7 @@ package com.test.teamlog.controller;
 import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.UserDTO;
+import com.test.teamlog.service.TeamMemberService;
 import com.test.teamlog.service.TeamService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,19 +22,19 @@ import java.util.List;
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class TeamMemberController {
-    private final TeamService teamService;
+    private final TeamMemberService teamMemberService;
 
     @ApiOperation(value = "팀 멤버가 아닌 유저 조회")
     @GetMapping("/teams/{teamId}/not-members")
     public ResponseEntity<List<UserDTO.UserSimpleInfo>> getUsersNotInTeamMember(@PathVariable("teamId") Long teamId) {
-        List<UserDTO.UserSimpleInfo> response = teamService.getUsersNotInTeamMember(teamId);
+        List<UserDTO.UserSimpleInfo> response = teamMemberService.getUsersNotInTeamMember(teamId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ApiOperation(value = "팀 초대 및 신청을 수락")
     @PostMapping("/team-joins/{joinId}")
     public ResponseEntity<ApiResponse> acceptTeamInvitation(@PathVariable("joinId") Long joinId) {
-        ApiResponse apiResponse = teamService.acceptTeamInvitation(joinId);
+        ApiResponse apiResponse = teamMemberService.acceptTeamInvitation(joinId);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
@@ -45,9 +46,9 @@ public class TeamMemberController {
         ApiResponse apiResponse = null;
         // userId 없으면 탈퇴 있으면 추방
         if(userId == null) {
-            apiResponse = teamService.leaveTeam(teamId, currentUser);
+            apiResponse = teamMemberService.leaveTeam(teamId, currentUser);
         } else {
-            apiResponse = teamService.expelMember(teamId, userId, currentUser);
+            apiResponse = teamMemberService.expelMember(teamId, userId, currentUser);
         }
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -55,14 +56,14 @@ public class TeamMemberController {
     @ApiOperation(value = "팀 멤버 삭제 By TeamMember key")
     @DeleteMapping("/team-members/{id}")
     public ResponseEntity<ApiResponse> leaveTeam(@PathVariable("id") long id) {
-        ApiResponse apiResponse = teamService.deleteTeamMemeber(id);
+        ApiResponse apiResponse = teamMemberService.deleteTeamMemeber(id);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @ApiOperation(value = "팀 멤버 조회")
     @GetMapping("/teams/{teamId}/members")
     public ResponseEntity<List<UserDTO.UserSimpleInfo>> getTeamMemberList(@PathVariable("teamId") Long teamId) {
-        List<UserDTO.UserSimpleInfo> response = teamService.getTeamMemberList(teamId);
+        List<UserDTO.UserSimpleInfo> response = teamMemberService.getTeamMemberList(teamId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

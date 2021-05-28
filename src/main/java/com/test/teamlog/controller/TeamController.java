@@ -26,6 +26,14 @@ public class TeamController {
     private final TeamService teamService;
     private final ProjectService projectService;
 
+    @ApiOperation(value = "팀 검색")
+    @GetMapping
+    public ResponseEntity<List<TeamDTO.TeamListResponse>> searchTeam(@RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                                     @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<TeamDTO.TeamListResponse> response = teamService.searchTeam(name, currentUser);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "팀 내 프로젝트 조회")
     @GetMapping("/{id}/projects")
     public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByTeam(@PathVariable("id") long id,
