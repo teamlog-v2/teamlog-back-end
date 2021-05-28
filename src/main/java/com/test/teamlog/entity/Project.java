@@ -64,6 +64,10 @@ public class Project extends BaseTimeEntity{
     private List<Task> tasks = new ArrayList<Task>();
 
     public void setTeam(Team team) {
+        if(team == null) {
+            this.team = null;
+            return;
+        }
         if(this.team != null) {
             this.team.getProjects().remove(this);
         }

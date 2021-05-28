@@ -321,6 +321,7 @@ public class ProjectService {
                     .orElseThrow(() -> new ResourceNotFoundException("Team", "id", request.getTeamId()));
         }
         project.setTeam(team);
+
         projectRepository.save(project);
 
         ProjectDTO.ProjectResponse result = new ProjectDTO.ProjectResponse(project);
