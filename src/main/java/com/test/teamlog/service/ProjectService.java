@@ -198,6 +198,9 @@ public class ProjectService {
                     .updateTime(project.getUpdateTime())
                     .thumbnail(imgUri)
                     .build();
+            if(project.getTeam() !=null){
+                item.setTeam(project.getTeam());
+            }
             projects.add(item);
         }
         return projects;
