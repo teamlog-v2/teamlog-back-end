@@ -66,6 +66,14 @@ public class PostController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "위치정보가 있는 프로젝트의 포스트들 조회")
+    @GetMapping("/projects/{projectId}/posts/with-location")
+    public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts(@PathVariable("projectId") long projectId,
+                                                                       @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<PostDTO.PostResponse> response = postService.getLocationPosts(projectId, currentUser);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "프로젝트 내 게시물의 해시태그들 조회")
     @GetMapping("/projects/{projectId}/hashtags")
     public ResponseEntity<List<String>> getHashTagsInProjectPosts(@PathVariable("projectId") long projectId) {
