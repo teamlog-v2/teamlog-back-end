@@ -42,6 +42,7 @@ public class TeamDTO {
     @Builder
     public static class TeamListResponse {
         private Long id;
+        private String masterId;
         private String name;
         private long projectCount;
         private LocalDateTime updateTime;

@@ -257,6 +257,7 @@ public class ProjectService {
                     .toUriString();
             ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
                     .id(project.getId())
+                    .masterId(project.getMaster().getId())
                     .name(project.getName())
                     .postCount(postcount)
                     .updateTime(project.getUpdateTime())

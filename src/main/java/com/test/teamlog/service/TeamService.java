@@ -103,6 +103,7 @@ public class TeamService {
                     .id(team.getId())
                     .name(team.getName())
                     .updateTime(team.getUpdateTime())
+                    .masterId(team.getMaster().getId())
                     .build();
             teamList.add(item);
         }

@@ -51,6 +51,7 @@ public class ProjectDTO {
     @Builder
     public static class ProjectListResponse {
         private Long id;
+        private String masterId;
         private String name;
         private long postCount;
         private LocalDateTime updateTime; // 마지막 활동 시간
