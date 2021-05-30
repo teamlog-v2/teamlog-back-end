@@ -31,6 +31,14 @@ public class TeamMemberController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "팀 초대 수락 ( 메인용 )")
+    @PostMapping("/teams/{teamId}/members")
+    public ResponseEntity<ApiResponse> createProjectMember(@PathVariable("teamId") Long teamId,
+                                                           @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = teamMemberService.createTeamMember(teamId, currentUser);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
     @ApiOperation(value = "팀 초대 및 신청을 수락")
     @PostMapping("/team-joins/{joinId}")
     public ResponseEntity<ApiResponse> acceptTeamInvitation(@PathVariable("joinId") Long joinId) {
