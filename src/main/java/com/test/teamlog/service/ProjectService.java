@@ -8,13 +8,16 @@ import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.*;
 import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -232,11 +235,11 @@ public class ProjectService {
                 user = userRepository.findById(id)
                         .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         }
-        List<ProjectMember> userProjectList = projectMemberRepository.findByUser(user);
+        List<Project> userProjectList = projectRepository.getProjectByUser(user);
+        List<Project> sorted =userProjectList.stream().sorted(Comparator.comparing(p -> p.getUpdateTime())).collect(Collectors.toList());
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
-        for (ProjectMember projectMember : userProjectList) {
-            Project project = projectMember.getProject();
+        for (Project project : sorted) {
             if (!isMyProjectList) {
                 // 팀멤버도 아니고 private면 x
                 if (!isUserMemberOfProject(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
@@ -307,13 +310,13 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
         validateUserIsMaster(project, currentUser);
 
-        if(request.getName() != null) {
+        if (request.getName() != null) {
             project.setName(request.getName());
         }
-        if(request.getAccessModifier() != null) {
+        if (request.getAccessModifier() != null) {
             project.setAccessModifier(request.getAccessModifier());
         }
-        if(request.getIntroduction() != null) {
+        if (request.getIntroduction() != null) {
             project.setIntroduction(request.getIntroduction());
         }
 
