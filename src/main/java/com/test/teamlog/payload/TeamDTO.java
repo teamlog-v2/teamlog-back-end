@@ -27,6 +27,7 @@ public class TeamDTO {
         private LocalDateTime createTime;
         private String masterId;
         private int memberCount;
+        private int followerCount;
         public TeamResponse(Team team) {
             this.id = team.getId();
             this.name = team.getName();
@@ -34,6 +35,7 @@ public class TeamDTO {
             this.accessModifier = team.getAccessModifier();
             this.masterId = team.getMaster().getId();
             this.memberCount = team.getTeamMembers().size();
+            this.followerCount = team.getTeamFollowers().size();
             this.createTime = team.getCreateTime();
         }
     }
