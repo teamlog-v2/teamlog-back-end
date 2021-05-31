@@ -30,7 +30,7 @@ public class UserController {
     @GetMapping("/validate")
     public ResponseEntity<UserDTO.UserSimpleInfo> validateUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
         if(currentUser == null) {
-            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(), HttpStatus.UNAUTHORIZED);
         } else {
             return new ResponseEntity<>(new UserDTO.UserSimpleInfo(currentUser), HttpStatus.OK);
         }

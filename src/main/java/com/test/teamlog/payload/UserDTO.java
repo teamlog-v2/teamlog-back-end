@@ -3,6 +3,7 @@ package com.test.teamlog.payload;
 import com.test.teamlog.entity.User;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -63,6 +64,7 @@ public class UserDTO {
     }
 
     @Data
+    @NoArgsConstructor
     public static class UserSimpleInfo {
         private String id;
         private String name;
