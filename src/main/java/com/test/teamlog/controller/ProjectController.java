@@ -89,6 +89,15 @@ public class ProjectController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "프로젝트 팀 변경")
+    @PutMapping("/projects/{id}/team")
+    public ResponseEntity<ProjectDTO.ProjectResponse> setTeamInProject(@PathVariable("id") long id,
+                                                                    @RequestBody ProjectDTO.ProjectRequest request,
+                                                                    @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        ProjectDTO.ProjectResponse response = projectService.setTeamInProject(id, request, currentUser);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "프로젝트 마스터 위임")
     @PutMapping("/projects/{id}/master")
     public ResponseEntity<ApiResponse> delegateProjectMaster(@PathVariable("id") long id,

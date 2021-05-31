@@ -316,20 +316,13 @@ public class ProjectService {
         if (request.getAccessModifier() != null) {
             project.setAccessModifier(request.getAccessModifier());
         }
-        if (request.getIntroduction() != null) {
-            project.setIntroduction(request.getIntroduction());
-        }
+
+        project.setIntroduction(request.getIntroduction());
 
         if (request.getMasterId() != null) {
             User newMaster = userRepository.findById(request.getMasterId())
                     .orElseThrow(() -> new ResourceNotFoundException("Project", "id", request.getMasterId()));
             project.setMaster(newMaster);
-        }
-
-        if (request.getTeamId() != null) {
-            Team team = teamRepository.findById(request.getTeamId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Team", "id", request.getTeamId()));
-            project.setTeam(team);
         }
 
         projectRepository.save(project);
@@ -338,6 +331,28 @@ public class ProjectService {
         result.setRelation(Relation.MASTER);
         return result;
     }
+
+    // 프로젝트 팀
+    @Transactional
+    public ProjectDTO.ProjectResponse setTeamInProject(Long id, ProjectDTO.ProjectRequest request, User currentUser) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
+        validateUserIsMaster(project, currentUser);
+
+        Team team = null;
+        if (request.getTeamId() != null) {
+            team = teamRepository.findById(request.getTeamId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Team", "id", request.getTeamId()));
+            project.setTeam(team);
+        }
+        project.setTeam(team);
+
+        projectRepository.save(project);
+        ProjectDTO.ProjectResponse result = new ProjectDTO.ProjectResponse(project);
+        result.setRelation(Relation.MASTER);
+        return result;
+    }
+
 
     // 프로젝트 마스터 위임
     @Transactional
