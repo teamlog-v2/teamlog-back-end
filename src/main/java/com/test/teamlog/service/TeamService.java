@@ -8,6 +8,7 @@ import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.*;
 import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.criterion.ProjectionList;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -171,20 +172,21 @@ public class TeamService {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
         validateUserIsMaster(team, currentUser);
-
-        // TODO : 팀 삭제시 팀에서 만들어진 프로젝트는 우짤건지.
-
+        
+        // 팀 내 프로젝트는 팀에서 독립된 프로젝트가 됨
+        for(Project project : team.getProjects()) {
+            project.setTeam(null);
+        }
         teamRepository.delete(team);
         return new ApiResponse(Boolean.TRUE, "팀 삭제 성공");
     }
-
     // ---------------------------
     // -------- 검증 메소드 --------
     // ---------------------------
     // 마스터 검증
     public void validateUserIsMaster(Team team, User currentUser) {
         if (!currentUser.getId().equals(team.getMaster().getId()))
-            throw new ResourceForbiddenException("권한이 없습니다. ( 프로젝트 마스터 아님 )");
+            throw new ResourceForbiddenException("권한이 없습니다. ( 팀 마스터 아님 )");
     }
 
     //

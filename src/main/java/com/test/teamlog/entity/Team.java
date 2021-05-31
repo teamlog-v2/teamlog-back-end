@@ -27,7 +27,7 @@ public class Team extends BaseTimeEntity {
     private AccessModifier accessModifier;
 
     @ManyToOne
-    @JoinColumn(name = "master_user_id", nullable = false) // master_user_id 때문에 nullable 문제 생기는 거 아니가?
+    @JoinColumn(name = "master_user_id", nullable = false)
     private User master;
 
     @Builder.Default
@@ -46,7 +46,7 @@ public class Team extends BaseTimeEntity {
     private List<TeamJoin> teamJoins = new ArrayList<TeamJoin>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "team")
     @BatchSize(size = 10)
     private List<Project> projects = new ArrayList<Project>();
 }
