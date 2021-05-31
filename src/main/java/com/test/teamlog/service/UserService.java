@@ -1,10 +1,16 @@
 package com.test.teamlog.service;
 
+import com.test.teamlog.entity.Project;
+import com.test.teamlog.entity.ProjectMember;
+import com.test.teamlog.entity.TeamMember;
 import com.test.teamlog.entity.User;
+import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.UserDTO;
+import com.test.teamlog.repository.ProjectMemberRepository;
+import com.test.teamlog.repository.TeamMemberRepository;
 import com.test.teamlog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +27,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final UserFollowService userFollowService;
+    private final ProjectMemberRepository projectMemberRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
     // TODO : 개인작성 이력 조회
 
@@ -131,6 +139,14 @@ public class UserService {
     //회원 탈퇴
     @Transactional
     public ApiResponse deleteUser(User currentUser) {
+        List<TeamMember> teamMemberList = teamMemberRepository.findByUser(currentUser);
+        if(teamMemberList.size() != 0) {
+            throw new BadRequestException("가입된 팀이 있습니다.\n모든 팀 탈퇴 후 진행해주세요.");
+        }
+        List<ProjectMember> projectMemberList = projectMemberRepository.findByUser(currentUser);
+        if(projectMemberList.size() != 0) {
+            throw new BadRequestException("가입된 프로젝트이 있습니다.\n모든 프로젝트 탈퇴 후 진행해주세요.");
+        }
         userRepository.delete(currentUser);
         return new ApiResponse(Boolean.TRUE, "회원 탈퇴 성공");
     }

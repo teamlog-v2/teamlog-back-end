@@ -21,9 +21,11 @@ import java.util.List;
 public class ProjectMemberService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final PostRepository postRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final ProjectJoinRepository projectJoinRepository;
     private final ProjectService projectService;
+    private final FileStorageService fileStorageService;
 
     // 프로젝트 멤버 아닌 유저 리스트
     public List<UserDTO.UserSimpleInfo> getUsersNotInProjectMember(Long projectId) {
@@ -91,9 +93,18 @@ public class ProjectMemberService {
     public ApiResponse leaveProject(Long projectId, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        // TODO : 자기자신이 마스터면 나갈 수 없어야함.
+        if(project.getMaster().getId().equals(currentUser.getId())) {
+            throw new ResourceForbiddenException("마스터는 탈퇴할 수 없습니다.\n위임하고 다시 시도하세요.");
+        }
         ProjectMember member = projectMemberRepository.findByProjectAndUser(project, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "UserId", currentUser.getId()));
+
+        List<Post> postList = postRepository.findAllByProjectAndWriter(project, currentUser);
+        for(Post post : postList) {
+            fileStorageService.deleteFilesByPost(post);
+            postRepository.delete(post);
+        }
+
         projectMemberRepository.delete(member);
         return new ApiResponse(Boolean.TRUE, "프로젝트 탈퇴 완료");
     }
@@ -108,6 +119,13 @@ public class ProjectMemberService {
         projectService.validateUserIsMaster(project, currentUser);
         ProjectMember member = projectMemberRepository.findByProjectAndUser(project, user)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "UserId", userId));
+
+        List<Post> postList = postRepository.findAllByProjectAndWriter(project,user);
+        for(Post post : postList) {
+            fileStorageService.deleteFilesByPost(post);
+            postRepository.delete(post);
+        }
+
         projectMemberRepository.delete(member);
         return new ApiResponse(Boolean.TRUE, "멤버 삭제 완료");
     }
@@ -117,6 +135,12 @@ public class ProjectMemberService {
     public ApiResponse deleteProjectMemeber(Long id) {
         ProjectMember member = projectMemberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "id", id));
+
+        List<Post> postList = postRepository.findAllByProjectAndWriter(member.getProject(),member.getUser());
+        for(Post post : postList) {
+            fileStorageService.deleteFilesByPost(post);
+            postRepository.delete(post);
+        }
         projectMemberRepository.delete(member);
         return new ApiResponse(Boolean.TRUE, "멤버 삭제 완료");
     }

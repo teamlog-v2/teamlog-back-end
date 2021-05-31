@@ -40,6 +40,26 @@ public class User implements UserDetails {
     @BatchSize(size = 10)
     private List<UserFollow> following = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
+    private List<ProjectFollower> projectFollowers = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
+    private List<TeamFollower> teamFollowers = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
+    private List<PostLiker> postLikers = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
+    private List<TaskPerformer> taskPerformers = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;

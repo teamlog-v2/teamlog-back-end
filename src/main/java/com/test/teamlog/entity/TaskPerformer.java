@@ -31,4 +31,12 @@ public class TaskPerformer {
         task.getTaskPerformers().add(this);
     }
 
+    public void setUser(User user) {
+        if(this.user != null) {
+            this.user.getTaskPerformers().remove(this);
+        }
+        this.user = user;
+        user.getTaskPerformers().add(this);
+    }
+
 }

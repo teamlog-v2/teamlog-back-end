@@ -37,4 +37,13 @@ public class ProjectFollower {
         this.project = project;
         project.getProjectFollowers().add(this);
     }
+
+    public void setUser(User user) {
+        if(this.user != null) {
+            this.user.getProjectFollowers().remove(this);
+        }
+        this.user = user;
+        user.getProjectFollowers().add(this);
+    }
+
 }

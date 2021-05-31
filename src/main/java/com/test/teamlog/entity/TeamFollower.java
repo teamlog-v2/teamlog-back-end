@@ -37,4 +37,12 @@ public class TeamFollower {
         this.team = team;
         team.getTeamFollowers().add(this);
     }
+
+    public void setUser(User user) {
+        if(this.user != null) {
+            this.user.getTeamFollowers().remove(this);
+        }
+        this.user = user;
+        user.getTeamFollowers().add(this);
+    }
 }

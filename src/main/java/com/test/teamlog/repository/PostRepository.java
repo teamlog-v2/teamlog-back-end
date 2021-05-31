@@ -15,6 +15,8 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
+    List<Post> findAllByProjectAndWriter(Project project, User user);
+
     @Query("SELECT p FROM Post p Where p.project = :project and p.location is not null")
     List<Post> findAllPostsWithLocationByProject(@Param("project") Project project);
 

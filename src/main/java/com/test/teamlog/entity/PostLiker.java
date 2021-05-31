@@ -36,4 +36,12 @@ public class PostLiker {
         this.post = post;
         post.getPostLikers().add(this);
     }
+
+    public void setUser(User user) {
+        if(this.user != null) {
+            this.user.getPostLikers().remove(this);
+        }
+        this.user = user;
+        post.getPostLikers().add(this);
+    }
 }
