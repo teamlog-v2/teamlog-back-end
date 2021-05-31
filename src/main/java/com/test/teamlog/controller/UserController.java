@@ -29,7 +29,11 @@ public class UserController {
     @ApiOperation(value = "로그인 된 사용자인지 검증")
     @GetMapping("/validate")
     public ResponseEntity<UserDTO.UserSimpleInfo> validateUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        return new ResponseEntity<>(new UserDTO.UserSimpleInfo(currentUser), HttpStatus.OK);
+        if(currentUser == null) {
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+        } else {
+            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(currentUser), HttpStatus.OK);
+        }
     }
 
     @ApiOperation(value = "로그인")
