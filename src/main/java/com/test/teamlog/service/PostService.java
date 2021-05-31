@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -529,16 +530,17 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        // 좋아요 중복 x
-        if (postLikerRepository.findByPostAndUser(post, currentUser).isPresent())
-            throw new ResourceAlreadyExistsException("좋아요는 한번만 가능합니다.");
-
         PostLiker postLiker = PostLiker.builder()
                 .post(post)
                 .user(currentUser)
                 .build();
 
-        postLikerRepository.save(postLiker);
+        try {
+            postLikerRepository.saveAndFlush(postLiker);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResourceAlreadyExistsException("좋아요는 한번만 가능합니다.");
+        }
+
         return new ApiResponse(Boolean.TRUE, "포스트 좋아요 성공");
     }
 

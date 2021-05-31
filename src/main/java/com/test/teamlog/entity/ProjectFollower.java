@@ -9,7 +9,14 @@ import javax.persistence.*;
 @Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "project_follower")
+@Table(
+        name = "project_follower",
+        uniqueConstraints={
+                @UniqueConstraint(
+                        columnNames={"user_id","project_id"}
+                )
+        }
+)
 public class ProjectFollower {
     @Id
     @GeneratedValue

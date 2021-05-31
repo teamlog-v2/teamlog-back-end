@@ -2,15 +2,19 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.entity.User;
 import com.test.teamlog.entity.UserFollow;
+import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.repository.UserFollowRepository;
 import com.test.teamlog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,8 +91,11 @@ public class UserFollowService {
                 .fromUser(currentUser)
                 .toUser(targetUser)
                 .build();
-
-        userFollowRepository.save(newFollow);
+        try {
+            userFollowRepository.saveAndFlush(newFollow);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResourceAlreadyExistsException("이미 팔로우 중 입니다.");
+        }
         return new ApiResponse(Boolean.TRUE, "팔로우 성공");
     }
 

@@ -11,6 +11,7 @@ import com.test.teamlog.repository.ProjectFollowerRepository;
 import com.test.teamlog.repository.ProjectRepository;
 import com.test.teamlog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,15 +69,17 @@ public class ProjectFollowService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
 
-        if(projectFollowerRepository.findByProjectAndUser(project, currentUser).isPresent())
-            throw new ResourceAlreadyExistsException("이미 해당 프로젝트를 팔로우 하고 있습니다.");
-
         ProjectFollower newFollow = ProjectFollower.builder()
                 .project(project)
                 .user(currentUser)
                 .build();
 
-        projectFollowerRepository.save(newFollow);
+        try {
+            projectFollowerRepository.saveAndFlush(newFollow);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResourceAlreadyExistsException("이미 해당 프로젝트를 팔로우 하고 있습니다.");
+        }
+
         return new ApiResponse(Boolean.TRUE, "프로젝트 팔로우 성공");
     }
 

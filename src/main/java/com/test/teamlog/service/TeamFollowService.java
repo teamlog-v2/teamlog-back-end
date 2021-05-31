@@ -6,6 +6,7 @@ import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.*;
 import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,16 +63,17 @@ public class TeamFollowService {
     public ApiResponse followTeam(Long teamId, User currentUser) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "ID", teamId));
-
-        if(teamFollowerRepository.findByTeamAndUser(team, currentUser).isPresent())
-            throw new ResourceAlreadyExistsException("이미 해당 팀을 팔로우 하고 있습니다.");
-
         TeamFollower newFollow = TeamFollower.builder()
                 .team(team)
                 .user(currentUser)
                 .build();
 
-        teamFollowerRepository.save(newFollow);
+        try {
+            teamFollowerRepository.saveAndFlush(newFollow);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResourceAlreadyExistsException("이미 해당 팀을 팔로우 하고 있습니다.");
+        }
+
         return new ApiResponse(Boolean.TRUE, "팀 팔로우 성공");
     }
 
