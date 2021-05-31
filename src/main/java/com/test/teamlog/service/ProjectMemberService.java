@@ -123,8 +123,8 @@ public class ProjectMemberService {
 
     // 프로젝트 멤버 검증
     public void validateUserIsMemberOfProject(Project project, User currentUser) {
-        if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다. 로그인 해주세요.");
+        if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다.\n로그인 해주세요.");
         projectMemberRepository.findByProjectAndUser(project, currentUser)
-                .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다. ( 프로젝트 멤버 아님 )"));
+                .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다.\n(프로젝트 멤버 아님)"));
     }
 }
