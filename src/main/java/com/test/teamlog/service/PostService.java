@@ -343,6 +343,7 @@ public class PostService {
         post.setContents(request.getContents());
         post.setAccessModifier(request.getAccessModifier());
         post.setCommentModifier(request.getCommentModifier());
+
         Point point = null;
         if (request.getLatitude() != null && request.getLongitude() != null) {
             GeometryFactory geometryFactory = new GeometryFactory();
