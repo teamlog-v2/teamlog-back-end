@@ -325,12 +325,12 @@ public class ProjectService {
                     .orElseThrow(() -> new ResourceNotFoundException("Project", "id", request.getMasterId()));
             project.setMaster(newMaster);
         }
-        Team team = null;
+
         if (request.getTeamId() != null) {
-            team = teamRepository.findById(request.getTeamId())
+            Team team = teamRepository.findById(request.getTeamId())
                     .orElseThrow(() -> new ResourceNotFoundException("Team", "id", request.getTeamId()));
+            project.setTeam(team);
         }
-        project.setTeam(team);
 
         projectRepository.save(project);
 
