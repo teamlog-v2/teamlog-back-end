@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -90,11 +92,11 @@ public class TeamService {
                 user = userRepository.findById(id)
                         .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         }
-        List<TeamMember> teams = teamMemberRepository.findByUser(user);
+        List<Team> teams = teamRepository.getTeamsByUser(user);
+        List<Team> sorted =teams.stream().sorted(Comparator.comparing(Team::getUpdateTime).reversed()).collect(Collectors.toList());
 
         List<TeamDTO.TeamListResponse> teamList = new ArrayList<>();
-        for (TeamMember temp : teams) {
-            Team team = temp.getTeam();
+        for (Team team : sorted) {
             if(!isMyTeamList) {
                 // 팀 멤버도 아니고 private면 x
                 if(!isUserMemberOfTeam(team,currentUser) && team.getAccessModifier() == AccessModifier.PRIVATE) continue;
@@ -172,7 +174,7 @@ public class TeamService {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
         validateUserIsMaster(team, currentUser);
-        
+
         // 팀 내 프로젝트는 팀에서 독립된 프로젝트가 됨
         for(Project project : team.getProjects()) {
             project.setTeam(null);
@@ -186,7 +188,7 @@ public class TeamService {
     // 마스터 검증
     public void validateUserIsMaster(Team team, User currentUser) {
         if (!currentUser.getId().equals(team.getMaster().getId()))
-            throw new ResourceForbiddenException("권한이 없습니다. ( 팀 마스터 아님 )");
+            throw new ResourceForbiddenException("권한이 없습니다.\n(팀 마스터 아님)");
     }
 
     //
@@ -202,9 +204,9 @@ public class TeamService {
 
     // 팀 멤버 검증
     public void validateUserIsMemberOfTeam(Team team, User currentUser) {
-        if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다. 로그인 해주세요.");
+        if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다.\n로그인 해주세요.");
         teamMemberRepository.findByTeamAndUser(team, currentUser)
-                .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다. ( 팀 멤버 아님 )"));
+                .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다.\n(팀 멤버 아님)"));
     }
 
 }
