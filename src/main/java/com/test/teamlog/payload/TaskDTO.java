@@ -5,6 +5,8 @@ import com.test.teamlog.entity.TaskPerformer;
 import com.test.teamlog.entity.TaskStatus;
 import lombok.*;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -13,6 +15,8 @@ import java.util.List;
 public class TaskDTO {
     @Getter
     public static class TaskRequest {
+        @NotBlank(message = "빈문자열, 공백만 입력할 수 없습니다.")
+        @Size(min=1,max=30, message = "태스크 이름을 1자에서 30자 사이로 입력해주세요.")
         private String taskName;
         private TaskStatus status;
         private ZonedDateTime deadline;

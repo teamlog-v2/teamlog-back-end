@@ -7,11 +7,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 public class ProjectDTO {
     @Getter
     public static class ProjectRequest {
+        @NotBlank(message = "빈문자열, 공백만 입력할 수 없습니다.")
+        @Size(min=1,max=20, message = "프로젝트 이름을 1자에서 20자 사이로 입력해주세요.")
         private String name;
         private String introduction;
         private AccessModifier accessModifier;

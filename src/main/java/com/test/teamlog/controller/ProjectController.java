@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -74,7 +75,7 @@ public class ProjectController {
 
     @ApiOperation(value = "프로젝트 생성")
     @PostMapping("/projects")
-    public ResponseEntity<ProjectDTO.ProjectResponse> createProject(@RequestBody ProjectDTO.ProjectRequest request,
+    public ResponseEntity<ProjectDTO.ProjectResponse> createProject(@Valid @RequestBody ProjectDTO.ProjectRequest request,
                                                                     @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ProjectDTO.ProjectResponse response = projectService.createProject(request, currentUser);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -83,7 +84,7 @@ public class ProjectController {
     @ApiOperation(value = "프로젝트 수정")
     @PutMapping("/projects/{id}")
     public ResponseEntity<ProjectDTO.ProjectResponse> updateProject(@PathVariable("id") long id,
-                                                                    @RequestBody ProjectDTO.ProjectRequest request,
+                                                                    @Valid @RequestBody ProjectDTO.ProjectRequest request,
                                                                     @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ProjectDTO.ProjectResponse response = projectService.updateProject(id, request, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);

@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Api(description = "팀 관리")
@@ -60,7 +61,7 @@ public class TeamController {
 
     @ApiOperation(value = "팀 생성")
     @PostMapping
-    public ResponseEntity<TeamDTO.TeamResponse> createTeam(@RequestBody TeamDTO.TeamRequest request,
+    public ResponseEntity<TeamDTO.TeamResponse> createTeam(@Valid @RequestBody TeamDTO.TeamRequest request,
                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
         TeamDTO.TeamResponse response = teamService.createTeam(request, currentUser);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -69,7 +70,7 @@ public class TeamController {
     @ApiOperation(value = "팀 수정")
     @PutMapping("/{id}")
     public ResponseEntity<TeamDTO.TeamResponse> updateTeam(@PathVariable("id") long id,
-                                                           @RequestBody TeamDTO.TeamRequest request,
+                                                           @Valid @RequestBody TeamDTO.TeamRequest request,
                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
         TeamDTO.TeamResponse response = teamService.updateTeam(id, request, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);

@@ -18,11 +18,11 @@ public class UserDTO {
 
     @Data
     public static class UserRequest {
-        @NotBlank(message = "올바른 값 입력해주세요")
+        @NotBlank(message = "빈문자열, 공백만 입력할 수 없습니다.")
         private String id;
-        @NotBlank(message = "올바른 값 입력해주세요")
+        @NotBlank(message = "빈문자열, 공백만 입력할 수 없습니다.")
         private String password;
-        @NotBlank(message = "올바른 값 입력해주세요")
+        @NotBlank(message = "빈문자열, 공백만 입력할 수 없습니다.")
         private String name;
         private String introduction;
         private String profileImgPath;
@@ -30,11 +30,9 @@ public class UserDTO {
 
     @Data
     public static class UserUpdateRequest {
-        @NotBlank(message = "올바른 값 입력해주세요")
         private String id;
-        @NotBlank(message = "올바른 값 입력해주세요")
         private String password;
-        @NotBlank(message = "올바른 값 입력해주세요")
+        @NotBlank(message = "빈문자열, 공백만 입력할 수 없습니다.")
         private String name;
         private String introduction;
         private Boolean defaultImage;
