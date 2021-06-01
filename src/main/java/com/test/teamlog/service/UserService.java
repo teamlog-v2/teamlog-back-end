@@ -145,7 +145,7 @@ public class UserService {
         }
         List<ProjectMember> projectMemberList = projectMemberRepository.findByUser(currentUser);
         if(projectMemberList.size() != 0) {
-            throw new BadRequestException("가입된 프로젝트이 있습니다.\n모든 프로젝트 탈퇴 후 진행해주세요.");
+            throw new BadRequestException("가입된 프로젝트가 있습니다.\n모든 프로젝트 탈퇴 후 진행해주세요.");
         }
         userRepository.delete(currentUser);
         return new ApiResponse(Boolean.TRUE, "회원 탈퇴 성공");
