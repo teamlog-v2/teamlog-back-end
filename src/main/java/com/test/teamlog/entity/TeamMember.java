@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "team_member")
+@Table(name = "team_member",
+        uniqueConstraints =@UniqueConstraint(columnNames = {"team_id", "user_id"}))
 public class TeamMember {
     @Id
     @GeneratedValue
