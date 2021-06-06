@@ -32,7 +32,7 @@ public class FileController {
         }
         String originalFileName = resource.getFileName();
         originalFileName =
-                new String(originalFileName.getBytes("euc-kr"), "ISO-8859-1");
+                new String(originalFileName.getBytes("ISO-8859-1"), "euc-kr");
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .cacheControl(CacheControl.maxAge(10800, TimeUnit.SECONDS))
