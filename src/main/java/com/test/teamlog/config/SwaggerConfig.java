@@ -27,9 +27,9 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("TeamLog Api Docs")
-                .version("v0.1")
-                .description("팀로그 api 문서 입니다.")
-                .license("bingbong")
+                .version("v1.0")
+                .description("TeamLog Api 문서 입니다.")
+                .license("hamchu")
                 .build();
     }
 }
