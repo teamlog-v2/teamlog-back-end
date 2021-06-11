@@ -4,6 +4,7 @@ import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TaskDTO;
 import com.test.teamlog.service.TaskService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Api(tags = "태스크 관리")
 public class TaskController {
     private final TaskService taskService;
 

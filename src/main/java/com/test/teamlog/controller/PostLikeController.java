@@ -15,7 +15,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
-@Api(description = "포스트 좋아요")
+@Api(tags = "게시물 좋아요 관리")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")

@@ -5,6 +5,7 @@ import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.PagedResponse;
 import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.service.PostService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Api(tags = "게시물 관리")
 public class PostController {
     private final PostService postService;
 

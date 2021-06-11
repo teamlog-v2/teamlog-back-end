@@ -4,6 +4,7 @@ import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.UserFollowService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Api(tags = "유저 팔로우 관리")
 public class UserFollowController {
     private final UserFollowService userFollowService;
 

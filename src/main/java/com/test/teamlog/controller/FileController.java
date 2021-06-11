@@ -2,6 +2,7 @@ package com.test.teamlog.controller;
 
 import com.test.teamlog.payload.FileDTO;
 import com.test.teamlog.service.FileStorageService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
@@ -16,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Api(tags = "파일 다운로드 관리")
 public class FileController {
     private final FileStorageService fileStorageService;
 

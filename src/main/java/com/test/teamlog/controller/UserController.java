@@ -6,6 +6,7 @@ import com.test.teamlog.payload.Token;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.security.JwtUtil;
 import com.test.teamlog.service.UserService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -22,9 +23,20 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
+@Api(tags = "유저 관리")
 public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
+
+//    @ApiOperation(value = "개인작성이력조회 (게시물)")
+//    @GetMapping("/user/posts")
+//    public ResponseEntity<UserDTO.UserSimpleInfo> getPostsByUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+//        if(currentUser == null) {
+//            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(), HttpStatus.UNAUTHORIZED);
+//        } else {
+//            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(currentUser), HttpStatus.OK);
+//        }
+//    }
 
     @ApiOperation(value = "로그인 된 사용자인지 검증")
     @GetMapping("/validate")
@@ -77,7 +89,7 @@ public class UserController {
     //Update
     @ApiOperation(value = "회원 수정")
     @PutMapping("/users")
-    public ResponseEntity<ApiResponse> updateUser(@RequestPart(value = "key", required = true) UserDTO.UserUpdateRequest userRequest,
+    public ResponseEntity<ApiResponse> updateUser(@Valid @RequestPart(value = "key", required = true) UserDTO.UserUpdateRequest userRequest,
                                                   @RequestPart(value = "profileImg", required = false) MultipartFile image,
                                                   @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.updateUser(userRequest, image, currentUser);

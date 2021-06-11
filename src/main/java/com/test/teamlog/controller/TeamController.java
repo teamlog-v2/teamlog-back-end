@@ -18,7 +18,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.validation.Valid;
 import java.util.List;
 
-@Api(description = "팀 관리")
+@Api(tags = "팀 관리")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/teams")

@@ -5,6 +5,7 @@ import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.payload.UserDTO;
 import com.test.teamlog.service.ProjectService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@Api(tags = "프로젝트 관리")
 public class ProjectController {
     private final ProjectService projectService;
 

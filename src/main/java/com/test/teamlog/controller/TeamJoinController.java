@@ -16,7 +16,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
-@Api(description = "팀 초대 관리")
+@Api(tags = "팀 초대 관리")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
