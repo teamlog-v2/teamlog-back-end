@@ -3,6 +3,7 @@ package com.test.teamlog.controller;
 import com.test.teamlog.payload.FileDTO;
 import com.test.teamlog.service.FileStorageService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class FileController {
     private final FileStorageService fileStorageService;
 
+    @ApiOperation(value = "파일 다운로드")
     @GetMapping("/downloadFile/{storedFileName}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String storedFileName)
             throws UnsupportedEncodingException {

@@ -5,6 +5,7 @@ import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TaskDTO;
 import com.test.teamlog.service.TaskService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,21 +23,21 @@ import java.util.List;
 public class TaskController {
     private final TaskService taskService;
 
-    // Read
+    @ApiOperation(value = "태스크 상세 조회")
     @GetMapping("/tasks/{id}")
     public ResponseEntity<TaskDTO.TaskResponse> getTaskById(@PathVariable("id") Long id) {
         TaskDTO.TaskResponse taskResponse = taskService.getTask(id);
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
     }
 
-    // Read
+    @ApiOperation(value = "프로젝트의 태스크들 조회")
     @GetMapping("projects/{id}/tasks")
     public ResponseEntity<List<TaskDTO.TaskResponse>> getTasksByProject(@PathVariable("id") Long id) {
         List<TaskDTO.TaskResponse> taskList = taskService.getTasksByProject(id);
         return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
-    // Create
+    @ApiOperation(value = "태스크 생성")
     @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<TaskDTO.TaskResponse> createTask(@PathVariable("projectId") Long projectId,
                                                            @Valid @RequestBody TaskDTO.TaskRequest taskRequest,
@@ -45,6 +46,7 @@ public class TaskController {
         return new ResponseEntity<>(taskResponse, HttpStatus.CREATED);
     }
 
+    @ApiOperation(value = "태스크 상태 변경")
     @PutMapping("/tasks/{id}/location")
     public ResponseEntity<TaskDTO.TaskResponse> updateTaskStatus(@PathVariable("id") Long id,
                                                                  @Valid @RequestBody TaskDTO.TaskDropLocation request,
@@ -54,7 +56,7 @@ public class TaskController {
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
     }
 
-    //Update
+    @ApiOperation(value = "태스크 수정")
     @PutMapping("/tasks/{id}")
     public ResponseEntity<TaskDTO.TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO.TaskRequest request,
                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
@@ -63,7 +65,7 @@ public class TaskController {
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
     }
 
-    // Delete
+    @ApiOperation(value = "태스크 삭제")
     @DeleteMapping("/tasks/{id}")
     public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
                                                   @ApiIgnore @AuthenticationPrincipal User currentUser) {

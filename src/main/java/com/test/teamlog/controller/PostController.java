@@ -76,13 +76,17 @@ public class PostController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "해시태그 추천")
+    @GetMapping("/projects/{projectId}/recommended-hashtags")
+    public ResponseEntity<List<String>> getRecommendedHashTags(@PathVariable("projectId") long projectId) {
+        List<String> response = postService.getRecommendedHashTags(projectId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "프로젝트 내 게시물의 해시태그들 조회")
     @GetMapping("/projects/{projectId}/hashtags")
     public ResponseEntity<List<String>> getHashTagsInProjectPosts(@PathVariable("projectId") long projectId) {
-        long start = System.currentTimeMillis();
         List<String> response = postService.getHashTagsInProjectPosts(projectId);
-        long end = System.currentTimeMillis();
-        System.out.println("수행시간: " + (end - start) + " ms");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

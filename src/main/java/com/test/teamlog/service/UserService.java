@@ -30,8 +30,6 @@ public class UserService {
     private final ProjectMemberRepository projectMemberRepository;
     private final TeamMemberRepository teamMemberRepository;
 
-    // TODO : 개인작성 이력 조회
-
     public List<UserDTO.UserSimpleInfo> searchUser(String id, String name) {
         List<User> userList = userRepository.searchUserByIdAndName(id,name);
         List<UserDTO.UserSimpleInfo> response = new ArrayList<>();

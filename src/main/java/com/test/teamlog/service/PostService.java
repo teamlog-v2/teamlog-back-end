@@ -36,6 +36,16 @@ public class PostService {
     private final FileStorageService fileStorageService;
     private final ProjectService projectService;
 
+    public List<PostDTO.PostResponse> getPostsByUser(User currentUser) {
+        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        List<Post> posts = postRepository.findAllByWriter(currentUser);
+
+        for (Post post : posts) {
+            responses.add(convertToPostResponse(post, currentUser));
+        }
+        return responses;
+    }
+
     public List<PostDTO.PostResponse> getPostsByFollowingUser(User currentUser) {
         List<UserFollow> userFollowingList = userFollowRepository.findByFromUser(currentUser);
         List<PostDTO.PostResponse> responses = new ArrayList<>();
@@ -235,6 +245,19 @@ public class PostService {
         List<String> hashtags = postTagRepository.getHashTagsInProjectPosts(project);
 
         return hashtags;
+    }
+
+    // 해시태그 추천
+    public List<String> getRecommendedHashTags(Long id) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
+
+        List<PostTagInfo> hashtags = postTagRepository.getRecommendedHashTags(id);
+        List<String> response = new ArrayList<>();
+        for(PostTagInfo tag : hashtags) {
+            response.add(tag.getName());
+        }
+        return response;
     }
 
     // 위치정보가 있는 Public 포스트들 조회

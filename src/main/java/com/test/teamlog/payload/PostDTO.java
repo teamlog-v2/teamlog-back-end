@@ -1,9 +1,7 @@
 package com.test.teamlog.payload;
 
 import com.test.teamlog.entity.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;

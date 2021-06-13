@@ -25,6 +25,17 @@ import java.util.List;
 public class ProjectController {
     private final ProjectService projectService;
 
+    @ApiOperation(value = "연관 프로젝트 추천")
+    @GetMapping("/user/recommended-projects")
+    public ResponseEntity<List<ProjectDTO.ProjectSimpleInfo>> getRecommendedProjects(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<ProjectDTO.ProjectSimpleInfo> response = null;
+        if(currentUser != null) {
+            response = projectService.getRecommendedProjects(currentUser);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "프로젝트 썸네일 변경")
     @PutMapping("/projects/{projectId}/thumbnail")
     public ResponseEntity<ApiResponse> updateUserProfileImage(@PathVariable("projectId") Long projectId,

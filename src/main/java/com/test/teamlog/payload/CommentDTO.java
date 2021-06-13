@@ -1,5 +1,7 @@
 package com.test.teamlog.payload;
 
+import com.test.teamlog.entity.Comment;
+import com.test.teamlog.entity.Project;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -42,5 +44,20 @@ public class CommentDTO {
         private UserDTO.UserSimpleInfo writer;
         private List<String> commentMentions;
         private LocalDateTime writeTime;
+    }
+
+    @Data
+    public static class CommentNotification {
+        private Long commentId;
+        private String contents;
+        private String writeTime;
+        private Long postId;
+        public CommentNotification(Comment comment) {
+            this.commentId = comment.getId();
+            this.contents = comment.getContents();
+            this.writeTime = comment.getCreateTime().toString();
+            this.postId = comment.getPost().getId();
+        }
+
     }
 }

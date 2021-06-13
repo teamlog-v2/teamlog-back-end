@@ -1,10 +1,10 @@
 package com.test.teamlog.controller;
 
 import com.test.teamlog.entity.User;
-import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.Token;
-import com.test.teamlog.payload.UserDTO;
+import com.test.teamlog.payload.*;
 import com.test.teamlog.security.JwtUtil;
+import com.test.teamlog.service.CommentService;
+import com.test.teamlog.service.PostService;
 import com.test.teamlog.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,17 +26,34 @@ import java.util.List;
 @Api(tags = "유저 관리")
 public class UserController {
     private final UserService userService;
+    private final PostService postService;
+    private final CommentService commentService;
     private final JwtUtil jwtUtil;
 
-//    @ApiOperation(value = "개인작성이력조회 (게시물)")
-//    @GetMapping("/user/posts")
-//    public ResponseEntity<UserDTO.UserSimpleInfo> getPostsByUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-//        if(currentUser == null) {
-//            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(), HttpStatus.UNAUTHORIZED);
-//        } else {
-//            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(currentUser), HttpStatus.OK);
-//        }
-//    }
+    @ApiOperation(value = "개인 작성 이력 조회 (게시물)")
+    @GetMapping("/user/posts")
+    public ResponseEntity<List<PostDTO.PostResponse>> getPostsByUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<PostDTO.PostResponse> response = null;
+        if(currentUser == null) {
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        } else {
+            response = postService.getPostsByUser(currentUser);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @ApiOperation(value = "개인 작성 이력 조회 (댓글)")
+    @GetMapping("/user/comments")
+    public ResponseEntity<List<CommentDTO.CommentInfo>> getCommentsByUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<CommentDTO.CommentInfo> response = null;
+
+        if(currentUser == null) {
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        } else {
+            response = commentService.getCommentByUser(currentUser);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
 
     @ApiOperation(value = "로그인 된 사용자인지 검증")
     @GetMapping("/validate")
@@ -62,7 +79,7 @@ public class UserController {
         }
     }
 
-    @ApiOperation(value = "회원 검색( query value 없으면 모든 회원 조회되도록 임시로 설정 )")
+    @ApiOperation(value = "회원 검색")
     @GetMapping("/users")
     public ResponseEntity<List<UserDTO.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String id,
                                                                     @RequestParam(value = "name", required = false, defaultValue = "") String name,

@@ -36,6 +36,17 @@ public class ProjectService {
             "20210504(171eb9ac-f7ce-4e30-b4c6-a19a28e45c75)",
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
 
+    public List<ProjectDTO.ProjectSimpleInfo> getRecommendedProjects(User currentUser) {
+        List<ProjectDTO.ProjectSimpleInfo> response = new ArrayList<>();
+        List<Project> projectList = projectRepository.getProjectsByTeamFollower(currentUser);
+        if(projectList.size() != 0) {
+            for(Project project : projectList) {
+                response.add(new ProjectDTO.ProjectSimpleInfo(project));
+            }
+        }
+        return response;
+    }
+
     @Transactional
     public ApiResponse updateProjectThumbnail(Long projectId, MultipartFile image, User currentUser) {
         Project project = projectRepository.findById(projectId)
@@ -63,7 +74,6 @@ public class ProjectService {
     }
 
     // 팀 내 프로젝트 리스트 조회
-    // TODO : 팀 내는 다 보여주지만 private/public 여부도 줘서 뭔가 다른 효과를 보여주는게 좋을 것 같음. 아니면 팀 멤버는 다 볼 수 있나?
     public List<ProjectDTO.ProjectListResponse> getProjectsByTeam(Long teamId) {
         User user = null;
         Team team = teamRepository.findById(teamId)
