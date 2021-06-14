@@ -24,13 +24,6 @@ import java.util.List;
 public class TeamMemberController {
     private final TeamMemberService teamMemberService;
 
-    @ApiOperation(value = "팀 멤버가 아닌 유저 조회")
-    @GetMapping("/teams/{teamId}/not-members")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getUsersNotInTeamMember(@PathVariable("teamId") Long teamId) {
-        List<UserDTO.UserSimpleInfo> response = teamMemberService.getUsersNotInTeamMember(teamId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
     @ApiOperation(value = "팀 초대 수락 ( 메인용 )")
     @PostMapping("/teams/{teamId}/members")
     public ResponseEntity<ApiResponse> createProjectMember(@PathVariable("teamId") Long teamId,
@@ -46,7 +39,7 @@ public class TeamMemberController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "팀 멤버 탈퇴/ 추방(userId 필요) : 임시")
+    @ApiOperation(value = "팀 멤버 삭제")
     @DeleteMapping("/teams/{teamId}/members")
     public ResponseEntity<ApiResponse> leaveTeam(@PathVariable("teamId") long teamId,
                                                     @RequestParam(value = "userId", required = false) String userId,
@@ -61,13 +54,6 @@ public class TeamMemberController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "팀 멤버 삭제 By TeamMember key")
-    @DeleteMapping("/team-members/{id}")
-    public ResponseEntity<ApiResponse> leaveTeam(@PathVariable("id") long id) {
-        ApiResponse apiResponse = teamMemberService.deleteTeamMemeber(id);
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
     @ApiOperation(value = "팀 멤버 조회")
     @GetMapping("/teams/{teamId}/members")
     public ResponseEntity<List<UserDTO.UserSimpleInfo>> getTeamMemberList(@PathVariable("teamId") Long teamId) {
@@ -75,4 +61,10 @@ public class TeamMemberController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "팀 멤버가 아닌 유저 조회")
+    @GetMapping("/teams/{teamId}/not-members")
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getUsersNotInTeamMember(@PathVariable("teamId") Long teamId) {
+        List<UserDTO.UserSimpleInfo> response = teamMemberService.getUsersNotInTeamMember(teamId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

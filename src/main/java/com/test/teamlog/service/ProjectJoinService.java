@@ -28,9 +28,6 @@ public class ProjectJoinService {
             "20210504(171eb9ac-f7ce-4e30-b4c6-a19a28e45c75)",
             "20210504(31157ace-269d-4a84-a73a-7a584f91ad9f)"};
 
-    // -------------------------------
-    // ----- 프로젝트 멤버 신청 관리 -----
-    // -------------------------------
     // 프로젝트 멤버 초대
     @Transactional
     public ApiResponse inviteUserForProject(Long projectId, String userId) {

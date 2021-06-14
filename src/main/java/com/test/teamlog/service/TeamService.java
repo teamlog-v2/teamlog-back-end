@@ -182,9 +182,7 @@ public class TeamService {
         teamRepository.delete(team);
         return new ApiResponse(Boolean.TRUE, "팀 삭제 성공");
     }
-    // ---------------------------
-    // -------- 검증 메소드 --------
-    // ---------------------------
+
     // 마스터 검증
     public void validateUserIsMaster(Team team, User currentUser) {
         if (!currentUser.getId().equals(team.getMaster().getId()))

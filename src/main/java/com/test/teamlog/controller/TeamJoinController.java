@@ -24,7 +24,7 @@ import java.util.List;
 public class TeamJoinController {
     private final TeamJoinService teamJoinService;
 
-    @ApiOperation(value = "팀 멤버 초대(userId 필요) 및 신청")
+    @ApiOperation(value = "팀 멤버 초대(신청) 추가")
     @PostMapping("/teams/{teamId}/joins")
     public ResponseEntity<ApiResponse> inviteUserForTeam(@PathVariable("teamId") long teamId,
                                                          @RequestParam(value = "userId", required = false) String userId,
@@ -39,31 +39,24 @@ public class TeamJoinController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "팀 멤버 신청 삭제")
+    @ApiOperation(value = "팀 멤버 초대(신청) 삭제")
     @DeleteMapping("/team-joins/{joinId}")
     public ResponseEntity<ApiResponse> deleteTeamJoin(@PathVariable("joinId") Long joinId) {
         ApiResponse apiResponse = teamJoinService.deleteTeamJoin(joinId);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "팀 멤버 신청자 목록 조회 (팀 관리)")
+    @ApiOperation(value = "팀 멤버 신청 목록 조회")
     @GetMapping("/teams/{id}/joins/apply")
     public ResponseEntity<List<TeamJoinDTO.TeamJoinForTeam>> getTeamApplyListForTeam(@PathVariable("id") Long id) {
         List<TeamJoinDTO.TeamJoinForTeam> response = teamJoinService.getTeamApplyListForTeam(id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "팀 멤버로 초대한 사용자 목록 조회 (팀 관리)")
+    @ApiOperation(value = "팀 멤버 초대 목록 조회")
     @GetMapping("/teams/{id}/joins/invitation")
     public ResponseEntity<List<TeamJoinDTO.TeamJoinForTeam>> getTeamInvitationListForTeam(@PathVariable("id") Long id) {
         List<TeamJoinDTO.TeamJoinForTeam> response = teamJoinService.getTeamInvitationListForTeam(id);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "유저가 받은 팀 초대 조회")
-    @GetMapping("users/team-invitation")
-    public ResponseEntity<List<TeamJoinDTO.TeamJoinForUser>> getTeamInvitationListForUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        List<TeamJoinDTO.TeamJoinForUser> response = teamJoinService.getTeamInvitationListForUser(currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -71,6 +64,13 @@ public class TeamJoinController {
     @GetMapping("users/team-apply")
     public ResponseEntity<List<TeamJoinDTO.TeamJoinForUser>> getTeamApplyListForUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
         List<TeamJoinDTO.TeamJoinForUser> response = teamJoinService.getTeamApplyListForUser(currentUser);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "유저가 받은 팀 초대 조회")
+    @GetMapping("users/team-invitation")
+    public ResponseEntity<List<TeamJoinDTO.TeamJoinForUser>> getTeamInvitationListForUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<TeamJoinDTO.TeamJoinForUser> response = teamJoinService.getTeamInvitationListForUser(currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

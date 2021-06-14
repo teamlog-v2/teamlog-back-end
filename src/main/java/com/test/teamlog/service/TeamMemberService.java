@@ -37,9 +37,6 @@ public class TeamMemberService {
         return response;
     }
 
-    // ---------------------------
-    // ----- 팀 멤버 관리 -----
-    // ---------------------------
     // 팀 멤버 추가 (초대 수락)
     @Transactional
     public ApiResponse createTeamMember(Long id, User currentUser) {
@@ -63,8 +60,6 @@ public class TeamMemberService {
     public ApiResponse acceptTeamInvitation(Long id) {
         TeamJoin join = teamJoinRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation", "ID", id));
-        // TODO : join 삭제 할지 말지?
-        // TODO : 수락하는 사람이 마스터이냐 사용자이냐에 따라 구분해야함.
         teamJoinRepository.delete(join);
 
         TeamMember newMember = TeamMember.builder()
@@ -95,7 +90,6 @@ public class TeamMemberService {
     public ApiResponse leaveTeam(Long teamId, User currentUser) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
-        // TODO : 자기자신이 마스터면 나갈 수 없어야함.
         TeamMember member = teamMemberRepository.findByTeamAndUser(team, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("TeamMemeber", "UserId", currentUser.getId()));
         teamMemberRepository.delete(member);
@@ -115,14 +109,4 @@ public class TeamMemberService {
         teamMemberRepository.delete(member);
         return new ApiResponse(Boolean.TRUE, "팀 멤버 삭제 완료");
     }
-
-    // member pk 까지 준다면 (마스터)
-    @Transactional
-    public ApiResponse deleteTeamMemeber(Long id) {
-        TeamMember member = teamMemberRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("TeamMemeber", "id", id));
-        teamMemberRepository.delete(member);
-        return new ApiResponse(Boolean.TRUE, "팀 멤버 삭제 완료");
-    }
-
 }

@@ -23,20 +23,6 @@ import java.util.List;
 public class ProjectFollowController {
     private final ProjectFollowService projectFollowService;
 
-    @ApiOperation(value = "유저가 팔로우하는 프로젝트 목록 조회")
-    @GetMapping("/users/{userId}/project-follow")
-    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getFollowingProjectListByUser(@PathVariable("userId") String userId) {
-        List<ProjectDTO.ProjectListResponse> response = projectFollowService.getProjectListByProjectFollower(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "프로젝트를 팔로우하는 사용자 목록 조회")
-    @GetMapping("/projects/{projectId}/followers")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectFollowerList(@PathVariable("projectId") Long projectId) {
-        List<UserDTO.UserSimpleInfo> response = projectFollowService.getProjectFollowerList(projectId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
     @ApiOperation(value = "프로젝트 팔로우")
     @PostMapping("/projects/{projectId}/followers")
     public ResponseEntity<ApiResponse> followProject(@PathVariable("projectId") Long projectId,
@@ -53,4 +39,17 @@ public class ProjectFollowController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "프로젝트 팔로워 조회")
+    @GetMapping("/projects/{projectId}/followers")
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectFollowerList(@PathVariable("projectId") Long projectId) {
+        List<UserDTO.UserSimpleInfo> response = projectFollowService.getProjectFollowerList(projectId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "유저가 팔로우하는 프로젝트 조회")
+    @GetMapping("/users/{userId}/project-follow")
+    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getFollowingProjectListByUser(@PathVariable("userId") String userId) {
+        List<ProjectDTO.ProjectListResponse> response = projectFollowService.getProjectListByProjectFollower(userId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

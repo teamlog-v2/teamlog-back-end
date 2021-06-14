@@ -79,7 +79,6 @@ public class ProjectFollowService {
         } catch (DataIntegrityViolationException e) {
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트를 팔로우 하고 있습니다.");
         }
-
         return new ApiResponse(Boolean.TRUE, "프로젝트 팔로우 성공");
     }
 
@@ -93,5 +92,4 @@ public class ProjectFollowService {
         projectFollowerRepository.delete(projectFollower);
         return new ApiResponse(Boolean.TRUE, "프로젝트 언팔로우 성공");
     }
-
 }

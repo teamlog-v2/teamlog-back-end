@@ -37,9 +37,6 @@ public class ProjectMemberService {
         return response;
     }
 
-    // ---------------------------
-    // ----- 프로젝트 멤버 관리 -----
-    // ---------------------------
     // 프로젝트 멤버 추가 ( 초대 수락 )
     @Transactional
     public ApiResponse createProjectMember(Long projectId, User currentUser) {
@@ -128,27 +125,5 @@ public class ProjectMemberService {
 
         projectMemberRepository.delete(member);
         return new ApiResponse(Boolean.TRUE, "멤버 삭제 완료");
-    }
-
-    // member pk 까지 준다면 (마스터)
-    @Transactional
-    public ApiResponse deleteProjectMemeber(Long id) {
-        ProjectMember member = projectMemberRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "id", id));
-
-        List<Post> postList = postRepository.findAllByProjectAndWriter(member.getProject(),member.getUser());
-        for(Post post : postList) {
-            fileStorageService.deleteFilesByPost(post);
-            postRepository.delete(post);
-        }
-        projectMemberRepository.delete(member);
-        return new ApiResponse(Boolean.TRUE, "멤버 삭제 완료");
-    }
-
-    // 프로젝트 멤버 검증
-    public void validateUserIsMemberOfProject(Project project, User currentUser) {
-        if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다.\n로그인 해주세요.");
-        projectMemberRepository.findByProjectAndUser(project, currentUser)
-                .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다.\n(프로젝트 멤버 아님)"));
     }
 }

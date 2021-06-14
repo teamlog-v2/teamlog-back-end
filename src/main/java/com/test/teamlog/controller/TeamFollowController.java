@@ -23,20 +23,6 @@ import java.util.List;
 public class TeamFollowController {
     private final TeamFollowService teamFollowService;
 
-    @ApiOperation(value = "유저가 팔로우하는 팀 목록 조회")
-    @GetMapping("/users/{userId}/team-follow")
-    public ResponseEntity<List<TeamDTO.TeamListResponse>> getFollowingTeamListByUser(@PathVariable("userId") String userId) {
-        List<TeamDTO.TeamListResponse> response = teamFollowService.getTeamListByTeamFollower(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "팀를 팔로우하는 사용자 목록 조회")
-    @GetMapping("/teams/{teamId}/followers")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getTeamFollowerList(@PathVariable("teamId") Long teamId) {
-        List<UserDTO.UserSimpleInfo> response = teamFollowService.getTeamFollowerList(teamId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
     @ApiOperation(value = "팀 팔로우")
     @PostMapping("/teams/{teamId}/followers")
     public ResponseEntity<ApiResponse> followTeam(@PathVariable("teamId") Long teamId,
@@ -53,4 +39,17 @@ public class TeamFollowController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @ApiOperation(value = "팀 팔로워 조회")
+    @GetMapping("/teams/{teamId}/followers")
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getTeamFollowerList(@PathVariable("teamId") Long teamId) {
+        List<UserDTO.UserSimpleInfo> response = teamFollowService.getTeamFollowerList(teamId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "유저가 팔로우하는 팀 조회")
+    @GetMapping("/users/{userId}/team-follow")
+    public ResponseEntity<List<TeamDTO.TeamListResponse>> getFollowingTeamListByUser(@PathVariable("userId") String userId) {
+        List<TeamDTO.TeamListResponse> response = teamFollowService.getTeamListByTeamFollower(userId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

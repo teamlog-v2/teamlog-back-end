@@ -22,14 +22,7 @@ import java.util.List;
 public class PostLikeController {
     private final PostService postService;
 
-    @ApiOperation(value = "해당 포스트를 좋아하는 사람 목록 조회")
-    @GetMapping("/posts/{postId}/likers")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getPostLikerList(@PathVariable("postId") long postId) {
-        List<UserDTO.UserSimpleInfo> response = postService.getPostLikerList(postId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "포스트 좋아요")
+    @ApiOperation(value = "게시물 좋아요")
     @PostMapping("/posts/{postId}/likers")
     public ResponseEntity<ApiResponse> likePost(@PathVariable("postId") long postId,
                                                 @ApiIgnore @AuthenticationPrincipal User currentUser) {
@@ -37,11 +30,18 @@ public class PostLikeController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    @ApiOperation(value = "포스트 좋아요 취소")
+    @ApiOperation(value = "게시물 좋아요 취소")
     @DeleteMapping("/posts/{postId}/likers")
     public ResponseEntity<ApiResponse> unlikePost(@PathVariable("postId") long postId,
                                                   @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = postService.unlikePost(postId, currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "게시물을 좋아하는 사람 조회")
+    @GetMapping("/posts/{postId}/likers")
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getPostLikerList(@PathVariable("postId") long postId) {
+        List<UserDTO.UserSimpleInfo> response = postService.getPostLikerList(postId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

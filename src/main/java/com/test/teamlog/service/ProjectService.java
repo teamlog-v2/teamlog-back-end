@@ -389,9 +389,6 @@ public class ProjectService {
         return new ApiResponse(Boolean.TRUE, "프로젝트 삭제 성공");
     }
 
-    // ---------------------------
-    // -------- 검증 메소드 --------
-    // ---------------------------
     // 마스터 검증
     public void validateUserIsMaster(Project project, User currentUser) {
         if (!project.getMaster().getId().equals(currentUser.getId()))

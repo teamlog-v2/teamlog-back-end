@@ -22,6 +22,22 @@ import java.util.List;
 public class UserFollowController {
     private final UserFollowService userFollowService;
 
+    @ApiOperation(value = "유저 팔로우")
+    @PostMapping("/userfollows/{targetId}")
+    public ResponseEntity<ApiResponse> followUser(@PathVariable("targetId") String toUserId,
+                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = userFollowService.followUser(currentUser, toUserId);
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+    @ApiOperation(value = "유저 언팔로우")
+    @DeleteMapping("/userfollows/{targetId}")
+    public ResponseEntity<ApiResponse> unfollowUser(@PathVariable("targetId") String fromUserId,
+                                                    @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = userFollowService.unfollowUser(fromUserId, currentUser);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "유저 팔로워 조회")
     @GetMapping("/users/{id}/follower")
     public ResponseEntity<List<UserDTO.UserFollowInfo>> getFollowerList(@PathVariable("id") String id,
@@ -37,21 +53,4 @@ public class UserFollowController {
         List<UserDTO.UserFollowInfo> response = userFollowService.getFollowingList(id, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-    @ApiOperation(value = "팔로우")
-    @PostMapping("/userfollows/{targetId}")
-    public ResponseEntity<ApiResponse> followUser(@PathVariable("targetId") String toUserId,
-                                                  @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = userFollowService.followUser(currentUser, toUserId);
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
-    }
-
-    @ApiOperation(value = "언팔로우")
-    @DeleteMapping("/userfollows/{targetId}")
-    public ResponseEntity<ApiResponse> unfollowUser(@PathVariable("targetId") String fromUserId,
-                                                    @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = userFollowService.unfollowUser(fromUserId, currentUser);
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
 }

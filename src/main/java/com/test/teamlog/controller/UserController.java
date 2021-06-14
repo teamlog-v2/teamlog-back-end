@@ -30,40 +30,6 @@ public class UserController {
     private final CommentService commentService;
     private final JwtUtil jwtUtil;
 
-    @ApiOperation(value = "개인 작성 이력 조회 (게시물)")
-    @GetMapping("/user/posts")
-    public ResponseEntity<List<PostDTO.PostResponse>> getPostsByUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        List<PostDTO.PostResponse> response = null;
-        if(currentUser == null) {
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            response = postService.getPostsByUser(currentUser);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-    }
-
-    @ApiOperation(value = "개인 작성 이력 조회 (댓글)")
-    @GetMapping("/user/comments")
-    public ResponseEntity<List<CommentDTO.CommentInfo>> getCommentsByUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        List<CommentDTO.CommentInfo> response = null;
-
-        if(currentUser == null) {
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            response = commentService.getCommentByUser(currentUser);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-    }
-
-    @ApiOperation(value = "로그인 된 사용자인지 검증")
-    @GetMapping("/validate")
-    public ResponseEntity<UserDTO.UserSimpleInfo> validateUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        if(currentUser == null) {
-            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(), HttpStatus.UNAUTHORIZED);
-        } else {
-            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(currentUser), HttpStatus.OK);
-        }
-    }
 
     @ApiOperation(value = "로그인")
     @PostMapping("/sign-in")
@@ -79,21 +45,14 @@ public class UserController {
         }
     }
 
-    @ApiOperation(value = "회원 검색")
-    @GetMapping("/users")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String id,
-                                                                    @RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                                    @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        List<UserDTO.UserSimpleInfo> response = userService.searchUser(id, name);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @ApiOperation(value = "회원 조회")
-    @GetMapping("/users/{id}")
-    public ResponseEntity<UserDTO.UserResponse> getUserById(@PathVariable("id") String id,
-                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        UserDTO.UserResponse userResponse = userService.getUser(id, currentUser);
-        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    @ApiOperation(value = "로그인 검증")
+    @GetMapping("/validate")
+    public ResponseEntity<UserDTO.UserSimpleInfo> validateUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(), HttpStatus.UNAUTHORIZED);
+        } else {
+            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(currentUser), HttpStatus.OK);
+        }
     }
 
     @ApiOperation(value = "회원 가입")
@@ -103,13 +62,27 @@ public class UserController {
         return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
     }
 
-    //Update
-    @ApiOperation(value = "회원 수정")
+    @ApiOperation(value = "회원 정보 조회")
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserDTO.UserResponse> getUserById(@PathVariable("id") String id,
+                                                            @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        UserDTO.UserResponse userResponse = userService.getUser(id, currentUser);
+        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "회원 정보 수정")
     @PutMapping("/users")
     public ResponseEntity<ApiResponse> updateUser(@Valid @RequestPart(value = "key", required = true) UserDTO.UserUpdateRequest userRequest,
                                                   @RequestPart(value = "profileImg", required = false) MultipartFile image,
                                                   @ApiIgnore @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.updateUser(userRequest, image, currentUser);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "회원 삭제")
+    @DeleteMapping("/users")
+    public ResponseEntity<ApiResponse> deleteUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        ApiResponse apiResponse = userService.deleteUser(currentUser);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
@@ -128,11 +101,38 @@ public class UserController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    // Delete
-    @ApiOperation(value = "회원 삭제")
-    @DeleteMapping("/users")
-    public ResponseEntity<ApiResponse> deleteUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = userService.deleteUser(currentUser);
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    @ApiOperation(value = "개인 작성 이력 조회 (게시물)")
+    @GetMapping("/user/posts")
+    public ResponseEntity<List<PostDTO.PostResponse>> getPostsByUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<PostDTO.PostResponse> response = null;
+        if (currentUser == null) {
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        } else {
+            response = postService.getPostsByUser(currentUser);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @ApiOperation(value = "개인 작성 이력 조회 (댓글)")
+    @GetMapping("/user/comments")
+    public ResponseEntity<List<CommentDTO.CommentInfo>> getCommentsByUser(@ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<CommentDTO.CommentInfo> response = null;
+
+        if (currentUser == null) {
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        } else {
+            response = commentService.getCommentByUser(currentUser);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+
+    @ApiOperation(value = "회원 검색")
+    @GetMapping("/users")
+    public ResponseEntity<List<UserDTO.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String id,
+                                                                   @RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                                   @ApiIgnore @AuthenticationPrincipal User currentUser) {
+        List<UserDTO.UserSimpleInfo> response = userService.searchUser(id, name);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

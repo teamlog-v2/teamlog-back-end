@@ -26,9 +26,6 @@ public class TeamJoinService {
     private final TeamJoinRepository teamJoinRepository;
     private final TeamService teamService;
 
-    // -------------------------------
-    // ------- 팀 멤버 신청 관리 -------
-    // -------------------------------
     // 팀 멤버 초대
     @Transactional
     public ApiResponse inviteUserForTeam(Long teamId, String userId) {
