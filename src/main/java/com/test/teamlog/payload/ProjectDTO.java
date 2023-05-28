@@ -1,7 +1,5 @@
 package com.test.teamlog.payload;
 
-import com.test.teamlog.domain.account.model.User;
-
 import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Project;
 import com.test.teamlog.entity.Team;
@@ -46,7 +44,7 @@ public class ProjectDTO {
             this.name = project.getName();
             this.introduction = project.getIntroduction();
             this.accessModifier = project.getAccessModifier();
-            this.masterId = project.getMaster().getId();
+            this.masterId = project.getMaster().getIdentification();
             this.memberCount = project.getProjectMembers().size();
             this.followerCount = project.getProjectFollowers().size();
             this.createTime = project.getCreateTime();

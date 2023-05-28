@@ -3,7 +3,7 @@ package com.test.teamlog.controller;
 import com.test.teamlog.domain.account.model.User;
 
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.service.UserFollowService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,17 +41,17 @@ public class UserFollowController {
 
     @Operation(summary = "유저 팔로워 조회")
     @GetMapping("/users/{id}/follower")
-    public ResponseEntity<List<UserDTO.UserFollowInfo>> getFollowerList(@PathVariable("id") String id,
-                                                                        @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        List<UserDTO.UserFollowInfo> response = userFollowService.getFollowerList(id, currentUser);
+    public ResponseEntity<List<UserRequest.UserFollowInfo>> getFollowerList(@PathVariable("id") String id,
+                                                                            @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+        List<UserRequest.UserFollowInfo> response = userFollowService.getFollowerList(id, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "유저 팔로잉 조회")
     @GetMapping("/users/{id}/following")
-    public ResponseEntity<List<UserDTO.UserFollowInfo>> getFollowingList(@PathVariable("id") String id,
-                                                                         @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        List<UserDTO.UserFollowInfo> response = userFollowService.getFollowingList(id, currentUser);
+    public ResponseEntity<List<UserRequest.UserFollowInfo>> getFollowingList(@PathVariable("id") String id,
+                                                                             @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+        List<UserRequest.UserFollowInfo> response = userFollowService.getFollowingList(id, currentUser);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

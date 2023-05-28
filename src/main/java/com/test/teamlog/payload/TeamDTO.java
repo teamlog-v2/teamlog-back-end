@@ -1,7 +1,5 @@
 package com.test.teamlog.payload;
 
-import com.test.teamlog.domain.account.model.User;
-
 import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Team;
 import lombok.Builder;
@@ -39,7 +37,7 @@ public class TeamDTO {
             this.name = team.getName();
             this.introduction = team.getIntroduction();
             this.accessModifier = team.getAccessModifier();
-            this.masterId = team.getMaster().getId();
+            this.masterId = team.getMaster().getIdentification();
             this.memberCount = team.getTeamMembers().size();
             this.followerCount = team.getTeamFollowers().size();
             this.createTime = team.getCreateTime();

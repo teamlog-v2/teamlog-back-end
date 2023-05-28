@@ -1,6 +1,6 @@
 package com.test.teamlog.payload;
 
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 
 import com.test.teamlog.entity.Comment;
 import lombok.Builder;
@@ -30,7 +30,7 @@ public class CommentDTO {
     public static class CommentResponse {
         private Long id;
         private String contents;
-        private UserDTO.UserSimpleInfo writer;
+        private UserRequest.UserSimpleInfo writer;
         private List<String> commentMentions;
         private List<CommentInfo> childComments;
         private LocalDateTime writeTime;
@@ -42,7 +42,7 @@ public class CommentDTO {
         private Boolean isMyComment;
         private Long id;
         private String contents;
-        private UserDTO.UserSimpleInfo writer;
+        private UserRequest.UserSimpleInfo writer;
         private List<String> commentMentions;
         private LocalDateTime writeTime;
     }

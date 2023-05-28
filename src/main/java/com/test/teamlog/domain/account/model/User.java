@@ -19,7 +19,10 @@ import java.util.List;
 @Table(name = "users")
 public class User implements UserDetails {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idx;
+    @Column(nullable = false, unique = true)
+    private String identification;
 
     @Column(nullable = false)
     private String password;
@@ -69,7 +72,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return id;
+        return identification;
     }
 
     @Override

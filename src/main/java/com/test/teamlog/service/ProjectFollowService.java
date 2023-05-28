@@ -8,7 +8,7 @@ import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.repository.PostRepository;
 import com.test.teamlog.repository.ProjectFollowerRepository;
 import com.test.teamlog.repository.ProjectRepository;
@@ -52,15 +52,15 @@ public class ProjectFollowService {
     }
 
     // 해당 프로젝트를 팔로우하는 사용자 목록 조회
-    public List<UserDTO.UserSimpleInfo> getProjectFollowerList(Long projectId) {
+    public List<UserRequest.UserSimpleInfo> getProjectFollowerList(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
 
         List<ProjectFollower> projectFollowers = projectFollowerRepository.findAllByProject(project);
 
-        List<UserDTO.UserSimpleInfo> userList = new ArrayList<>();
+        List<UserRequest.UserSimpleInfo> userList = new ArrayList<>();
         for (ProjectFollower follower : projectFollowers) {
-            userList.add(new UserDTO.UserSimpleInfo(follower.getUser()));
+            userList.add(new UserRequest.UserSimpleInfo(follower.getUser()));
         }
         return userList;
     }
@@ -90,7 +90,7 @@ public class ProjectFollowService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
         ProjectFollower projectFollower = projectFollowerRepository.findByProjectAndUser(project, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectFollwer", "UserId", currentUser.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectFollwer", "UserId", currentUser.getIdentification()));
         projectFollowerRepository.delete(projectFollower);
         return new ApiResponse(Boolean.TRUE, "프로젝트 언팔로우 성공");
     }

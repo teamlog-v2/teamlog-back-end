@@ -9,7 +9,7 @@ import com.test.teamlog.entity.TeamMember;
 import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.repository.TeamJoinRepository;
 import com.test.teamlog.repository.TeamMemberRepository;
 import com.test.teamlog.repository.TeamRepository;
@@ -31,11 +31,11 @@ public class TeamMemberService {
     private final TeamService teamService;
 
     // 팀 멤버 아닌 유저 리스트
-    public List<UserDTO.UserSimpleInfo> getUsersNotInTeamMember(Long teamId) {
+    public List<UserRequest.UserSimpleInfo> getUsersNotInTeamMember(Long teamId) {
         List<User> userList = userRepository.getUsersNotInTeamMember(teamId);
-        List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
+        List<UserRequest.UserSimpleInfo> response = new ArrayList<>();
         for(User user : userList) {
-            response.add(new UserDTO.UserSimpleInfo(user));
+            response.add(new UserRequest.UserSimpleInfo(user));
         }
         return response;
     }
@@ -75,14 +75,14 @@ public class TeamMemberService {
 
 
     // 팀 멤버 조회
-    public List<UserDTO.UserSimpleInfo> getTeamMemberList(Long id) {
+    public List<UserRequest.UserSimpleInfo> getTeamMemberList(Long id) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
         List<TeamMember> members = teamMemberRepository.findByTeam(team);
 
-        List<UserDTO.UserSimpleInfo> memberList = new ArrayList<>();
+        List<UserRequest.UserSimpleInfo> memberList = new ArrayList<>();
         for (TeamMember member : members) {
-            memberList.add(new UserDTO.UserSimpleInfo(member.getUser()));
+            memberList.add(new UserRequest.UserSimpleInfo(member.getUser()));
         }
 
         return memberList;
@@ -94,7 +94,7 @@ public class TeamMemberService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
         TeamMember member = teamMemberRepository.findByTeamAndUser(team, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("TeamMemeber", "UserId", currentUser.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("TeamMemeber", "UserId", currentUser.getIdentification()));
         teamMemberRepository.delete(member);
         return new ApiResponse(Boolean.TRUE, "팀 탈퇴 완료");
     }

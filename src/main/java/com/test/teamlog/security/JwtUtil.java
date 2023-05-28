@@ -28,7 +28,7 @@ public class JwtUtil {
     }
 
     public String generateToken(User user) {
-        return doGenerateToken(user.getId(), TOKEN_VALIDATION_SECOND);
+        return doGenerateToken(user.getIdentification(), TOKEN_VALIDATION_SECOND);
     }
 
     // 토큰 생성, payload

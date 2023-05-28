@@ -1,6 +1,6 @@
 package com.test.teamlog.payload;
 
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 
 import com.test.teamlog.entity.Task;
 import com.test.teamlog.entity.TaskPerformer;
@@ -39,7 +39,7 @@ public class TaskDTO {
         private LocalDateTime deadline;
         private LocalDateTime updateTime;
         private String updateTimeStr;
-        private List<UserDTO.UserSimpleInfo> performers;
+        private List<UserRequest.UserSimpleInfo> performers;
         public TaskResponse(Task task) {
             this.id = task.getId();
             this.taskName = task.getTaskName();
@@ -47,10 +47,10 @@ public class TaskDTO {
             this.updateTime = task.getUpdateTime();
             this.updateTimeStr = task.getUpdateTime().toString();
             this.deadline = task.getDeadline();
-            List<UserDTO.UserSimpleInfo> performers = new ArrayList<>();
+            List<UserRequest.UserSimpleInfo> performers = new ArrayList<>();
             if(task.getTaskPerformers() !=null) {
                 for (TaskPerformer temp : task.getTaskPerformers()) {
-                    UserDTO.UserSimpleInfo userInfo = new UserDTO.UserSimpleInfo(temp.getUser());
+                    UserRequest.UserSimpleInfo userInfo = new UserRequest.UserSimpleInfo(temp.getUser());
                     performers.add(userInfo);
                 }
             }
