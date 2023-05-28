@@ -1,6 +1,8 @@
 package com.test.teamlog.domain.account.controller;
 
 import com.test.teamlog.domain.account.dto.SignUpRequest;
+import com.test.teamlog.domain.account.dto.SignUpResponse;
+import com.test.teamlog.domain.account.dto.SignUpResult;
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.UserService;
@@ -34,7 +36,6 @@ public class UserController {
     private final UserService userService;
     private final PostService postService;
     private final CommentService commentService;
-    private final JwtUtil jwtUtil;
 
     @Operation(summary = "로그인")
     @PostMapping("/sign-in")
@@ -43,7 +44,7 @@ public class UserController {
                                         HttpServletResponse response) {
         User user = userService.signIn(userRequest);
         if (user != null) {
-            String token = jwtUtil.generateToken(user);
+            String token = JwtUtil.generateToken(user);
             return new ResponseEntity<>(new Token(token), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -62,9 +63,9 @@ public class UserController {
 
     @Operation(summary = "회원 가입")
     @PostMapping("/users")
-    public ResponseEntity<UserRequest.UserSimpleInfo> signUp(@Valid @RequestBody SignUpRequest request) {
-        UserRequest.UserSimpleInfo userResponse = userService.signUp(request.toInput());
-        return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
+    public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest request) {
+        final SignUpResult result = userService.signUp(request.toInput());
+        return new ResponseEntity<>(SignUpResponse.from(result), HttpStatus.CREATED);
     }
 
     @Operation(summary = "회원 정보 조회")

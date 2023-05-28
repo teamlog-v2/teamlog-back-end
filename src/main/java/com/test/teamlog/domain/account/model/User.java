@@ -12,8 +12,9 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 @Builder
-@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")

@@ -51,6 +51,8 @@ public class UserRequest {
         }
     }
 
+    // FIXME: UserFollow 리팩할 때 삭제
+
     @Data
     @NoArgsConstructor
     public static class UserSimpleInfo {

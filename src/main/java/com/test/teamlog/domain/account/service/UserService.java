@@ -1,6 +1,7 @@
 package com.test.teamlog.domain.account.service;
 
 import com.test.teamlog.domain.account.dto.SignUpInput;
+import com.test.teamlog.domain.account.dto.SignUpResult;
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.UserRepository;
@@ -71,16 +72,13 @@ public class UserService {
 
     // 회원 가입
     @Transactional
-    public UserRequest.UserSimpleInfo signUp(SignUpInput input) {
+    public SignUpResult signUp(SignUpInput input) {
         checkIdDuplication(input.getIdentification());
 
-        User user = User.builder()
-                .identification(input.getIdentification())
-                .password(input.getPassword())
-                .name(input.getName())
-                .build();
+        final User user = input.toUser();
         userRepository.save(user);
-        return new UserRequest.UserSimpleInfo(user);
+
+        return SignUpResult.from(user);
     }
 
     // identification 중복 체크
