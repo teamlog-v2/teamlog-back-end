@@ -1,16 +1,21 @@
 package com.test.teamlog.service;
 
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.repository.UserRepository;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.BadRequestException;
-import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.*;
-import com.test.teamlog.repository.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.repository.PostRepository;
+import com.test.teamlog.repository.ProjectJoinRepository;
+import com.test.teamlog.repository.ProjectMemberRepository;
+import com.test.teamlog.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;

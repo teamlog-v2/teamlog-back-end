@@ -1,9 +1,10 @@
 package com.test.teamlog.repository;
 
+import com.test.teamlog.domain.account.model.User;
+
 import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Post;
 import com.test.teamlog.entity.Project;
-import com.test.teamlog.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;

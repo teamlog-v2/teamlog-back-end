@@ -1,6 +1,7 @@
-package com.test.teamlog.payload;
+package com.test.teamlog.domain.account.dto;
 
-import com.test.teamlog.entity.User;
+import com.test.teamlog.domain.account.model.User;
+
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

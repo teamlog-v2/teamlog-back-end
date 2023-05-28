@@ -1,12 +1,19 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.entity.*;
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.entity.Comment;
+import com.test.teamlog.entity.CommentMention;
+import com.test.teamlog.entity.Post;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.CommentDTO;
+import com.test.teamlog.payload.PagedResponse;
+import com.test.teamlog.domain.account.dto.UserDTO;
 import com.test.teamlog.repository.CommentMentionRepository;
 import com.test.teamlog.repository.CommentRepository;
 import com.test.teamlog.repository.PostRepository;
-import com.test.teamlog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

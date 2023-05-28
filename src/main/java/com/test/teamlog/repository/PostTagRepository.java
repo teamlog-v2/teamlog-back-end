@@ -1,5 +1,7 @@
 package com.test.teamlog.repository;
 
+import com.test.teamlog.domain.account.model.User;
+
 import com.test.teamlog.entity.Post;
 import com.test.teamlog.entity.PostTag;
 import com.test.teamlog.entity.Project;

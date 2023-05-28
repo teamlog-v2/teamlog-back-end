@@ -1,5 +1,7 @@
 package com.test.teamlog.controller;
 
+import com.test.teamlog.domain.account.model.User;
+
 import com.test.teamlog.payload.FileDTO;
 import com.test.teamlog.service.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;

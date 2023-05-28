@@ -1,7 +1,8 @@
 package com.test.teamlog.payload;
 
+import com.test.teamlog.domain.account.dto.UserDTO;
+
 import com.test.teamlog.entity.Comment;
-import com.test.teamlog.entity.Project;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;

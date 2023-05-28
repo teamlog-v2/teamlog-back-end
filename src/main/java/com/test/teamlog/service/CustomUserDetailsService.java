@@ -1,12 +1,13 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.entity.User;
-import com.test.teamlog.repository.UserRepository;
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

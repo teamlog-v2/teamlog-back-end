@@ -1,5 +1,7 @@
 package com.test.teamlog.payload;
 
+import com.test.teamlog.domain.account.model.User;
+
 import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Team;
 import lombok.Builder;

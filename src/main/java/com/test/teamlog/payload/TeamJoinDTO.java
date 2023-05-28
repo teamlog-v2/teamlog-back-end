@@ -1,5 +1,7 @@
 package com.test.teamlog.payload;
 
+import com.test.teamlog.domain.account.dto.UserDTO;
+
 import lombok.Builder;
 import lombok.Data;
 
