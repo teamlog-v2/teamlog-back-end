@@ -23,7 +23,7 @@ public class Team extends BaseTimeEntity {
     private String introduction;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "access_modifier",nullable = false, columnDefinition = "TINYINT(1)")
+    @Column(name = "access_modifier",nullable = false, columnDefinition = "smallint")
     private AccessModifier accessModifier;
 
     @ManyToOne

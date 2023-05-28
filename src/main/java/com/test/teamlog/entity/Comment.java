@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Setter
+@Getter
 @Builder
-@Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Comment extends BaseTimeEntity {
@@ -21,7 +22,7 @@ public class Comment extends BaseTimeEntity {
     private Comment parentComment;
 
     @Builder.Default
-    @OneToMany(mappedBy = "parentComment",orphanRemoval = true)
+    @OneToMany(mappedBy = "parentComment", orphanRemoval = true)
     private List<Comment> childComments = new ArrayList<>();
 
     @ManyToOne
@@ -40,20 +41,18 @@ public class Comment extends BaseTimeEntity {
     private List<CommentMention> commentMentions = new ArrayList<>();
 
     public void setPost(Post post) {
-        if(this.post != null) {
+        if (this.post != null) {
             this.post.getComments().remove(this);
         }
         this.post = post;
         post.getComments().add(this);
     }
 
-    public void addCommentMentions(List<CommentMention> mentions)
-    {
+    public void addCommentMentions(List<CommentMention> mentions) {
         this.commentMentions.addAll(mentions);
     }
 
-    public void removeCommentMentions(List<CommentMention> mentions)
-    {
+    public void removeCommentMentions(List<CommentMention> mentions) {
         this.commentMentions.removeAll(mentions);
     }
 

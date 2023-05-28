@@ -28,11 +28,11 @@ public class Post extends BaseTimeEntity {
     private User writer;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "access_modifier",nullable = false, columnDefinition = "TINYINT(1)")
+    @Column(name = "access_modifier",nullable = false, columnDefinition = "smallint")
     private AccessModifier accessModifier;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "comment_modifier",nullable = false, columnDefinition = "TINYINT(1)")
+    @Column(name = "comment_modifier",nullable = false, columnDefinition = "smallint")
     private AccessModifier commentModifier;
 
     private Point location;
