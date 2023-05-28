@@ -1,35 +1,42 @@
 package com.test.teamlog.config;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import lombok.RequiredArgsConstructor;
+import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+@OpenAPIDefinition(
+        info = @Info(title = "TEAMLOG",
+                description = "TeamLog API 명세",
+                version = "v3"))
+@RequiredArgsConstructor
 @Configuration
-@EnableSwagger2
 public class SwaggerConfig {
 
     @Bean
-    public Docket api() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.test.teamlog"))
-                .paths(PathSelectors.any())
+    public GroupedOpenApi groupedOpenApi() {
+        String[] paths = {"/**"};
+
+        return GroupedOpenApi.builder()
+                .group("jinius")
+                .pathsToMatch(paths)
+                .addOpenApiCustomiser(buildSecurityOpenApi())
                 .build();
     }
 
-    private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title("TeamLog Api Docs")
-                .version("v1.0")
-                .description("TeamLog Api 문서 입니다.")
-                .license("hamchu")
-                .build();
+    public OpenApiCustomiser buildSecurityOpenApi() {
+        return OpenApi -> OpenApi.addSecurityItem(new SecurityRequirement().addList("jwt token"))
+                .getComponents()
+                .addSecuritySchemes("jwt token", new SecurityScheme()
+                        .name("Authorization")
+                        .type(SecurityScheme.Type.HTTP)
+                        .in(SecurityScheme.In.HEADER)
+                        .bearerFormat("JWT")
+                        .scheme("Bearer"));
     }
 }
