@@ -1,10 +1,18 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.entity.*;
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.entity.Team;
+import com.test.teamlog.entity.TeamFollower;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.*;
-import com.test.teamlog.repository.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.TeamDTO;
+import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.repository.ProjectRepository;
+import com.test.teamlog.repository.TeamFollowerRepository;
+import com.test.teamlog.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;

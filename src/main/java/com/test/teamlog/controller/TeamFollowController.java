@@ -1,16 +1,15 @@
 package com.test.teamlog.controller;
 
+import com.test.teamlog.domain.account.model.User;
+
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TeamDTO;
-import com.test.teamlog.payload.UserDTO;
+import com.test.teamlog.domain.account.dto.UserDTO;
 import com.test.teamlog.service.TeamFollowService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,11 +1,13 @@
-package com.test.teamlog.controller;
+package com.test.teamlog.domain.account.controller;
 
-import com.test.teamlog.entity.User;
+import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.service.UserService;
 import com.test.teamlog.payload.*;
 import com.test.teamlog.security.JwtUtil;
 import com.test.teamlog.service.CommentService;
 import com.test.teamlog.service.PostService;
-import com.test.teamlog.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

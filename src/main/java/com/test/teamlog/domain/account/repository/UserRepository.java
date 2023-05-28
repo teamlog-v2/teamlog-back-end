@@ -1,10 +1,6 @@
-package com.test.teamlog.repository;
+package com.test.teamlog.domain.account.repository;
 
-import com.test.teamlog.entity.Post;
-import com.test.teamlog.entity.Project;
-import com.test.teamlog.entity.User;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import com.test.teamlog.domain.account.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -1,5 +1,7 @@
 package com.test.teamlog.payload;
 
+import com.test.teamlog.domain.account.model.User;
+
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.core.io.Resource;

@@ -1,6 +1,7 @@
 package com.test.teamlog.security;
 
-import com.test.teamlog.entity.User;
+import com.test.teamlog.domain.account.model.User;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

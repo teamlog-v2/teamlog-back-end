@@ -1,5 +1,7 @@
 package com.test.teamlog.payload;
 
+import com.test.teamlog.domain.account.dto.UserDTO;
+
 import com.test.teamlog.entity.Task;
 import com.test.teamlog.entity.TaskPerformer;
 import com.test.teamlog.entity.TaskStatus;

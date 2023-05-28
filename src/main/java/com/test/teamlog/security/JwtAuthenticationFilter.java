@@ -1,5 +1,7 @@
 package com.test.teamlog.security;
 
+import com.test.teamlog.domain.account.model.User;
+
 import com.test.teamlog.service.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;

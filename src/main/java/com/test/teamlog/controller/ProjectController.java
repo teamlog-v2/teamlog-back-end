@@ -1,6 +1,7 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.entity.User;
+import com.test.teamlog.domain.account.model.User;
+
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.service.ProjectService;

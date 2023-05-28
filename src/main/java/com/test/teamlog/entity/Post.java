@@ -1,5 +1,7 @@
 package com.test.teamlog.entity;
 
+import com.test.teamlog.domain.account.model.User;
+
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 import org.locationtech.jts.geom.Point;
