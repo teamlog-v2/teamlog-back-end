@@ -7,7 +7,7 @@ import com.test.teamlog.entity.UserFollow;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.repository.UserFollowRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,15 +25,15 @@ public class UserFollowService {
     private final UserFollowRepository userFollowRepository;
 
     // 팔로워 리스트 조회
-    public List<UserDTO.UserFollowInfo> getFollowerList(String userId, User currentUser) {
+    public List<UserRequest.UserFollowInfo> getFollowerList(String userId, User currentUser) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<UserFollow> currentUserFollowings = userFollowRepository.findByFromUser(currentUser);
         List<UserFollow> followers = user.getFollowers();
-        List<UserDTO.UserFollowInfo> responses = new ArrayList<>();
+        List<UserRequest.UserFollowInfo> responses = new ArrayList<>();
         for (UserFollow follower : followers) {
-            UserDTO.UserFollowInfo temp = new UserDTO.UserFollowInfo(follower.getFromUser());
-            if (currentUser==null || follower.getFromUser().getId().equals(currentUser.getId())) {
+            UserRequest.UserFollowInfo temp = new UserRequest.UserFollowInfo(follower.getFromUser());
+            if (currentUser==null || follower.getFromUser().getIdentification().equals(currentUser.getIdentification())) {
                 temp.setIsFollow(null);
                 responses.add(temp);
                 continue;
@@ -53,15 +53,15 @@ public class UserFollowService {
     }
 
     // 팔로잉 리스트 조회
-    public List<UserDTO.UserFollowInfo> getFollowingList(String userId, User currentUser) {
+    public List<UserRequest.UserFollowInfo> getFollowingList(String userId, User currentUser) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<UserFollow> currentUserFollowings = userFollowRepository.findByFromUser(currentUser);
         List<UserFollow> followings = user.getFollowing();
-        List<UserDTO.UserFollowInfo> responses = new ArrayList<>();
+        List<UserRequest.UserFollowInfo> responses = new ArrayList<>();
         for (UserFollow following : followings) {
-            UserDTO.UserFollowInfo temp = new UserDTO.UserFollowInfo(following.getToUser());
-            if (currentUser==null || following.getToUser().getId().equals(currentUser.getId())) {
+            UserRequest.UserFollowInfo temp = new UserRequest.UserFollowInfo(following.getToUser());
+            if (currentUser==null || following.getToUser().getIdentification().equals(currentUser.getIdentification())) {
                 temp.setIsFollow(null);
                 responses.add(temp);
                 continue;
@@ -104,7 +104,7 @@ public class UserFollowService {
         User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", targetUserId));
         UserFollow userFollow = userFollowRepository.findByFromUserAndToUser(currentUser, targetUser)
-                .orElseThrow(() -> new ResourceNotFoundException("UserFollow", "FromUserId", currentUser.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("UserFollow", "FromUserId", currentUser.getIdentification()));
         userFollowRepository.delete(userFollow);
         return new ApiResponse(Boolean.TRUE, "언팔로우 성공");
     }

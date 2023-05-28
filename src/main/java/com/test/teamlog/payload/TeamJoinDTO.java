@@ -1,6 +1,6 @@
 package com.test.teamlog.payload;
 
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +11,7 @@ public class TeamJoinDTO {
     public static class TeamJoinForTeam {
         private Long id;
         private String teamName;
-        private UserDTO.UserSimpleInfo user;
+        private UserRequest.UserSimpleInfo user;
     }
 
     @Data

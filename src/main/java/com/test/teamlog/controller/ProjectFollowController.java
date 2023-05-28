@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.service.ProjectFollowService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +43,8 @@ public class ProjectFollowController {
 
     @Operation(summary = "프로젝트 팔로워 조회")
     @GetMapping("/projects/{projectId}/followers")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectFollowerList(@PathVariable("projectId") Long projectId) {
-        List<UserDTO.UserSimpleInfo> response = projectFollowService.getProjectFollowerList(projectId);
+    public ResponseEntity<List<UserRequest.UserSimpleInfo>> getProjectFollowerList(@PathVariable("projectId") Long projectId) {
+        List<UserRequest.UserSimpleInfo> response = projectFollowService.getProjectFollowerList(projectId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

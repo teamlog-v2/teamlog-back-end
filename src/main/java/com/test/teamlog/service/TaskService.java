@@ -133,8 +133,8 @@ public class TaskService {
             if (originalTaskPerformer != null) {
                 List<TaskPerformer> deletedTaskPerformers = new ArrayList<>();
                 for (TaskPerformer taskPerformer : originalTaskPerformer) {
-                    if (newTaskPerformersId.contains(taskPerformer.getUser().getId())) {
-                        maintainedTaskPerformersId.add(taskPerformer.getUser().getId());
+                    if (newTaskPerformersId.contains(taskPerformer.getUser().getIdentification())) {
+                        maintainedTaskPerformersId.add(taskPerformer.getUser().getIdentification());
                     } else {
                         deletedTaskPerformers.add(taskPerformer);
                     }

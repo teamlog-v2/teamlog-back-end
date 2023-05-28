@@ -9,7 +9,7 @@ import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectJoinDTO;
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.repository.ProjectJoinRepository;
 import com.test.teamlog.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -101,7 +101,7 @@ public class ProjectJoinService {
 
         List<ProjectJoinDTO.ProjectJoinForProject> response = new ArrayList<>();
         for (ProjectJoin join : projectJoins) {
-            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
+            UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(join.getUser());
             ProjectJoinDTO.ProjectJoinForProject temp = ProjectJoinDTO.ProjectJoinForProject.builder()
                     .id(join.getId())
                     .projectName(join.getProject().getName())
@@ -121,7 +121,7 @@ public class ProjectJoinService {
 
         List<ProjectJoinDTO.ProjectJoinForProject> response = new ArrayList<>();
         for (ProjectJoin join : projectJoins) {
-            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
+            UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(join.getUser());
             ProjectJoinDTO.ProjectJoinForProject temp = ProjectJoinDTO.ProjectJoinForProject.builder()
                     .id(join.getId())
                     .projectName(join.getProject().getName())

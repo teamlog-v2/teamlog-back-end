@@ -3,7 +3,7 @@ package com.test.teamlog.controller;
 import com.test.teamlog.domain.account.model.User;
 
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,8 +41,8 @@ public class PostLikeController {
 
     @Operation(summary = "게시물을 좋아하는 사람 조회")
     @GetMapping("/posts/{postId}/likers")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getPostLikerList(@PathVariable("postId") long postId) {
-        List<UserDTO.UserSimpleInfo> response = postService.getPostLikerList(postId);
+    public ResponseEntity<List<UserRequest.UserSimpleInfo>> getPostLikerList(@PathVariable("postId") long postId) {
+        List<UserRequest.UserSimpleInfo> response = postService.getPostLikerList(postId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

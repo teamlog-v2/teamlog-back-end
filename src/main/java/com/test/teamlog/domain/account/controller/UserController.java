@@ -1,10 +1,13 @@
 package com.test.teamlog.domain.account.controller;
 
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.SignUpRequest;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-
 import com.test.teamlog.domain.account.service.UserService;
-import com.test.teamlog.payload.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.CommentDTO;
+import com.test.teamlog.payload.PostDTO;
+import com.test.teamlog.payload.Token;
 import com.test.teamlog.security.JwtUtil;
 import com.test.teamlog.service.CommentService;
 import com.test.teamlog.service.PostService;
@@ -33,12 +36,11 @@ public class UserController {
     private final CommentService commentService;
     private final JwtUtil jwtUtil;
 
-
     @Operation(summary = "로그인")
     @PostMapping("/sign-in")
-    public ResponseEntity<Token> signIn(@RequestBody UserDTO.SignInRequest userRequest,
-                                        HttpServletRequest req,
-                                        HttpServletResponse res) {
+    public ResponseEntity<Token> signIn(@RequestBody UserRequest.SignInRequest userRequest,
+                                        HttpServletRequest request,
+                                        HttpServletResponse response) {
         User user = userService.signIn(userRequest);
         if (user != null) {
             String token = jwtUtil.generateToken(user);
@@ -50,32 +52,32 @@ public class UserController {
 
     @Operation(summary = "로그인 검증")
     @GetMapping("/validate")
-    public ResponseEntity<UserDTO.UserSimpleInfo> validateUser(@Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<UserRequest.UserSimpleInfo> validateUser(@Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
-            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new UserRequest.UserSimpleInfo(), HttpStatus.UNAUTHORIZED);
         } else {
-            return new ResponseEntity<>(new UserDTO.UserSimpleInfo(currentUser), HttpStatus.OK);
+            return new ResponseEntity<>(new UserRequest.UserSimpleInfo(currentUser), HttpStatus.OK);
         }
     }
 
     @Operation(summary = "회원 가입")
     @PostMapping("/users")
-    public ResponseEntity<UserDTO.UserSimpleInfo> signUp(@Valid @RequestBody UserDTO.UserRequest userRequest) {
-        UserDTO.UserSimpleInfo userResponse = userService.signUp(userRequest);
+    public ResponseEntity<UserRequest.UserSimpleInfo> signUp(@Valid @RequestBody SignUpRequest request) {
+        UserRequest.UserSimpleInfo userResponse = userService.signUp(request.toInput());
         return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
     }
 
     @Operation(summary = "회원 정보 조회")
     @GetMapping("/users/{id}")
-    public ResponseEntity<UserDTO.UserResponse> getUserById(@PathVariable("id") String id,
-                                                            @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        UserDTO.UserResponse userResponse = userService.getUser(id, currentUser);
+    public ResponseEntity<UserRequest.UserResponse> getUserById(@PathVariable("id") String id,
+                                                                @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+        UserRequest.UserResponse userResponse = userService.getUser(id, currentUser);
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "회원 정보 수정")
     @PutMapping("/users")
-    public ResponseEntity<ApiResponse> updateUser(@Valid @RequestPart(value = "key", required = true) UserDTO.UserUpdateRequest userRequest,
+    public ResponseEntity<ApiResponse> updateUser(@Valid @RequestPart(value = "key", required = true) UserRequest.UserUpdateRequest userRequest,
                                                   @RequestPart(value = "profileImg", required = false) MultipartFile image,
                                                   @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
         ApiResponse apiResponse = userService.updateUser(userRequest, image, currentUser);
@@ -132,10 +134,10 @@ public class UserController {
 
     @Operation(summary = "회원 검색")
     @GetMapping("/users")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String id,
-                                                                   @RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                                   @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        List<UserDTO.UserSimpleInfo> response = userService.searchUser(id, name);
+    public ResponseEntity<List<UserRequest.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String id,
+                                                                       @RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                                       @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+        List<UserRequest.UserSimpleInfo> response = userService.searchUser(id, name);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

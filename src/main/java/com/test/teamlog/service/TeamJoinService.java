@@ -9,7 +9,7 @@ import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TeamJoinDTO;
-import com.test.teamlog.domain.account.dto.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.repository.TeamJoinRepository;
 import com.test.teamlog.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
@@ -96,7 +96,7 @@ public class TeamJoinService {
 
         List<TeamJoinDTO.TeamJoinForTeam> response = new ArrayList<>();
         for (TeamJoin join : teamJoins) {
-            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
+            UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(join.getUser());
             TeamJoinDTO.TeamJoinForTeam temp = TeamJoinDTO.TeamJoinForTeam.builder()
                     .id(join.getId())
                     .teamName(join.getTeam().getName())
@@ -116,7 +116,7 @@ public class TeamJoinService {
 
         List<TeamJoinDTO.TeamJoinForTeam> response = new ArrayList<>();
         for (TeamJoin join : teamJoins) {
-            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
+            UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(join.getUser());
             TeamJoinDTO.TeamJoinForTeam temp = TeamJoinDTO.TeamJoinForTeam.builder()
                     .id(join.getId())
                     .teamName(join.getTeam().getName())

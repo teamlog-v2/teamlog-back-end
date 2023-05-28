@@ -118,7 +118,7 @@ public class ProjectService {
             user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
-            isMyProjectList = currentUser.getId().equals(id);
+            isMyProjectList = currentUser.getIdentification().equals(id);
             if (isMyProjectList)
                 user = currentUser;
             else
@@ -197,7 +197,7 @@ public class ProjectService {
     // 프로젝트와의 관계
     public Relation getRelation(Project project, User currentUser) {
         if (currentUser == null) return Relation.NONE;
-        if (project.getMaster().getId().equals(currentUser.getId())) return Relation.MASTER;
+        if (project.getMaster().getIdentification().equals(currentUser.getIdentification())) return Relation.MASTER;
         if (isUserMemberOfProject(project, currentUser)) return Relation.MEMBER;
 
         ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
@@ -240,7 +240,7 @@ public class ProjectService {
             user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
-            isMyProjectList = currentUser.getId().equals(id);
+            isMyProjectList = currentUser.getIdentification().equals(id);
             if (isMyProjectList)
                 user = currentUser;
             else
@@ -272,7 +272,7 @@ public class ProjectService {
                     .toUriString();
             ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
                     .id(project.getId())
-                    .masterId(project.getMaster().getId())
+                    .masterId(project.getMaster().getIdentification())
                     .name(project.getName())
                     .postCount(postcount)
                     .updateTime(project.getUpdateTime())
@@ -393,7 +393,7 @@ public class ProjectService {
 
     // 마스터 검증
     public void validateUserIsMaster(Project project, User currentUser) {
-        if (!project.getMaster().getId().equals(currentUser.getId()))
+        if (!project.getMaster().getIdentification().equals(currentUser.getIdentification()))
             throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 마스터 아님 )");
     }
 

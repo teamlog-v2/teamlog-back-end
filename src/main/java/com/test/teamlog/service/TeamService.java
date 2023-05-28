@@ -55,7 +55,7 @@ public class TeamService {
     // 팀과의 관계
     public Relation getRelation(Team team, User currentUser) {
         if (currentUser == null) return Relation.NONE;
-        if (team.getMaster().getId().equals(currentUser.getId())) return Relation.MASTER;
+        if (team.getMaster().getIdentification().equals(currentUser.getIdentification())) return Relation.MASTER;
         if (isUserMemberOfTeam(team, currentUser)) return Relation.MEMBER;
 
         TeamJoin join = teamJoinRepository.findByTeamAndUser(team, currentUser).orElse(null);
@@ -88,7 +88,7 @@ public class TeamService {
             user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
-            isMyTeamList = currentUser.getId().equals(id);
+            isMyTeamList = currentUser.getIdentification().equals(id);
             if (isMyTeamList)
                 user = currentUser;
             else
@@ -109,7 +109,7 @@ public class TeamService {
                     .id(team.getId())
                     .name(team.getName())
                     .updateTime(team.getUpdateTime())
-                    .masterId(team.getMaster().getId())
+                    .masterId(team.getMaster().getIdentification())
                     .build();
             teamList.add(item);
         }
@@ -188,7 +188,7 @@ public class TeamService {
 
     // 마스터 검증
     public void validateUserIsMaster(Team team, User currentUser) {
-        if (!currentUser.getId().equals(team.getMaster().getId()))
+        if (!currentUser.getIdentification().equals(team.getMaster().getIdentification()))
             throw new ResourceForbiddenException("권한이 없습니다.\n(팀 마스터 아님)");
     }
 
