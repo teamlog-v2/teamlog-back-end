@@ -1,7 +1,7 @@
 package com.test.teamlog.config;
 
-import com.test.teamlog.security.JwtAuthenticationEntryPoint;
-import com.test.teamlog.security.JwtAuthenticationFilter;
+import com.test.teamlog.global.security.JwtAuthenticationEntryPoint;
+import com.test.teamlog.global.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

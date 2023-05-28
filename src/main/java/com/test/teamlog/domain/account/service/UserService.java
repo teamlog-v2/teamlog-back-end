@@ -1,8 +1,6 @@
 package com.test.teamlog.domain.account.service;
 
-import com.test.teamlog.domain.account.dto.SignUpInput;
-import com.test.teamlog.domain.account.dto.SignUpResult;
-import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.UserRepository;
 import com.test.teamlog.entity.ProjectMember;
@@ -10,6 +8,7 @@ import com.test.teamlog.entity.TeamMember;
 import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
+import com.test.teamlog.global.utility.PasswordUtil;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.repository.ProjectMemberRepository;
 import com.test.teamlog.repository.TeamMemberRepository;
@@ -27,6 +26,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserService {
+    private final TokenService tokenService;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final UserFollowService userFollowService;
@@ -60,14 +60,19 @@ public class UserService {
     }
 
     // 로그인
-    public User signIn(UserRequest.SignInRequest request) {
-        User user = userRepository.findByIdentification(request.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "ID", request.getId()));
-        if (request.getPassword().equals(user.getPassword())) {
-            return user;
-        } else {
-            return null;
+    public SignInResult signIn(SignInInput input) {
+        final String identification = input.getIdentification();
+        User user = userRepository.findByIdentification(identification).orElse(null);
+
+        // FIXME: 추후 Exception 바꿀 예정. 프론트와 같이 바꿔야 한다.
+        if (user == null || !PasswordUtil.matches(input.getPassword(), user.getPassword())) {
+            throw new ResourceNotFoundException("USER", "IDENTIFICATION", identification);
         }
+
+        final String accessToken = tokenService.createAccessToken(user.getIdentification());
+
+        // TODO: refresh token 추가
+        return new SignInResult(accessToken, null);
     }
 
     // 회원 가입
