@@ -1,27 +1,26 @@
-package com.test.teamlog.security;
+package com.test.teamlog.global.security;
 
-import com.test.teamlog.domain.account.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.experimental.UtilityClass;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@UtilityClass
-public class JwtUtil {
-    private static final long ACCESS_TOKEN_VALIDATION_SECOND = 1000L * 60 * 60 * 24 * 7 * 3; //
+@Component
+public class JwtComponent {
+    private static final long ACCESS_TOKEN_VALIDATION_SECOND = 1000L * 60 * 60 * 24 * 7 * 3;
     private static final long REFRESH_TOKEN_VALIDATION_SECOND = 1000L * 60 * 60 * 24 * 7 * 3;
 
 
     @Value("${app.jwtSecret}")
     private String JWT_SECRET;
 
-    public String generateToken(User user) {
-        return doGenerateToken(user.getIdentification(), ACCESS_TOKEN_VALIDATION_SECOND);
+    public String generateToken(String identification) {
+        return doGenerateToken(identification, ACCESS_TOKEN_VALIDATION_SECOND);
     }
 
     public String getUserId(String token) {

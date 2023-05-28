@@ -11,11 +11,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.constraints.NotBlank;
 
 public class UserRequest {
-    @Data
-    public static class SignInRequest {
-        private String id;
-        private String password;
-    }
+
 
 
     @Data

@@ -1,16 +1,12 @@
 package com.test.teamlog.domain.account.controller;
 
-import com.test.teamlog.domain.account.dto.SignUpRequest;
-import com.test.teamlog.domain.account.dto.SignUpResponse;
-import com.test.teamlog.domain.account.dto.SignUpResult;
-import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.UserService;
+import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.CommentDTO;
 import com.test.teamlog.payload.PostDTO;
-import com.test.teamlog.payload.Token;
-import com.test.teamlog.security.JwtUtil;
 import com.test.teamlog.service.CommentService;
 import com.test.teamlog.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,8 +19,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -39,25 +33,19 @@ public class UserController {
 
     @Operation(summary = "로그인")
     @PostMapping("/sign-in")
-    public ResponseEntity<Token> signIn(@RequestBody UserRequest.SignInRequest userRequest,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response) {
-        User user = userService.signIn(userRequest);
-        if (user != null) {
-            String token = JwtUtil.generateToken(user);
-            return new ResponseEntity<>(new Token(token), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest request) {
+
+        final SignInResult result = userService.signIn(request.toInput());
+        return new ResponseEntity<>(SignInResponse.of(result), HttpStatus.OK);
     }
 
     @Operation(summary = "로그인 검증")
     @GetMapping("/validate")
-    public ResponseEntity<UserRequest.UserSimpleInfo> validateUser(@Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<UserRequest.UserSimpleInfo> validateUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         if (currentUser == null) {
             return new ResponseEntity<>(new UserRequest.UserSimpleInfo(), HttpStatus.UNAUTHORIZED);
         } else {
-            return new ResponseEntity<>(new UserRequest.UserSimpleInfo(currentUser), HttpStatus.OK);
+            return new ResponseEntity<>(new UserRequest.UserSimpleInfo(currentUser.getUser()), HttpStatus.OK);
         }
     }
 

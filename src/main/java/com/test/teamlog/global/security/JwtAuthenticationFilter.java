@@ -1,4 +1,4 @@
-package com.test.teamlog.security;
+package com.test.teamlog.global.security;
 
 import com.test.teamlog.service.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -22,6 +22,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final CustomUserDetailsService userDetailsService;
 
+    private final JwtComponent jwtComponent;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -30,12 +32,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwt = request.getHeader("Authorization");
 
         try {
-            String userId = JwtUtil.getUserId(jwt);
+            String userId = jwtComponent.getUserId(jwt);
 
             if (userId != null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
 
-                if (JwtUtil.validateToken(jwt, userDetails)) {
+                if (jwtComponent.validateToken(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
