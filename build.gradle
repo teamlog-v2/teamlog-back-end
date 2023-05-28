@@ -19,18 +19,19 @@ repositories {
 }
 
 dependencies {
+	implementation group: 'org.postgresql', name: 'postgresql'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'io.springfox:springfox-swagger2:2.9.2'
-	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+
+	// swagger
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.15'
+
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 	compile group: 'org.hibernate', name: 'hibernate-spatial', version: '5.4.20.Final'
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'mysql:mysql-connector-java'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

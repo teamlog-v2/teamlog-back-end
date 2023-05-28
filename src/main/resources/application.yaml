@@ -1,0 +1,54 @@
+server:
+  port: 8090
+
+spring:
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    database: postgresql
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+    username:
+    password:
+
+  # MULTIPART (MultipartProperties)
+  # Enable multipart uploads
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 215MB
+
+# json web token properties
+app:
+  jwtSecret: secret
+
+## File Storage Properties
+file:
+  upload-dir: /Users/jduckling_1024/project/storage
+
+# Swagger
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    groups-order: DESC
+    operationsSorter: method
+    disable-swagger-default-url: true
+    display-request-duration: true
+
+  api-docs:
+    path: /api-docs
+
+  show-actuator: true
+
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+  paths-to-match:
+    - /api/**

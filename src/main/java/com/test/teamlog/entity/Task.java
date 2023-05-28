@@ -25,7 +25,7 @@ public class Task extends BaseTimeEntity{
     private int priority;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    @Column(nullable = false, columnDefinition = "smallint")
     private TaskStatus status;
 
     private LocalDateTime deadline;
