@@ -10,6 +10,10 @@ public class TokenService {
     private final JwtComponent jwtComponent;
 
     public String createAccessToken(String identification) {
-        return jwtComponent.generateToken(identification);
+        return jwtComponent.generateAccessToken(identification);
+    }
+
+    public String createRefreshToken(String identification) {
+        return jwtComponent.generateRefreshToken(identification);
     }
 }

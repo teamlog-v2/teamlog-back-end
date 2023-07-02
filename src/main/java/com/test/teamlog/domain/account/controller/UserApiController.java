@@ -13,29 +13,47 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
+
+import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
 @Tag(name = "유저 관리")
-public class UserController {
+public class UserApiController {
+
+    @Value("${cookie.domain}")
+    private String cookieDomain;
     private final UserService userService;
     private final PostService postService;
     private final CommentService commentService;
 
     @Operation(summary = "로그인")
     @PostMapping("/sign-in")
-    public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest request) {
-
+    public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest request,
+                                                 HttpServletResponse httpServletResponse) {
         final SignInResult result = userService.signIn(request.toInput());
+
+        ResponseCookie cookie = ResponseCookie.from("Refresh-Token", result.getRefreshToken())
+                .domain(cookieDomain)
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .build();
+        httpServletResponse.addHeader(SET_COOKIE, cookie.toString());
+
         return new ResponseEntity<>(SignInResponse.of(result), HttpStatus.OK);
     }
 
@@ -119,7 +137,6 @@ public class UserController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
     }
-
 
     @Operation(summary = "회원 검색")
     @GetMapping("/users")
