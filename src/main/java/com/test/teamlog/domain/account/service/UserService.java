@@ -59,7 +59,6 @@ public class UserService {
         return response;
     }
 
-    // 로그인
     public SignInResult signIn(SignInInput input) {
         final String identification = input.getIdentification();
         User user = userRepository.findByIdentification(identification).orElse(null);
@@ -69,10 +68,10 @@ public class UserService {
             throw new ResourceNotFoundException("USER", "IDENTIFICATION", identification);
         }
 
-        final String accessToken = tokenService.createAccessToken(user.getIdentification());
+        final String accessToken = tokenService.createAccessToken(identification);
+        final String refreshToken = tokenService.createRefreshToken(identification);
 
-        // TODO: refresh token 추가
-        return new SignInResult(accessToken, null);
+        return new SignInResult(accessToken, refreshToken);
     }
 
     // 회원 가입
