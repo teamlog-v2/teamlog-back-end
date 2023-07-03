@@ -13,21 +13,25 @@ public class ResourceNotFoundException extends RuntimeException {
     private String fieldName;
     private Object fieldValue;
 
+    public ResourceNotFoundException(String message) {
+        super();
+        setApiResponse(message);
+    }
+
     public ResourceNotFoundException(String resourceName, String fieldName, Object fieldValue) {
         super();
         this.resourceName = resourceName;
         this.fieldName = fieldName;
         this.fieldValue = fieldValue;
-        setApiResponse();
+
+        setApiResponse(String.format("%s가 '%s' 인 %s 를 찾을 수 없습니다.", fieldName, fieldValue, resourceName));
     }
 
     public ApiResponse getApiResponse() {
         return apiResponse;
     }
 
-    private void setApiResponse() {
-        String message = String.format("%s가 '%s' 인 %s 를 찾을 수 없습니다.", fieldName, fieldValue, resourceName);
-
+    private void setApiResponse(String message) {
         apiResponse = new ApiResponse(Boolean.FALSE, message);
     }
 }

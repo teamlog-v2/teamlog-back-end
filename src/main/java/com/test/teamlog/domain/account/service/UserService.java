@@ -3,6 +3,8 @@ package com.test.teamlog.domain.account.service;
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.token.dto.CreateTokenResult;
+import com.test.teamlog.domain.token.service.TokenService;
 import com.test.teamlog.entity.ProjectMember;
 import com.test.teamlog.entity.TeamMember;
 import com.test.teamlog.exception.BadRequestException;
@@ -59,6 +61,7 @@ public class UserService {
         return response;
     }
 
+    @Transactional
     public SignInResult signIn(SignInInput input) {
         final String identification = input.getIdentification();
         User user = userRepository.findByIdentification(identification).orElse(null);
@@ -68,10 +71,8 @@ public class UserService {
             throw new ResourceNotFoundException("USER", "IDENTIFICATION", identification);
         }
 
-        final String accessToken = tokenService.createAccessToken(identification);
-        final String refreshToken = tokenService.createRefreshToken(identification);
-
-        return new SignInResult(accessToken, refreshToken);
+        final CreateTokenResult createTokenResult = tokenService.createToken(identification);
+        return SignInResult.from(createTokenResult);
     }
 
     // 회원 가입
