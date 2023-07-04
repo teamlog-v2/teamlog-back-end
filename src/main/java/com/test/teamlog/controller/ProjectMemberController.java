@@ -1,8 +1,8 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.global.security.UserAdapter;
+import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.service.ProjectMemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,8 +33,8 @@ public class ProjectMemberController {
     @Operation(summary = "프로젝트 초대 수락")
     @PostMapping("/projects/{projectId}/members")
     public ResponseEntity<ApiResponse> createProjectMember(@PathVariable("projectId") Long projectId,
-                                                           @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = projectMemberService.createProjectMember(projectId, currentUser);
+                                                           @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = projectMemberService.createProjectMember(projectId, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
@@ -42,13 +42,13 @@ public class ProjectMemberController {
     @DeleteMapping("/projects/{projectId}/members")
     public ResponseEntity<ApiResponse> leaveProject(@PathVariable("projectId") long projectId,
                                                     @RequestParam(value = "userId", required = false) String userId,
-                                                    @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+                                                    @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         ApiResponse apiResponse = null;
         // userId 없으면 탈퇴 있으면 추방
         if (userId == null) {
-            apiResponse = projectMemberService.leaveProject(projectId, currentUser);
+            apiResponse = projectMemberService.leaveProject(projectId, currentUser.getUser());
         } else {
-            apiResponse = projectMemberService.expelMember(projectId, userId, currentUser);
+            apiResponse = projectMemberService.expelMember(projectId, userId, currentUser.getUser());
         }
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

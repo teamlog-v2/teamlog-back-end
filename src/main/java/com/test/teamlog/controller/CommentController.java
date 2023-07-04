@@ -1,7 +1,6 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.domain.account.model.User;
-
+import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.CommentDTO;
 import com.test.teamlog.payload.PagedResponse;
@@ -25,8 +24,8 @@ public class CommentController {
     @Operation(summary = "댓글 생성")
     @PostMapping("/comments")
     public ResponseEntity<ApiResponse> createProject(@RequestBody CommentDTO.CommentRequest request,
-                                                     @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = commentService.createComment(request, currentUser);
+                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = commentService.createComment(request, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
@@ -34,7 +33,7 @@ public class CommentController {
     @PutMapping("/comments/{id}")
     public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
                                                      @RequestBody CommentDTO.CommentUpdateRequest request,
-                                                     @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         ApiResponse apiResponse = commentService.updateComment(id, request);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -42,7 +41,7 @@ public class CommentController {
     @Operation(summary = "댓글 삭제")
     @DeleteMapping("/comments/{id}")
     public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
-                                                  @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         ApiResponse apiResponse = commentService.deleteComment(id);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -52,8 +51,8 @@ public class CommentController {
     public ResponseEntity<PagedResponse<CommentDTO.CommentInfo>> getParentCommentsByPost(@PathVariable("postId") long postId,
                                                                                          @RequestParam(value = "page", required = false, defaultValue = "0") int page,
                                                                                          @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-                                                                                         @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        PagedResponse<CommentDTO.CommentInfo> response = commentService.getParentComments(postId, page, size, currentUser);
+                                                                                         @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        PagedResponse<CommentDTO.CommentInfo> response = commentService.getParentComments(postId, page, size, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -62,9 +61,9 @@ public class CommentController {
     public ResponseEntity<PagedResponse<CommentDTO.CommentInfo>> getChildComments(@PathVariable("commentId") long commentId,
                                                                                   @RequestParam(value = "page", required = false, defaultValue = "0") int page,
                                                                                   @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-                                                                                  @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+                                                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
 
-        PagedResponse<CommentDTO.CommentInfo> response = commentService.getChildComments(commentId, page, size, currentUser);
+        PagedResponse<CommentDTO.CommentInfo> response = commentService.getChildComments(commentId, page, size, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

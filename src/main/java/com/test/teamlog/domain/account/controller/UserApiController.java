@@ -1,7 +1,6 @@
 package com.test.teamlog.domain.account.controller;
 
 import com.test.teamlog.domain.account.dto.*;
-import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.UserService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
@@ -77,8 +76,8 @@ public class UserApiController {
     @Operation(summary = "회원 정보 조회")
     @GetMapping("/users/{id}")
     public ResponseEntity<UserRequest.UserResponse> getUserById(@PathVariable("id") String id,
-                                                                @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        UserRequest.UserResponse userResponse = userService.getUser(id, currentUser);
+                                                                @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        UserRequest.UserResponse userResponse = userService.getUser(id, currentUser.getUser());
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
@@ -86,54 +85,54 @@ public class UserApiController {
     @PutMapping("/users")
     public ResponseEntity<ApiResponse> updateUser(@Valid @RequestPart(value = "key", required = true) UserRequest.UserUpdateRequest userRequest,
                                                   @RequestPart(value = "profileImg", required = false) MultipartFile image,
-                                                  @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = userService.updateUser(userRequest, image, currentUser);
+                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = userService.updateUser(userRequest, image, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "회원 삭제")
     @DeleteMapping("/users")
-    public ResponseEntity<ApiResponse> deleteUser(@Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = userService.deleteUser(currentUser);
+    public ResponseEntity<ApiResponse> deleteUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = userService.deleteUser(currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "프로필 이미지 변경")
     @PutMapping("/users/profile-image")
     public ResponseEntity<ApiResponse> updateUserProfileImage(@RequestPart(value = "profileImg", required = true) MultipartFile image,
-                                                              @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = userService.updateUserProfileImage(image, currentUser);
+                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = userService.updateUserProfileImage(image, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "프로필 이미지 삭제")
     @DeleteMapping("/users/profile-image")
-    public ResponseEntity<ApiResponse> deleteUserProfileImage(@Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = userService.deleteUserProfileImage(currentUser);
+    public ResponseEntity<ApiResponse> deleteUserProfileImage(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = userService.deleteUserProfileImage(currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "개인 작성 이력 조회 (게시물)")
     @GetMapping("/user/posts")
-    public ResponseEntity<List<PostDTO.PostResponse>> getPostsByUser(@Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<List<PostDTO.PostResponse>> getPostsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<PostDTO.PostResponse> response = null;
         if (currentUser == null) {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         } else {
-            response = postService.getPostsByUser(currentUser);
+            response = postService.getPostsByUser(currentUser.getUser());
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
     }
 
     @Operation(summary = "개인 작성 이력 조회 (댓글)")
     @GetMapping("/user/comments")
-    public ResponseEntity<List<CommentDTO.CommentInfo>> getCommentsByUser(@Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<List<CommentDTO.CommentInfo>> getCommentsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<CommentDTO.CommentInfo> response = null;
 
         if (currentUser == null) {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         } else {
-            response = commentService.getCommentByUser(currentUser);
+            response = commentService.getCommentByUser(currentUser.getUser());
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
     }
@@ -142,7 +141,7 @@ public class UserApiController {
     @GetMapping("/users")
     public ResponseEntity<List<UserRequest.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String id,
                                                                        @RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                                       @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<UserRequest.UserSimpleInfo> response = userService.searchUser(id, name);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

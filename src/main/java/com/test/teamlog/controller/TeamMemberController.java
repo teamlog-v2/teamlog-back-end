@@ -1,14 +1,12 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.domain.account.model.User;
-
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
-import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.global.security.UserAdapter;
+import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.service.TeamMemberService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +26,8 @@ public class TeamMemberController {
     @Operation(summary = "팀 초대 수락 ( 메인용 )")
     @PostMapping("/teams/{teamId}/members")
     public ResponseEntity<ApiResponse> createProjectMember(@PathVariable("teamId") Long teamId,
-                                                           @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = teamMemberService.createTeamMember(teamId, currentUser);
+                                                           @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = teamMemberService.createTeamMember(teamId, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
@@ -44,13 +42,13 @@ public class TeamMemberController {
     @DeleteMapping("/teams/{teamId}/members")
     public ResponseEntity<ApiResponse> leaveTeam(@PathVariable("teamId") long teamId,
                                                     @RequestParam(value = "userId", required = false) String userId,
-                                                    @Parameter(hidden = true)  @AuthenticationPrincipal User currentUser) {
+                                                    @Parameter(hidden = true)  @AuthenticationPrincipal UserAdapter currentUser) {
         ApiResponse apiResponse = null;
         // userId 없으면 탈퇴 있으면 추방
         if(userId == null) {
-            apiResponse = teamMemberService.leaveTeam(teamId, currentUser);
+            apiResponse = teamMemberService.leaveTeam(teamId, currentUser.getUser());
         } else {
-            apiResponse = teamMemberService.expelMember(teamId, userId, currentUser);
+            apiResponse = teamMemberService.expelMember(teamId, userId, currentUser.getUser());
         }
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
