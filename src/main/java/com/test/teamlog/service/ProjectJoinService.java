@@ -1,12 +1,17 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.entity.*;
-import com.test.teamlog.exception.BadRequestException;
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.entity.Project;
+import com.test.teamlog.entity.ProjectJoin;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
-import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.*;
-import com.test.teamlog.repository.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.ProjectJoinDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.repository.ProjectJoinRepository;
+import com.test.teamlog.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,7 +101,7 @@ public class ProjectJoinService {
 
         List<ProjectJoinDTO.ProjectJoinForProject> response = new ArrayList<>();
         for (ProjectJoin join : projectJoins) {
-            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
+            UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(join.getUser());
             ProjectJoinDTO.ProjectJoinForProject temp = ProjectJoinDTO.ProjectJoinForProject.builder()
                     .id(join.getId())
                     .projectName(join.getProject().getName())
@@ -116,7 +121,7 @@ public class ProjectJoinService {
 
         List<ProjectJoinDTO.ProjectJoinForProject> response = new ArrayList<>();
         for (ProjectJoin join : projectJoins) {
-            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
+            UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(join.getUser());
             ProjectJoinDTO.ProjectJoinForProject temp = ProjectJoinDTO.ProjectJoinForProject.builder()
                     .id(join.getId())
                     .projectName(join.getProject().getName())

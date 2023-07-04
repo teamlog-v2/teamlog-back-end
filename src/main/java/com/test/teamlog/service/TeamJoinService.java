@@ -1,15 +1,17 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.entity.*;
-import com.test.teamlog.exception.BadRequestException;
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.entity.Team;
+import com.test.teamlog.entity.TeamJoin;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
-import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.TeamJoinDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.repository.TeamJoinRepository;
-import com.test.teamlog.repository.TeamMemberRepository;
 import com.test.teamlog.repository.TeamRepository;
-import com.test.teamlog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,7 +96,7 @@ public class TeamJoinService {
 
         List<TeamJoinDTO.TeamJoinForTeam> response = new ArrayList<>();
         for (TeamJoin join : teamJoins) {
-            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
+            UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(join.getUser());
             TeamJoinDTO.TeamJoinForTeam temp = TeamJoinDTO.TeamJoinForTeam.builder()
                     .id(join.getId())
                     .teamName(join.getTeam().getName())
@@ -114,7 +116,7 @@ public class TeamJoinService {
 
         List<TeamJoinDTO.TeamJoinForTeam> response = new ArrayList<>();
         for (TeamJoin join : teamJoins) {
-            UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(join.getUser());
+            UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(join.getUser());
             TeamJoinDTO.TeamJoinForTeam temp = TeamJoinDTO.TeamJoinForTeam.builder()
                     .id(join.getId())
                     .teamName(join.getTeam().getName())

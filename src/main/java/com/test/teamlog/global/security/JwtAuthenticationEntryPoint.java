@@ -1,4 +1,4 @@
-package com.test.teamlog.security;
+package com.test.teamlog.global.security;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

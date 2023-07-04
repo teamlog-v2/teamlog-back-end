@@ -1,5 +1,7 @@
 package com.test.teamlog.entity;
 
+import com.test.teamlog.domain.account.model.User;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;

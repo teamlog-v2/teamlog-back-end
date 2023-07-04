@@ -1,6 +1,7 @@
-package com.test.teamlog.payload;
+package com.test.teamlog.domain.account.dto;
 
-import com.test.teamlog.entity.User;
+import com.test.teamlog.domain.account.model.User;
+
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,24 +10,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.constraints.NotBlank;
 
-public class UserDTO {
-    @Data
-    public static class SignInRequest {
-        private String id;
-        private String password;
-    }
+public class UserRequest {
 
-    @Data
-    public static class UserRequest {
-        @NotBlank(message = "빈문자열, 공백만 입력할 수 없습니다.")
-        private String id;
-        @NotBlank(message = "빈문자열, 공백만 입력할 수 없습니다.")
-        private String password;
-        @NotBlank(message = "빈문자열, 공백만 입력할 수 없습니다.")
-        private String name;
-        private String introduction;
-        private String profileImgPath;
-    }
+
 
     @Data
     public static class UserUpdateRequest {
@@ -42,12 +28,12 @@ public class UserDTO {
     public static class UserResponse {
         private Boolean isMe;
         private Boolean isFollow;
-        private String id;
+        private String identification;
         private String name;
         private String introduction;
         private String profileImgPath;
         public UserResponse(User user) {
-            this.id = user.getId();
+            this.identification = user.getIdentification();
             this.name = user.getName();
             this.introduction = user.getIntroduction();
             String imgUri = null;
@@ -61,6 +47,8 @@ public class UserDTO {
         }
     }
 
+    // FIXME: UserFollow 리팩할 때 삭제
+
     @Data
     @NoArgsConstructor
     public static class UserSimpleInfo {
@@ -69,7 +57,7 @@ public class UserDTO {
         private String profileImgPath;
 
         public UserSimpleInfo(User user) {
-            this.id = user.getId();
+            this.id = user.getIdentification();
             this.name = user.getName();
             String imgUri = null;
             if(user.getProfileImgPath() != null){

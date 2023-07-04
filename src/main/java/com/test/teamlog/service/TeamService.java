@@ -1,17 +1,20 @@
 package com.test.teamlog.service;
 
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.repository.UserRepository;
 import com.test.teamlog.entity.*;
-import com.test.teamlog.exception.BadRequestException;
-import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.*;
-import com.test.teamlog.repository.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.Relation;
+import com.test.teamlog.payload.TeamDTO;
+import com.test.teamlog.repository.TeamJoinRepository;
+import com.test.teamlog.repository.TeamMemberRepository;
+import com.test.teamlog.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.criterion.ProjectionList;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -52,7 +55,7 @@ public class TeamService {
     // 팀과의 관계
     public Relation getRelation(Team team, User currentUser) {
         if (currentUser == null) return Relation.NONE;
-        if (team.getMaster().getId().equals(currentUser.getId())) return Relation.MASTER;
+        if (team.getMaster().getIdentification().equals(currentUser.getIdentification())) return Relation.MASTER;
         if (isUserMemberOfTeam(team, currentUser)) return Relation.MEMBER;
 
         TeamJoin join = teamJoinRepository.findByTeamAndUser(team, currentUser).orElse(null);
@@ -85,7 +88,7 @@ public class TeamService {
             user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
-            isMyTeamList = currentUser.getId().equals(id);
+            isMyTeamList = currentUser.getIdentification().equals(id);
             if (isMyTeamList)
                 user = currentUser;
             else
@@ -106,7 +109,7 @@ public class TeamService {
                     .id(team.getId())
                     .name(team.getName())
                     .updateTime(team.getUpdateTime())
-                    .masterId(team.getMaster().getId())
+                    .masterId(team.getMaster().getIdentification())
                     .build();
             teamList.add(item);
         }
@@ -185,7 +188,7 @@ public class TeamService {
 
     // 마스터 검증
     public void validateUserIsMaster(Team team, User currentUser) {
-        if (!currentUser.getId().equals(team.getMaster().getId()))
+        if (!currentUser.getIdentification().equals(team.getMaster().getIdentification()))
             throw new ResourceForbiddenException("권한이 없습니다.\n(팀 마스터 아님)");
     }
 

@@ -1,5 +1,8 @@
 package com.test.teamlog.service;
 
+import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.domain.account.model.User;
+
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
@@ -460,7 +463,7 @@ public class PostService {
 
     // Post to PostResponse
     public PostDTO.PostResponse convertToPostResponse(Post post, User currentUser) {
-        UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(post.getWriter());
+        UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(post.getWriter());
 
         List<String> hashtags = new ArrayList<>();
         List<PostTag> hashtagList = postTagRepository.findAllByPost(post);
@@ -575,21 +578,21 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         PostLiker postLiker = postLikerRepository.findByPostAndUser(post, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("PostLiker", "UserId", currentUser.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("PostLiker", "UserId", currentUser.getIdentification()));
 
         postLikerRepository.delete(postLiker);
         return new ApiResponse(Boolean.TRUE, "포스트 좋아요 취소 성공");
     }
 
     // 포스트 좋아요 목록 조회
-    public List<UserDTO.UserSimpleInfo> getPostLikerList(Long postId) {
+    public List<UserRequest.UserSimpleInfo> getPostLikerList(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         List<PostLiker> postLikers = postLikerRepository.findAllByPost(post);
-        List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
+        List<UserRequest.UserSimpleInfo> response = new ArrayList<>();
         for (PostLiker postLiker : postLikers) {
-            UserDTO.UserSimpleInfo temp = new UserDTO.UserSimpleInfo(postLiker.getUser());
+            UserRequest.UserSimpleInfo temp = new UserRequest.UserSimpleInfo(postLiker.getUser());
             response.add(temp);
         }
         return response;

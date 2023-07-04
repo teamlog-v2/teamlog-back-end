@@ -44,7 +44,7 @@ public class ProjectDTO {
             this.name = project.getName();
             this.introduction = project.getIntroduction();
             this.accessModifier = project.getAccessModifier();
-            this.masterId = project.getMaster().getId();
+            this.masterId = project.getMaster().getIdentification();
             this.memberCount = project.getProjectMembers().size();
             this.followerCount = project.getProjectFollowers().size();
             this.createTime = project.getCreateTime();

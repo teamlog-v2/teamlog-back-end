@@ -1,14 +1,16 @@
 package com.test.teamlog.service;
 
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.repository.UserRepository;
 import com.test.teamlog.entity.*;
-import com.test.teamlog.exception.BadRequestException;
-import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.ProjectDTO;
+import com.test.teamlog.payload.Relation;
 import com.test.teamlog.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -116,7 +118,7 @@ public class ProjectService {
             user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
-            isMyProjectList = currentUser.getId().equals(id);
+            isMyProjectList = currentUser.getIdentification().equals(id);
             if (isMyProjectList)
                 user = currentUser;
             else
@@ -195,7 +197,7 @@ public class ProjectService {
     // 프로젝트와의 관계
     public Relation getRelation(Project project, User currentUser) {
         if (currentUser == null) return Relation.NONE;
-        if (project.getMaster().getId().equals(currentUser.getId())) return Relation.MASTER;
+        if (project.getMaster().getIdentification().equals(currentUser.getIdentification())) return Relation.MASTER;
         if (isUserMemberOfProject(project, currentUser)) return Relation.MEMBER;
 
         ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
@@ -238,7 +240,7 @@ public class ProjectService {
             user = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
-            isMyProjectList = currentUser.getId().equals(id);
+            isMyProjectList = currentUser.getIdentification().equals(id);
             if (isMyProjectList)
                 user = currentUser;
             else
@@ -270,7 +272,7 @@ public class ProjectService {
                     .toUriString();
             ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
                     .id(project.getId())
-                    .masterId(project.getMaster().getId())
+                    .masterId(project.getMaster().getIdentification())
                     .name(project.getName())
                     .postCount(postcount)
                     .updateTime(project.getUpdateTime())
@@ -391,7 +393,7 @@ public class ProjectService {
 
     // 마스터 검증
     public void validateUserIsMaster(Project project, User currentUser) {
-        if (!project.getMaster().getId().equals(currentUser.getId()))
+        if (!project.getMaster().getIdentification().equals(currentUser.getIdentification()))
             throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 마스터 아님 )");
     }
 

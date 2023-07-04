@@ -1,9 +1,8 @@
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
+package com.test.teamlog.controller;
 
-import com.test.teamlog.entity.User;
+import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.service.ProjectMemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,15 +55,15 @@ public class ProjectMemberController {
 
     @Operation(summary = "프로젝트 멤버 조회")
     @GetMapping("/projects/{projectId}/members")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getProjectMemberList(@PathVariable("projectId") Long projectId) {
-        List<UserDTO.UserSimpleInfo> response = projectMemberService.getProjectMemberList(projectId);
+    public ResponseEntity<List<UserRequest.UserSimpleInfo>> getProjectMemberList(@PathVariable("projectId") Long projectId) {
+        List<UserRequest.UserSimpleInfo> response = projectMemberService.getProjectMemberList(projectId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "프로젝트 멤버가 아닌 유저 조회")
     @GetMapping("/projects/{projectId}/not-members")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> get(@PathVariable("projectId") Long projectId) {
-        List<UserDTO.UserSimpleInfo> response = projectMemberService.getUsersNotInProjectMember(projectId);
+    public ResponseEntity<List<UserRequest.UserSimpleInfo>> get(@PathVariable("projectId") Long projectId) {
+        List<UserRequest.UserSimpleInfo> response = projectMemberService.getUsersNotInProjectMember(projectId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

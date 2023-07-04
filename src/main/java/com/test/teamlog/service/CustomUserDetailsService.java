@@ -1,23 +1,24 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.entity.User;
-import com.test.teamlog.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.global.security.UserAdapter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 @Service
+@RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException(String.format("(id : %s) 유저를 찾을 수 없습니다", userId)));
-        return user;
+    public UserAdapter loadUserByUsername(String identification) throws UsernameNotFoundException {
+        final User user = userRepository.findByIdentification(identification)
+                .orElseThrow(() -> new UsernameNotFoundException(String.format("(identification : %s) 유저를 찾을 수 없습니다", identification)));
+
+        return new UserAdapter(user);
     }
 }

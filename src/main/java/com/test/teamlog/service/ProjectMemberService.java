@@ -1,16 +1,21 @@
 package com.test.teamlog.service;
 
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.repository.UserRepository;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.BadRequestException;
-import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.*;
-import com.test.teamlog.repository.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.repository.PostRepository;
+import com.test.teamlog.repository.ProjectJoinRepository;
+import com.test.teamlog.repository.ProjectMemberRepository;
+import com.test.teamlog.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +33,11 @@ public class ProjectMemberService {
     private final FileStorageService fileStorageService;
 
     // 프로젝트 멤버 아닌 유저 리스트
-    public List<UserDTO.UserSimpleInfo> getUsersNotInProjectMember(Long projectId) {
+    public List<UserRequest.UserSimpleInfo> getUsersNotInProjectMember(Long projectId) {
         List<User> userList = userRepository.getUsersNotInProjectMember(projectId);
-        List<UserDTO.UserSimpleInfo> response = new ArrayList<>();
+        List<UserRequest.UserSimpleInfo> response = new ArrayList<>();
         for (User user : userList) {
-            response.add(new UserDTO.UserSimpleInfo(user));
+            response.add(new UserRequest.UserSimpleInfo(user));
         }
         return response;
     }
@@ -43,7 +48,7 @@ public class ProjectMemberService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
         ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation", "ID", currentUser.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation", "ID", currentUser.getIdentification()));
         if (join.getIsInvited() != true || join.getIsAccepted() != false) throw new BadRequestException("잘못된 요청입니다.");
         projectJoinRepository.delete(join);
 
@@ -72,14 +77,14 @@ public class ProjectMemberService {
     }
 
     // 프로젝트 멤버 조회
-    public List<UserDTO.UserSimpleInfo> getProjectMemberList(Long id) {
+    public List<UserRequest.UserSimpleInfo> getProjectMemberList(Long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
         List<ProjectMember> members = projectMemberRepository.findByProject(project);
 
-        List<UserDTO.UserSimpleInfo> memberList = new ArrayList<>();
+        List<UserRequest.UserSimpleInfo> memberList = new ArrayList<>();
         for (ProjectMember member : members) {
-            memberList.add(new UserDTO.UserSimpleInfo(member.getUser()));
+            memberList.add(new UserRequest.UserSimpleInfo(member.getUser()));
         }
 
         return memberList;
@@ -90,11 +95,11 @@ public class ProjectMemberService {
     public ApiResponse leaveProject(Long projectId, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        if(project.getMaster().getId().equals(currentUser.getId())) {
+        if(project.getMaster().getIdentification().equals(currentUser.getIdentification())) {
             throw new ResourceForbiddenException("마스터는 탈퇴할 수 없습니다.\n위임하고 다시 시도하세요.");
         }
         ProjectMember member = projectMemberRepository.findByProjectAndUser(project, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "UserId", currentUser.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "UserId", currentUser.getIdentification()));
 
         List<Post> postList = postRepository.findAllByProjectAndWriter(project, currentUser);
         for(Post post : postList) {

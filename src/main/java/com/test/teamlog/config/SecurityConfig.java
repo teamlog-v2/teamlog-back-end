@@ -1,7 +1,7 @@
 package com.test.teamlog.config;
 
-import com.test.teamlog.security.JwtAuthenticationEntryPoint;
-import com.test.teamlog.security.JwtAuthenticationFilter;
+import com.test.teamlog.global.security.JwtAuthenticationEntryPoint;
+import com.test.teamlog.global.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,7 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/api/sign-in", "/api/users").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/sign-in", "/api/users", "/api/tokens/reissue").permitAll()
                 .antMatchers(HttpMethod.GET, "/resources/**").permitAll()
                 .antMatchers(HttpMethod.GET,"/api/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/downloadFile/**").permitAll()

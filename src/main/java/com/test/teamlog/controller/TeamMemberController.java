@@ -1,15 +1,14 @@
 package com.test.teamlog.controller;
 
+import com.test.teamlog.domain.account.model.User;
+
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import com.test.teamlog.entity.User;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.UserDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.service.TeamMemberService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,15 +57,15 @@ public class TeamMemberController {
 
     @Operation(summary = "팀 멤버 조회")
     @GetMapping("/teams/{teamId}/members")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getTeamMemberList(@PathVariable("teamId") Long teamId) {
-        List<UserDTO.UserSimpleInfo> response = teamMemberService.getTeamMemberList(teamId);
+    public ResponseEntity<List<UserRequest.UserSimpleInfo>> getTeamMemberList(@PathVariable("teamId") Long teamId) {
+        List<UserRequest.UserSimpleInfo> response = teamMemberService.getTeamMemberList(teamId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "팀 멤버가 아닌 유저 조회")
     @GetMapping("/teams/{teamId}/not-members")
-    public ResponseEntity<List<UserDTO.UserSimpleInfo>> getUsersNotInTeamMember(@PathVariable("teamId") Long teamId) {
-        List<UserDTO.UserSimpleInfo> response = teamMemberService.getUsersNotInTeamMember(teamId);
+    public ResponseEntity<List<UserRequest.UserSimpleInfo>> getUsersNotInTeamMember(@PathVariable("teamId") Long teamId) {
+        List<UserRequest.UserSimpleInfo> response = teamMemberService.getUsersNotInTeamMember(teamId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

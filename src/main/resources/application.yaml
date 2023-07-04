@@ -30,6 +30,10 @@ spring:
 app:
   jwtSecret: secret
 
+# cookie
+cookie:
+  domain: localhost
+
 ## File Storage Properties
 file:
   upload-dir: /Users/jduckling_1024/project/storage

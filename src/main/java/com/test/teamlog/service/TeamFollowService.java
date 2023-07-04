@@ -1,10 +1,18 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.entity.*;
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.entity.Team;
+import com.test.teamlog.entity.TeamFollower;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.*;
-import com.test.teamlog.repository.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.TeamDTO;
+import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.repository.ProjectRepository;
+import com.test.teamlog.repository.TeamFollowerRepository;
+import com.test.teamlog.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -45,15 +53,15 @@ public class TeamFollowService {
     }
 
     // 해당 팀을 팔로우하는 사용자 목록 조회
-    public List<UserDTO.UserSimpleInfo> getTeamFollowerList(Long teamId) {
+    public List<UserRequest.UserSimpleInfo> getTeamFollowerList(Long teamId) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "ID", teamId));
 
         List<TeamFollower> teamFollowers = teamFollowerRepository.findAllByTeam(team);
 
-        List<UserDTO.UserSimpleInfo> userList = new ArrayList<>();
+        List<UserRequest.UserSimpleInfo> userList = new ArrayList<>();
         for (TeamFollower follower : teamFollowers) {
-            userList.add(new UserDTO.UserSimpleInfo(follower.getUser()));
+            userList.add(new UserRequest.UserSimpleInfo(follower.getUser()));
         }
         return userList;
     }
@@ -83,7 +91,7 @@ public class TeamFollowService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "ID", teamId));
         TeamFollower teamFollower = teamFollowerRepository.findByTeamAndUser(team, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("TeamFollwer", "UserId", currentUser.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("TeamFollwer", "UserId", currentUser.getIdentification()));
         teamFollowerRepository.delete(teamFollower);
         return new ApiResponse(Boolean.TRUE, "팀 언팔로우 성공");
     }

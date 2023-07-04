@@ -1,5 +1,7 @@
 package com.test.teamlog.payload;
 
+import com.test.teamlog.domain.account.dto.UserRequest;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,7 +11,7 @@ public class ProjectJoinDTO {
     public static class ProjectJoinForProject {
         private Long id;
         private String projectName;
-        private UserDTO.UserSimpleInfo user;
+        private UserRequest.UserSimpleInfo user;
     }
 
     @Data

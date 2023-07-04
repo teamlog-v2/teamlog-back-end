@@ -1,5 +1,7 @@
 package com.test.teamlog.payload;
 
+import com.test.teamlog.domain.account.dto.UserRequest;
+
 import com.test.teamlog.entity.*;
 import lombok.*;
 
@@ -38,7 +40,7 @@ public class PostDTO {
         private Boolean isILikeIt;
         private Long id;
         private ProjectDTO.ProjectSimpleInfo project;
-        private UserDTO.UserSimpleInfo writer;
+        private UserRequest.UserSimpleInfo writer;
         private AccessModifier accessModifier;
         private AccessModifier commentModifier;
         private String contents;
@@ -56,10 +58,10 @@ public class PostDTO {
 
     @Getter
     public static class PostHistoryInfo {
-        private UserDTO.UserSimpleInfo writer;
+        private UserRequest.UserSimpleInfo writer;
         private LocalDateTime writeTime;
         public PostHistoryInfo(PostUpdateHistory history) {
-            this.writer = new UserDTO.UserSimpleInfo(history.getUser());
+            this.writer = new UserRequest.UserSimpleInfo(history.getUser());
             this.writeTime = history.getCreateTime();
         }
     }

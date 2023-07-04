@@ -1,9 +1,9 @@
 package com.test.teamlog.repository;
 
+import com.test.teamlog.domain.account.model.User;
+
 import com.test.teamlog.entity.Project;
 import com.test.teamlog.entity.Team;
-import com.test.teamlog.entity.User;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

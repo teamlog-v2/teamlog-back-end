@@ -1,12 +1,19 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.entity.*;
+import com.test.teamlog.domain.account.model.User;
+
+import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.entity.Comment;
+import com.test.teamlog.entity.CommentMention;
+import com.test.teamlog.entity.Post;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.CommentDTO;
+import com.test.teamlog.payload.PagedResponse;
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.repository.CommentMentionRepository;
 import com.test.teamlog.repository.CommentRepository;
 import com.test.teamlog.repository.PostRepository;
-import com.test.teamlog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,16 +40,16 @@ public class CommentService {
 
         List<CommentDTO.CommentInfo> responses = new ArrayList<>();
         if(commentList.size() != 0) {
-            UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(currentUser);
+            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(currentUser);
 
             for (Comment comment : commentList) {
                 List<String> commentMentions = new ArrayList<>();
                 for (CommentMention targetUSer : comment.getCommentMentions()) {
-                    commentMentions.add(targetUSer.getTargetUser().getId());
+                    commentMentions.add(targetUSer.getTargetUser().getIdentification());
                 }
 
                 Boolean isMyComment = Boolean.TRUE;
-                if (currentUser==null || !comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.FALSE;
+                if (currentUser==null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification())) isMyComment = Boolean.FALSE;
 
                 CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
                         .isMyComment(isMyComment)
@@ -68,15 +75,15 @@ public class CommentService {
 
         List<CommentDTO.CommentInfo> responses = new ArrayList<>();
         for (Comment comment : parentComments) {
-            UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(comment.getWriter());
+            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(comment.getWriter());
 
             List<String> commentMentions = new ArrayList<>();
             for (CommentMention targetUSer : comment.getCommentMentions()) {
-                commentMentions.add(targetUSer.getTargetUser().getId());
+                commentMentions.add(targetUSer.getTargetUser().getIdentification());
             }
 
             Boolean isMyComment = Boolean.TRUE;
-            if (currentUser==null || !comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.FALSE;
+            if (currentUser==null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification())) isMyComment = Boolean.FALSE;
 
             CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
                     .isMyComment(isMyComment)
@@ -111,15 +118,15 @@ public class CommentService {
 
         responses = new ArrayList<>();
         for (Comment childComment : childComments) {
-            UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(childComment.getWriter());
+            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(childComment.getWriter());
 
             List<String> commentMentions = new ArrayList<>();
             for (CommentMention targetUSer : childComment.getCommentMentions()) {
-                commentMentions.add(targetUSer.getTargetUser().getId());
+                commentMentions.add(targetUSer.getTargetUser().getIdentification());
             }
 
             Boolean isMyComment = Boolean.TRUE;
-            if (currentUser==null || !comment.getWriter().getId().equals(currentUser.getId())) isMyComment = Boolean.FALSE;
+            if (currentUser==null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification())) isMyComment = Boolean.FALSE;
 
             CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
                     .isMyComment(isMyComment)
@@ -145,20 +152,20 @@ public class CommentService {
         List<CommentDTO.CommentResponse> responses = new ArrayList<>();
 
         for (Comment comment : parentComments) {
-            UserDTO.UserSimpleInfo writer = new UserDTO.UserSimpleInfo(comment.getWriter());
+            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(comment.getWriter());
 
             List<String> commentMentions = new ArrayList<>();
             for (CommentMention targetUSer : comment.getCommentMentions()) {
-                commentMentions.add(targetUSer.getTargetUser().getId());
+                commentMentions.add(targetUSer.getTargetUser().getIdentification());
             }
 
             List<CommentDTO.CommentInfo> childComments = new ArrayList<>();
             for (Comment childComment : comment.getChildComments()) {
-                UserDTO.UserSimpleInfo user = new UserDTO.UserSimpleInfo(childComment.getWriter());
+                UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(childComment.getWriter());
 
                 List<String> childCommentMentions = new ArrayList<>();
                 for (CommentMention targetUSer : childComment.getCommentMentions()) {
-                    childCommentMentions.add(targetUSer.getTargetUser().getId());
+                    childCommentMentions.add(targetUSer.getTargetUser().getIdentification());
                 }
 
                 CommentDTO.CommentInfo childTemp = CommentDTO.CommentInfo.builder()
@@ -242,8 +249,8 @@ public class CommentService {
             if (originalCommentMentions != null) {
                 List<CommentMention> deletedCommentMentions = new ArrayList<>();
                 for (CommentMention commentMention : originalCommentMentions) {
-                    if (newCommentMentions.contains(commentMention.getTargetUser().getId())) {
-                        maintainedCommentMentions.add(commentMention.getTargetUser().getId());
+                    if (newCommentMentions.contains(commentMention.getTargetUser().getIdentification())) {
+                        maintainedCommentMentions.add(commentMention.getTargetUser().getIdentification());
                     } else {
                         deletedCommentMentions.add(commentMention);
                     }
