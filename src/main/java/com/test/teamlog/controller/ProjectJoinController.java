@@ -1,7 +1,6 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.domain.account.model.User;
-
+import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectJoinDTO;
 import com.test.teamlog.service.ProjectJoinService;
@@ -28,13 +27,13 @@ public class ProjectJoinController {
     @PostMapping("/projects/{projectId}/joins")
     public ResponseEntity<ApiResponse> inviteUserForProject(@PathVariable("projectId") long projectId,
                                                             @RequestParam(value = "userId", required = false) String userId,
-                                                            @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
+                                                            @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         ApiResponse apiResponse = null;
         // userId 있으면 초대, 없으면 신청
         if (userId != null) {
             apiResponse = projectJoinService.inviteUserForProject(projectId, userId);
         } else {
-            apiResponse = projectJoinService.applyForProject(projectId, currentUser);
+            apiResponse = projectJoinService.applyForProject(projectId, currentUser.getUser());
         }
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
@@ -62,15 +61,15 @@ public class ProjectJoinController {
 
     @Operation(summary = "유저가 가입 신청한 프로젝트 조회")
     @GetMapping("users/project-apply")
-    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForUser>> getProjectApplyListForUser(@Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        List<ProjectJoinDTO.ProjectJoinForUser> response = projectJoinService.getProjectApplyListForUser(currentUser);
+    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForUser>> getProjectApplyListForUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<ProjectJoinDTO.ProjectJoinForUser> response = projectJoinService.getProjectApplyListForUser(currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "유저가 받은 프로젝트 초대 조회")
     @GetMapping("users/project-invitation")
-    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForUser>> getProjectInvitationListForUser(@Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        List<ProjectJoinDTO.ProjectJoinForUser> response = projectJoinService.getProjectInvitationListForUser(currentUser);
+    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForUser>> getProjectInvitationListForUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<ProjectJoinDTO.ProjectJoinForUser> response = projectJoinService.getProjectInvitationListForUser(currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

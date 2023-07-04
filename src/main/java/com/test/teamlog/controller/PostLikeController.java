@@ -1,9 +1,8 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.domain.account.model.User;
-
-import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.global.security.UserAdapter;
+import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,16 +25,16 @@ public class PostLikeController {
     @Operation(summary = "게시물 좋아요")
     @PostMapping("/posts/{postId}/likers")
     public ResponseEntity<ApiResponse> likePost(@PathVariable("postId") long postId,
-                                                @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = postService.likePost(postId, currentUser);
+                                                @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = postService.likePost(postId, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @Operation(summary = "게시물 좋아요 취소")
     @DeleteMapping("/posts/{postId}/likers")
     public ResponseEntity<ApiResponse> unlikePost(@PathVariable("postId") long postId,
-                                                  @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = postService.unlikePost(postId, currentUser);
+                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = postService.unlikePost(postId, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

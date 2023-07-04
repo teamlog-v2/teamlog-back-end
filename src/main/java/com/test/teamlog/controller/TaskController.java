@@ -1,7 +1,6 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.domain.account.model.User;
-
+import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TaskDTO;
 import com.test.teamlog.service.TaskService;
@@ -28,8 +27,8 @@ public class TaskController {
     @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<TaskDTO.TaskResponse> createTask(@PathVariable("projectId") Long projectId,
                                                            @Valid @RequestBody TaskDTO.TaskRequest taskRequest,
-                                                           @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        TaskDTO.TaskResponse taskResponse = taskService.createTask(projectId, taskRequest, currentUser);
+                                                           @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        TaskDTO.TaskResponse taskResponse = taskService.createTask(projectId, taskRequest, currentUser.getUser());
         return new ResponseEntity<>(taskResponse, HttpStatus.CREATED);
     }
 
@@ -43,8 +42,8 @@ public class TaskController {
     @Operation(summary = "태스크 수정")
     @PutMapping("/tasks/{id}")
     public ResponseEntity<TaskDTO.TaskResponse> updateTask(@PathVariable("id") Long id, @Valid @RequestBody TaskDTO.TaskRequest request,
-                                                           @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        taskService.updateTask(id, request, currentUser);
+                                                           @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        taskService.updateTask(id, request, currentUser.getUser());
         TaskDTO.TaskResponse taskResponse = taskService.getTask(id);
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
     }
@@ -52,8 +51,8 @@ public class TaskController {
     @Operation(summary = "태스크 삭제")
     @DeleteMapping("/tasks/{id}")
     public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
-                                                  @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = taskService.deleteTask(id, currentUser);
+                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = taskService.deleteTask(id, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
@@ -61,8 +60,8 @@ public class TaskController {
     @PutMapping("/tasks/{id}/location")
     public ResponseEntity<TaskDTO.TaskResponse> updateTaskStatus(@PathVariable("id") Long id,
                                                                  @Valid @RequestBody TaskDTO.TaskDropLocation request,
-                                                                 @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        taskService.updateTaskStatus(id, request, currentUser);
+                                                                 @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        taskService.updateTaskStatus(id, request, currentUser.getUser());
         TaskDTO.TaskResponse taskResponse = taskService.getTask(id);
         return new ResponseEntity<>(taskResponse, HttpStatus.OK);
     }

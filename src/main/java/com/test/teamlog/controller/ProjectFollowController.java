@@ -1,15 +1,13 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.domain.account.model.User;
-
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
+import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
-import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.service.ProjectFollowService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,16 +26,16 @@ public class ProjectFollowController {
     @Operation(summary = "프로젝트 팔로우")
     @PostMapping("/projects/{projectId}/followers")
     public ResponseEntity<ApiResponse> followProject(@PathVariable("projectId") Long projectId,
-                                                     @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = projectFollowService.followProject(projectId, currentUser);
+                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = projectFollowService.followProject(projectId, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @Operation(summary = "프로젝트 언팔로우")
     @DeleteMapping("/projects/{projectId}/followers")
     public ResponseEntity<ApiResponse> unfollowProject(@PathVariable("projectId") Long projectId,
-                                                       @Parameter(hidden = true) @AuthenticationPrincipal User currentUser) {
-        ApiResponse apiResponse = projectFollowService.unfollowProject(projectId, currentUser);
+                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = projectFollowService.unfollowProject(projectId, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
