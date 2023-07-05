@@ -13,7 +13,8 @@ import java.util.List;
 
 @Entity
 @Builder
-@Setter @Getter
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -30,11 +31,11 @@ public class Post extends BaseTimeEntity {
     private User writer;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "access_modifier",nullable = false, columnDefinition = "smallint")
+    @Column(name = "access_modifier", nullable = false, columnDefinition = "smallint")
     private AccessModifier accessModifier;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "comment_modifier",nullable = false, columnDefinition = "smallint")
+    @Column(name = "comment_modifier", nullable = false, columnDefinition = "smallint")
     private AccessModifier commentModifier;
 
     private Point location;
@@ -70,18 +71,16 @@ public class Post extends BaseTimeEntity {
     @BatchSize(size = 10)
     private List<PostUpdateHistory> postUpdateHistories = new ArrayList<>();
 
-    public void addHashTags(List<PostTag> tags)
-    {
+    public void addHashTags(List<PostTag> tags) {
         this.hashtags.addAll(tags);
     }
 
-    public void removeHashTags(List<PostTag> tags)
-    {
+    public void removeHashTags(List<PostTag> tags) {
         this.hashtags.removeAll(tags);
     }
 
     public void setProject(Project project) {
-        if(this.project != null) {
+        if (this.project != null) {
             this.project.getPosts().remove(this);
         }
         this.project = project;

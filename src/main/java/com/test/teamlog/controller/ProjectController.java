@@ -1,7 +1,9 @@
 package com.test.teamlog.controller;
 
+import com.test.teamlog.domain.post.service.PostService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +25,7 @@ import java.util.List;
 @Tag(name = "프로젝트 관리")
 public class ProjectController {
     private final ProjectService projectService;
+    private final PostService postService;
 
     @Operation(summary = "프로젝트 생성")
     @PostMapping("/projects")
@@ -124,6 +127,28 @@ public class ProjectController {
     public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getUserFollowingProjects(@PathVariable("id") String id,
                                                                                          @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<ProjectDTO.ProjectListResponse> response = projectService.getUserFollowingProjects(id, currentUser.getUser());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(summary = "해시태그 추천")
+    @GetMapping("/projects/{projectId}/recommended-hashtags")
+    public ResponseEntity<List<String>> getRecommendedHashTags(@PathVariable("projectId") long projectId) {
+        List<String> response = postService.getRecommendedHashTags(projectId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(summary = "위치정보가 있는 프로젝트 게시물 조회")
+    @GetMapping("/projects/{projectId}/posts/with-location")
+    public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts(@PathVariable("projectId") long projectId,
+                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<PostDTO.PostResponse> response = postService.getLocationPosts(projectId, currentUser.getUser());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(summary = "프로젝트 내 게시물 전체 해시태그 조회")
+    @GetMapping("/projects/{projectId}/hashtags")
+    public ResponseEntity<List<String>> getHashTagsInProjectPosts(@PathVariable("projectId") long projectId) {
+        List<String> response = postService.getHashTagsInProjectPosts(projectId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -13,7 +13,7 @@ import com.test.teamlog.payload.PagedResponse;
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.repository.CommentMentionRepository;
 import com.test.teamlog.repository.CommentRepository;
-import com.test.teamlog.repository.PostRepository;
+import com.test.teamlog.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

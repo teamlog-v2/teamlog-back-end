@@ -3,7 +3,7 @@ package com.test.teamlog.controller;
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.service.PostService;
+import com.test.teamlog.domain.post.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

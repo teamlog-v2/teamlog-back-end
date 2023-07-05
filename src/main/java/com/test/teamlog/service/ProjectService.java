@@ -3,6 +3,7 @@ package com.test.teamlog.service;
 import com.test.teamlog.domain.account.model.User;
 
 import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;

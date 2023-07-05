@@ -1,13 +1,16 @@
-package com.test.teamlog.service;
+package com.test.teamlog.domain.post.service;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-
+import com.test.teamlog.domain.post.dto.PostInput;
+import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.*;
 import com.test.teamlog.repository.*;
+import com.test.teamlog.service.FileStorageService;
+import com.test.teamlog.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -16,6 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -257,7 +261,7 @@ public class PostService {
 
         List<PostTagInfo> hashtags = postTagRepository.getRecommendedHashTags(id);
         List<String> response = new ArrayList<>();
-        for(PostTagInfo tag : hashtags) {
+        for (PostTagInfo tag : hashtags) {
             response.add(tag.getName());
         }
         return response;
@@ -297,66 +301,48 @@ public class PostService {
 
     // 포스트 생성
     @Transactional
-    public Long createPost(PostDTO.PostRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
-        Project project = projectRepository.findById(request.getProjectId())
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", request.getProjectId()));
+    public Long createPost(PostInput input,
+                           MultipartFile[] media,
+                           MultipartFile[] files,
+                           User currentUser) {
+        Project project = projectRepository.findById(input.getProjectId())
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", input.getProjectId()));
         projectService.validateUserIsMemberOfProject(project, currentUser);
 
-        Point point = null;
-        if (request.getLatitude() != null && request.getLongitude() != null) {
-            GeometryFactory geometryFactory = new GeometryFactory();
-            point = geometryFactory.createPoint(new Coordinate(request.getLatitude(), request.getLongitude()));
-        }
+        Post post = input.toPost(project, currentUser);
 
-        Post post = Post.builder()
-                .contents(request.getContents())
-                .accessModifier(request.getAccessModifier())
-                .commentModifier(request.getCommentModifier())
-                .location(point)
-                .address(request.getAddress())
-                .writer(currentUser)
-                .project(project)
-                .build();
+        if (!CollectionUtils.isEmpty(input.getHashtags())) {
+            final List<PostTag> postTagList
+                    = input.getHashtags()
+                    .stream().map(hashTag -> PostTag.builder().name(hashTag).build()).collect(Collectors.toList());
+            postTagList.forEach(tag -> tag.addPost(post));
+        }
 
         Post newPost = postRepository.save(post);
 
-        if (request.getHashtags() != null) {
-            List<PostTag> hashtags = new ArrayList<>();
-            for (String tagName : request.getHashtags()) {
-                PostTag newTag = PostTag.builder()
-                        .name(tagName)
-                        .post(post)
-                        .build();
-                hashtags.add(newTag);
-            }
-            postTagRepository.saveAll(hashtags);
-            post.setHashtags(hashtags);
-        }
-        if (media != null) {
-            Arrays.asList(media)
-                    .stream()
-                    .map(file -> fileStorageService.storeFile(file, post, Boolean.TRUE))
-                    .collect(Collectors.toList());
-        }
+        storeMediaFiles(media, post);
+        storeFiles(files, post);
 
-        if (files != null) {
-            Arrays.asList(files)
-                    .stream()
-                    .map(file -> fileStorageService.storeFile(file, post, Boolean.FALSE))
-                    .collect(Collectors.toList());
-        }
-
-        // 포스트 수정내역 생성
-        PostUpdateHistory history = PostUpdateHistory.builder()
-                .post(post)
-                .user(currentUser)
-                .build();
-        postUpdateHistoryRepository.save(history);
+        createPostUpdateHistory(currentUser, post);
 
         project.setUpdateTime(LocalDateTime.now());
-        projectRepository.save(project);
-
         return newPost.getId();
+    }
+
+    private void storeFiles(MultipartFile[] files, Post post) {
+        if (files == null) return;
+
+        for (MultipartFile file : files) {
+            fileStorageService.storeFile(file, post, Boolean.FALSE);
+        }
+    }
+
+    private void storeMediaFiles(MultipartFile[] media, Post post) {
+        if (media == null) return;
+
+        for (MultipartFile file : media) {
+            fileStorageService.storeFile(file, post, Boolean.TRUE);
+        }
     }
 
     // 포스트 수정
@@ -440,11 +426,7 @@ public class PostService {
             }
         }
         // 포스트 수정내역 생성
-        PostUpdateHistory history = PostUpdateHistory.builder()
-                .post(post)
-                .user(currentUser)
-                .build();
-        postUpdateHistoryRepository.save(history);
+        createPostUpdateHistory(currentUser, post);
 
         return new ApiResponse(Boolean.TRUE, "포스트 수정 성공");
     }
@@ -462,7 +444,7 @@ public class PostService {
     }
 
     // Post to PostResponse
-    public PostDTO.PostResponse convertToPostResponse(Post post, User currentUser) {
+    private PostDTO.PostResponse convertToPostResponse(Post post, User currentUser) {
         UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(post.getWriter());
 
         List<String> hashtags = new ArrayList<>();
@@ -600,5 +582,14 @@ public class PostService {
 
     public Boolean isILikeIt(Post post, User currentUser) {
         return postLikerRepository.findByPostAndUser(post, currentUser).isPresent();
+    }
+
+    // TODO: PostUpdateHistoryService로 이동
+    private void createPostUpdateHistory(User currentUser, Post post) {
+        PostUpdateHistory history = PostUpdateHistory.builder()
+                .post(post)
+                .user(currentUser)
+                .build();
+        postUpdateHistoryRepository.save(history);
     }
 }

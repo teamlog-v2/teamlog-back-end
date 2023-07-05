@@ -2,12 +2,12 @@ package com.test.teamlog.domain.account.controller;
 
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.service.UserService;
+import com.test.teamlog.domain.post.service.PostService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.CommentDTO;
 import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.service.CommentService;
-import com.test.teamlog.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -141,7 +141,8 @@ public class UserApiController {
     @GetMapping("/users")
     public ResponseEntity<List<UserRequest.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String identification,
                                                                        @RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {List<UserRequest.UserSimpleInfo> response = userService.searchUser(identification, name);
+                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<UserRequest.UserSimpleInfo> response = userService.searchUser(identification, name);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

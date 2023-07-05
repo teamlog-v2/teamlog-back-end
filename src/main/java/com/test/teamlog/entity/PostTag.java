@@ -1,7 +1,5 @@
 package com.test.teamlog.entity;
 
-import com.test.teamlog.domain.account.model.User;
-
 import lombok.*;
 
 import javax.persistence.*;
@@ -24,10 +22,11 @@ public class PostTag {
     @JoinColumn(name = "post_id",nullable = false)
     private Post post;
 
-    public void setPost(Post post) {
+    public void addPost(Post post) {
         if(this.post != null) {
             this.post.getHashtags().remove(this);
         }
+
         this.post = post;
         post.getHashtags().add(this);
     }
