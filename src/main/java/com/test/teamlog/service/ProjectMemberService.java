@@ -116,7 +116,7 @@ public class ProjectMemberService {
     public ApiResponse expelMember(Long projectId, String userId, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         projectService.validateUserIsMaster(project, currentUser);
         ProjectMember member = projectMemberRepository.findByProjectAndUser(project, user)

@@ -85,14 +85,14 @@ public class TeamService {
         User user = null;
         boolean isMyTeamList = false;
         if (currentUser == null) {
-            user = userRepository.findById(id)
+            user = userRepository.findByIdentification(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
             isMyTeamList = currentUser.getIdentification().equals(id);
             if (isMyTeamList)
                 user = currentUser;
             else
-                user = userRepository.findById(id)
+                user = userRepository.findByIdentification(id)
                         .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         }
         List<Team> teams = teamRepository.getTeamsByUser(user);
@@ -148,7 +148,7 @@ public class TeamService {
         team.setAccessModifier(request.getAccessModifier());
 
         if (request.getMasterId() != null) {
-            User newMaster = userRepository.findById(request.getMasterId())
+            User newMaster = userRepository.findByIdentification(request.getMasterId())
                     .orElseThrow(() -> new ResourceNotFoundException("Project", "id", request.getMasterId()));
             team.setMaster(newMaster);
         }
@@ -164,7 +164,7 @@ public class TeamService {
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
         validateUserIsMaster(team, currentUser);
 
-        User newMaster = userRepository.findById(newMasterId)
+        User newMaster = userRepository.findByIdentification(newMasterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", newMasterId));
         team.setMaster(newMaster);
         teamRepository.save(team);

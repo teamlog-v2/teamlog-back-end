@@ -38,7 +38,7 @@ public class ProjectJoinService {
     public ApiResponse inviteUserForProject(Long projectId, String userId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         if (projectService.isUserMemberOfProject(project, user))

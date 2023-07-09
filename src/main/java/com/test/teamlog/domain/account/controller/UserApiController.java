@@ -74,10 +74,10 @@ public class UserApiController {
     }
 
     @Operation(summary = "회원 정보 조회")
-    @GetMapping("/users/{id}")
-    public ResponseEntity<UserRequest.UserResponse> getUserById(@PathVariable("id") String id,
+    @GetMapping("/users/{identification}")
+    public ResponseEntity<UserRequest.UserResponse> getUserById(@PathVariable("identification") String identification,
                                                                 @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        UserRequest.UserResponse userResponse = userService.getUser(id, currentUser.getUser());
+        UserRequest.UserResponse userResponse = userService.getUser(identification, currentUser.getUser());
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
@@ -139,10 +139,9 @@ public class UserApiController {
 
     @Operation(summary = "회원 검색")
     @GetMapping("/users")
-    public ResponseEntity<List<UserRequest.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String id,
+    public ResponseEntity<List<UserRequest.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String identification,
                                                                        @RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<UserRequest.UserSimpleInfo> response = userService.searchUser(id, name);
+                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {List<UserRequest.UserSimpleInfo> response = userService.searchUser(identification, name);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

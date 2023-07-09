@@ -88,7 +88,7 @@ public class TaskService {
         List<TaskPerformer> performers = new ArrayList<>();
         if (request.getPerformersId() != null) {
             for (String userId : request.getPerformersId()) {
-                User tempUser = userRepository.findById(userId)
+                User tempUser = userRepository.findByIdentification(userId)
                         .orElseThrow(() -> new ResourceNotFoundException("USER", "id", userId));
                 TaskPerformer performer = TaskPerformer.builder()
                         .task(task)
@@ -146,7 +146,7 @@ public class TaskService {
             if (newTaskPerformersId.size() > 0) {
                 List<TaskPerformer> taskPerformers = new ArrayList<>();
                 for (String performerId : newTaskPerformersId) {
-                    User performer = userRepository.findById(performerId)
+                    User performer = userRepository.findByIdentification(performerId)
                             .orElseThrow(() -> new ResourceNotFoundException("USER", "id", performerId));
                     TaskPerformer newPerformer = TaskPerformer.builder()
                             .task(task)

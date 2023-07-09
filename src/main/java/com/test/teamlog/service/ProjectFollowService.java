@@ -31,7 +31,7 @@ public class ProjectFollowService {
 
     // 유저가 팔로우하는 프로젝트 목록 조회
     public List<ProjectDTO.ProjectListResponse> getProjectListByProjectFollower(String userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<ProjectFollower> projectFollowers = projectFollowerRepository.findAllByUser(user);
 

@@ -32,7 +32,7 @@ public class TeamFollowService {
 
     // 유저가 팔로우하는 팀 목록 조회
     public List<TeamDTO.TeamListResponse> getTeamListByTeamFollower(String userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<TeamFollower> teamFollowers = teamFollowerRepository.findAllByUser(user);
 

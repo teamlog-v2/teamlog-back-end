@@ -115,14 +115,14 @@ public class ProjectService {
         User user = null;
         boolean isMyProjectList = false;
         if (currentUser == null) {
-            user = userRepository.findById(id)
+            user = userRepository.findByIdentification(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
             isMyProjectList = currentUser.getIdentification().equals(id);
             if (isMyProjectList)
                 user = currentUser;
             else
-                user = userRepository.findById(id)
+                user = userRepository.findByIdentification(id)
                         .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         }
         List<ProjectFollower> userFollowingProjects = projectFollowerRepository.findAllByUser(user);
@@ -237,14 +237,14 @@ public class ProjectService {
         User user = null;
         boolean isMyProjectList = false;
         if (currentUser == null) {
-            user = userRepository.findById(id)
+            user = userRepository.findByIdentification(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
             isMyProjectList = currentUser.getIdentification().equals(id);
             if (isMyProjectList)
                 user = currentUser;
             else
-                user = userRepository.findById(id)
+                user = userRepository.findByIdentification(id)
                         .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         }
         List<Project> userProjectList = projectRepository.getProjectByUser(user);
@@ -332,7 +332,7 @@ public class ProjectService {
         project.setIntroduction(request.getIntroduction());
 
         if (request.getMasterId() != null) {
-            User newMaster = userRepository.findById(request.getMasterId())
+            User newMaster = userRepository.findByIdentification(request.getMasterId())
                     .orElseThrow(() -> new ResourceNotFoundException("Project", "id", request.getMasterId()));
             project.setMaster(newMaster);
         }
@@ -373,7 +373,7 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
         validateUserIsMaster(project, currentUser);
 
-        User newMaster = userRepository.findById(newMasterId)
+        User newMaster = userRepository.findByIdentification(newMasterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", newMasterId));
         project.setMaster(newMaster);
         projectRepository.save(project);

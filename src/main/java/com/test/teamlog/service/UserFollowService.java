@@ -26,7 +26,7 @@ public class UserFollowService {
 
     // 팔로워 리스트 조회
     public List<UserRequest.UserFollowInfo> getFollowerList(String userId, User currentUser) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<UserFollow> currentUserFollowings = userFollowRepository.findByFromUser(currentUser);
         List<UserFollow> followers = user.getFollowers();
@@ -54,7 +54,7 @@ public class UserFollowService {
 
     // 팔로잉 리스트 조회
     public List<UserRequest.UserFollowInfo> getFollowingList(String userId, User currentUser) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<UserFollow> currentUserFollowings = userFollowRepository.findByFromUser(currentUser);
         List<UserFollow> followings = user.getFollowing();
@@ -83,7 +83,7 @@ public class UserFollowService {
     // 팔로우
     @Transactional
     public ApiResponse followUser(User currentUser, String targetUserID) {
-        User targetUser = userRepository.findById(targetUserID)
+        User targetUser = userRepository.findByIdentification(targetUserID)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", targetUserID));
 
         UserFollow newFollow = UserFollow.builder()
@@ -101,7 +101,7 @@ public class UserFollowService {
     // 언팔로우
     @Transactional
     public ApiResponse unfollowUser(String targetUserId, User currentUser) {
-        User targetUser = userRepository.findById(targetUserId)
+        User targetUser = userRepository.findByIdentification(targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", targetUserId));
         UserFollow userFollow = userFollowRepository.findByFromUserAndToUser(currentUser, targetUser)
                 .orElseThrow(() -> new ResourceNotFoundException("UserFollow", "FromUserId", currentUser.getIdentification()));

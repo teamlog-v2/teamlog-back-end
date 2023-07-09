@@ -214,7 +214,7 @@ public class CommentService {
 
         List<CommentMention> commentMentions = new ArrayList<>();
         for (String targetId : request.getCommentMentions()) {
-            User target = userRepository.findById(targetId)
+            User target = userRepository.findByIdentification(targetId)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", targetId));
 
             CommentMention commentMention = CommentMention.builder()
@@ -262,7 +262,7 @@ public class CommentService {
             if (newCommentMentions.size() > 0) {
                 List<CommentMention> commentMentions = new ArrayList<>();
                 for (String targetId : newCommentMentions) {
-                    User target = userRepository.findById(targetId)
+                    User target = userRepository.findByIdentification(targetId)
                             .orElseThrow(() -> new ResourceNotFoundException("USER", "id", targetId));
 
                     CommentMention commentMention = CommentMention.builder()
