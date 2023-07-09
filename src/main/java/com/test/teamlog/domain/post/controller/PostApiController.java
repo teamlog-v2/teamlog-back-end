@@ -35,7 +35,7 @@ public class PostApiController {
                                                        @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                        @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         Long newPostId = postService.create(request.toInput(), media, files, currentUser.getUser());
-        PostDTO.PostResponse response = postService.getPost(newPostId, currentUser.getUser());
+        PostDTO.PostResponse response = postService.readOne(newPostId, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -50,7 +50,7 @@ public class PostApiController {
                                                        @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                        @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         final Long postId = postService.update(id, request.toInput(), media, files, currentUser.getUser());
-        PostDTO.PostResponse response = postService.getPost(postId, currentUser.getUser());
+        PostDTO.PostResponse response = postService.readOne(postId, currentUser.getUser());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -65,9 +65,9 @@ public class PostApiController {
 
     @Operation(summary = "게시물 조회")
     @GetMapping("/{id}")
-    public ResponseEntity<PostDTO.PostResponse> readPostById(@PathVariable("id") long id,
-                                                             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        PostDTO.PostResponse response = postService.getPost(id, currentUser.getUser());
+    public ResponseEntity<PostDTO.PostResponse> readOne(@PathVariable("id") long id,
+                                                        @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        PostDTO.PostResponse response = postService.readOne(id, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

@@ -72,7 +72,7 @@ public class PostService {
     }
 
     // 단일 포스트 조회
-    public PostDTO.PostResponse getPost(Long id, User currentUser) {
+    public PostDTO.PostResponse readOne(Long id, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         if (post.getAccessModifier() == AccessModifier.PRIVATE) {
