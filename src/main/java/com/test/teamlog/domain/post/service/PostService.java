@@ -85,14 +85,12 @@ public class PostService {
     }
 
     // 모든 포스트 조회
-    public PagedResponse<PostDTO.PostResponse> getAllPosts(int page, int size, User currentUser) {
-        Pageable pageable = PageRequest.of(0, size, Sort.Direction.DESC, "createTime");
-
+    public PagedResponse<PostDTO.PostResponse> readAll(int page, int size, User currentUser) {
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
         Page<Post> posts = postRepository.findAll(pageable);
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
-        for (Post post : posts) {
-            responses.add(convertToPostResponse(post, currentUser));
-        }
+
+        List<PostDTO.PostResponse> responses
+                = posts.stream().map(post -> convertToPostResponse(post, currentUser)).collect(Collectors.toList());
         return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
                 posts.getTotalPages(), posts.isLast());
     }

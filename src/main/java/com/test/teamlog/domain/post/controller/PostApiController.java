@@ -80,12 +80,13 @@ public class PostApiController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    // TODO: API 사용 여부 확인
     @Operation(summary = "모든 게시물 조회")
     @GetMapping
-    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> readAllPosts(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-                                                                            @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        PagedResponse<PostDTO.PostResponse> response = postService.getAllPosts(page, size, currentUser.getUser());
+    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> readAll(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                       @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        PagedResponse<PostDTO.PostResponse> response = postService.readAll(page, size, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
