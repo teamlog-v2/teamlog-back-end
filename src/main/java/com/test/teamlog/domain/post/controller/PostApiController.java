@@ -30,33 +30,25 @@ public class PostApiController {
 
     @Operation(summary = "게시물 생성")
     @PostMapping
-    public ResponseEntity<PostDTO.PostResponse> createProject(@RequestPart(value = "key") PostRequest request,
-                                                              @RequestPart(value = "media", required = false) MultipartFile[] media,
-                                                              @RequestPart(value = "files", required = false) MultipartFile[] files,
-                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+    public ResponseEntity<PostDTO.PostResponse> create(@RequestPart(value = "key") PostRequest request,
+                                                       @RequestPart(value = "media", required = false) MultipartFile[] media,
+                                                       @RequestPart(value = "files", required = false) MultipartFile[] files,
+                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         Long newPostId = postService.create(request.toInput(), media, files, currentUser.getUser());
         PostDTO.PostResponse response = postService.getPost(newPostId, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "게시물 조회")
-    @GetMapping("/{id}")
-    public ResponseEntity<PostDTO.PostResponse> readPostById(@PathVariable("id") long id,
-                                                             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        PostDTO.PostResponse response = postService.getPost(id, currentUser.getUser());
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
     @Operation(summary = "게시물 수정")
     @PutMapping("/{id}")
-    public ResponseEntity<PostDTO.PostResponse> updateProject(@PathVariable("id") long id,
-                                                              @Parameter(name = "생성 리퀘스트 + deletedFileIdList 추가됨.\n" +
+    public ResponseEntity<PostDTO.PostResponse> update(@PathVariable("id") long id,
+                                                       @Parameter(name = "생성 리퀘스트 + deletedFileIdList 추가됨.\n" +
                                                                       "List<Long> 타입이고 삭제할 파일 id를 모아서 보내주면됨\n" +
                                                                       "(포스트 조회시 file, media 안에 id도 같이 보내도록 바꿈. 그걸 보내주면 될듯)"
                                                               ) @RequestPart(value = "key") PostUpdateRequest request,
-                                                              @RequestPart(value = "media", required = false) MultipartFile[] media,
-                                                              @RequestPart(value = "files", required = false) MultipartFile[] files,
-                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+                                                       @RequestPart(value = "media", required = false) MultipartFile[] media,
+                                                       @RequestPart(value = "files", required = false) MultipartFile[] files,
+                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         final Long postId = postService.update(id, request.toInput(), media, files, currentUser.getUser());
         PostDTO.PostResponse response = postService.getPost(postId, currentUser.getUser());
 
@@ -65,10 +57,18 @@ public class PostApiController {
 
     @Operation(summary = "게시물 삭제")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
-                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = postService.deletePost(id, currentUser.getUser());
+    public ResponseEntity<ApiResponse> delete(@PathVariable("id") Long id,
+                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = postService.delete(id, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @Operation(summary = "게시물 조회")
+    @GetMapping("/{id}")
+    public ResponseEntity<PostDTO.PostResponse> readPostById(@PathVariable("id") long id,
+                                                             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        PostDTO.PostResponse response = postService.getPost(id, currentUser.getUser());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "게시물 수정 내역 조회")

@@ -414,7 +414,7 @@ public class PostService {
 
     // 포스트 삭제
     @Transactional
-    public ApiResponse deletePost(Long id, User currentUser) {
+    public ApiResponse delete(Long id, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         projectService.validateUserIsMemberOfProject(post.getProject(), currentUser);
