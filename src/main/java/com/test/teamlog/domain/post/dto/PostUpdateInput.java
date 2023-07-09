@@ -2,9 +2,6 @@ package com.test.teamlog.domain.post.dto;
 
 import com.test.teamlog.entity.AccessModifier;
 import lombok.Data;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 
 import java.util.List;
 
@@ -19,14 +16,4 @@ public class PostUpdateInput {
     private Long projectId;
     private List<String> hashtags;
     private List<Long> deletedFileIdList;
-
-    private Point makeLocation() {
-        Point point = null;
-        if (latitude != null && longitude != null) {
-            GeometryFactory geometryFactory = new GeometryFactory();
-            point = geometryFactory.createPoint(new Coordinate(latitude, longitude));
-        }
-
-        return point;
-    }
 }

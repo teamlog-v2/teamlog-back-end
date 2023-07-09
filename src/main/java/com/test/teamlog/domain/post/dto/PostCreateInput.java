@@ -5,19 +5,18 @@ import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Post;
 import com.test.teamlog.entity.Project;
 import lombok.Data;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 import java.util.List;
 
 @Data
-public class PostInput {
+public class PostCreateInput {
     private String contents;
     private AccessModifier accessModifier;
     private AccessModifier commentModifier;
     private Double latitude;
     private Double longitude;
+    private Point location;
     private String address;
     private Long projectId;
     private List<String> hashtags;
@@ -25,23 +24,13 @@ public class PostInput {
 
     public Post toPost(Project project, User currentUser) {
         return Post.builder()
-                .contents(contents)
-                .accessModifier(accessModifier)
-                .commentModifier(commentModifier)
-                .address(address)
-                .location(makeLocation())
+                .contents(this.contents)
+                .accessModifier(this.accessModifier)
+                .commentModifier(this.commentModifier)
+                .address(this.address)
+                .location(this.location)
                 .writer(currentUser)
                 .project(project)
                 .build();
-    }
-
-    private Point makeLocation() {
-        Point point = null;
-        if (latitude != null && longitude != null) {
-            GeometryFactory geometryFactory = new GeometryFactory();
-            point = geometryFactory.createPoint(new Coordinate(latitude, longitude));
-        }
-
-        return point;
     }
 }

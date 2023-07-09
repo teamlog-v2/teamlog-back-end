@@ -34,9 +34,9 @@ public class PostApiController {
                                                               @RequestPart(value = "media", required = false) MultipartFile[] media,
                                                               @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        Long newPostId = postService.createPost(request.toInput(), media, files, currentUser.getUser());
-        PostDTO.PostResponse newPost = postService.getPost(newPostId, currentUser.getUser());
-        return new ResponseEntity<>(newPost, HttpStatus.CREATED);
+        Long newPostId = postService.create(request.toInput(), media, files, currentUser.getUser());
+        PostDTO.PostResponse response = postService.getPost(newPostId, currentUser.getUser());
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Operation(summary = "게시물 조회")
@@ -57,7 +57,7 @@ public class PostApiController {
                                                               @RequestPart(value = "media", required = false) MultipartFile[] media,
                                                               @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        final Long postId = postService.updatePost(id, request.toInput(), media, files, currentUser.getUser());
+        final Long postId = postService.update(id, request.toInput(), media, files, currentUser.getUser());
         PostDTO.PostResponse response = postService.getPost(postId, currentUser.getUser());
 
         return new ResponseEntity<>(response, HttpStatus.OK);

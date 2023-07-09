@@ -16,8 +16,8 @@ public class PostRequest {
     private Long projectId;
     private List<String> hashtags;
 
-    public PostInput toInput() {
-        PostInput input = new PostInput();
+    public PostCreateInput toInput() {
+        PostCreateInput input = new PostCreateInput();
         input.setContents(this.contents);
         input.setAccessModifier(this.accessModifier);
         input.setCommentModifier(this.commentModifier);

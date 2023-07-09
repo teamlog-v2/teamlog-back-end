@@ -2,7 +2,7 @@ package com.test.teamlog.domain.post.service;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.post.dto.PostInput;
+import com.test.teamlog.domain.post.dto.PostCreateInput;
 import com.test.teamlog.domain.post.dto.PostUpdateInput;
 import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.entity.*;
@@ -301,14 +301,15 @@ public class PostService {
 
     // 포스트 생성
     @Transactional
-    public Long createPost(PostInput input,
-                           MultipartFile[] media,
-                           MultipartFile[] files,
-                           User currentUser) {
+    public Long create(PostCreateInput input,
+                       MultipartFile[] media,
+                       MultipartFile[] files,
+                       User currentUser) {
         Project project = projectRepository.findById(input.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", input.getProjectId()));
         projectService.validateUserIsMemberOfProject(project, currentUser);
 
+        input.setLocation(makeLocation(input.getLatitude(), input.getLongitude()));
         Post post = input.toPost(project, currentUser);
 
         if (!CollectionUtils.isEmpty(input.getHashtags())) {
@@ -348,15 +349,15 @@ public class PostService {
 
     // 포스트 수정
     @Transactional
-    public Long updatePost(Long id,
-                           PostUpdateInput input,
-                           MultipartFile[] media,
-                           MultipartFile[] files, User currentUser) {
+    public Long update(Long id,
+                       PostUpdateInput input,
+                       MultipartFile[] media,
+                       MultipartFile[] files, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         projectService.validateUserIsMemberOfProject(post.getProject(), currentUser);
 
-        post.update(input.getContents(), input.getAccessModifier(), input.getCommentModifier(), makeLocation(input), input.getAddress());
+        post.update(input.getContents(), input.getAccessModifier(), input.getCommentModifier(), makeLocation(input.getLatitude(), input.getLongitude()), input.getAddress());
 
         // 취소한 파일 삭제 후 새로운 파일 저장
         fileStorageService.deleteFileById(input.getDeletedFileIdList());
@@ -370,10 +371,10 @@ public class PostService {
         return post.getId();
     }
 
-    private static Point makeLocation(PostUpdateInput input) {
+    private static Point makeLocation(Double latitude, Double longitude) {
         Point location = null;
-        if (input.getLatitude() != null && input.getLongitude() != null) {
-            location = new GeometryFactory().createPoint(new Coordinate(input.getLatitude(), input.getLongitude()));
+        if (latitude != null && longitude != null) {
+            location = new GeometryFactory().createPoint(new Coordinate(latitude, longitude));
         }
 
         return location;
