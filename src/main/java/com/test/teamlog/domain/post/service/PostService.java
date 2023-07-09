@@ -2,10 +2,9 @@ package com.test.teamlog.domain.post.service;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.post.dto.PostCreateInput;
-import com.test.teamlog.domain.post.dto.PostReadByProjectInput;
-import com.test.teamlog.domain.post.dto.PostUpdateInput;
+import com.test.teamlog.domain.post.dto.*;
 import com.test.teamlog.domain.post.repository.PostRepository;
+import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
 import com.test.teamlog.domain.postupdatehistory.service.PostUpdateHistoryService;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
@@ -46,30 +45,29 @@ public class PostService {
     private final PostMediaRepository postMediaRepository;
     private final PostLikerRepository postLikerRepository;
     private final PostUpdateHistoryRepository postUpdateHistoryRepository;
-    private final ProjectRepository projectRepository;
 
-    public List<PostDTO.PostResponse> getPostsByUser(User currentUser) {
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
+    public List<PostResult> getPostsByUser(User currentUser) {
+        List<PostResult> resultList = new ArrayList<>();
         List<Post> posts = postRepository.findAllByWriter(currentUser);
 
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post, currentUser));
+            resultList.add(convertToPostResult(post, currentUser));
         }
-        return responses;
+        return resultList;
     }
 
-    public List<PostDTO.PostResponse> readAllByFollowingUser(User currentUser) {
+    public List<PostResult> readAllByFollowingUser(User currentUser) {
         List<UserFollow> userFollowingList = userFollowService.readUserFollowList(currentUser);
         if (CollectionUtils.isEmpty(userFollowingList)) return Collections.emptyList();
 
         List<User> userFollowings = userFollowingList.stream().map(UserFollow::getToUser).collect(Collectors.toList());
         List<Post> posts = postRepository.findAllByWriters(userFollowings);
 
-        return posts.stream().map(post -> convertToPostResponse(post, currentUser)).collect(Collectors.toList());
+        return posts.stream().map(post -> convertToPostResult(post, currentUser)).collect(Collectors.toList());
     }
 
     // 단일 포스트 조회
-    public PostDTO.PostResponse readOne(Long id, User currentUser) {
+    public PostResult readOne(Long id, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
 
@@ -78,23 +76,23 @@ public class PostService {
             projectService.validateUserIsMemberOfProject(post.getProject(), currentUser);
         }
 
-        return convertToPostResponse(post, currentUser);
+        return convertToPostResult(post, currentUser);
     }
 
     // 모든 포스트 조회
-    public PagedResponse<PostDTO.PostResponse> readAll(int page, int size, User currentUser) {
+    public PagedResponse<PostResult> readAll(int page, int size, User currentUser) {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
         Page<Post> posts = postRepository.findAll(pageable);
 
-        List<PostDTO.PostResponse> responses
-                = posts.stream().map(post -> convertToPostResponse(post, currentUser)).collect(Collectors.toList());
-        return new PagedResponse<>(responses, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
+        List<PostResult> resultList
+                = posts.stream().map(post -> convertToPostResult(post, currentUser)).collect(Collectors.toList());
+        return new PagedResponse<>(resultList, posts.getNumber(), posts.getSize(), posts.getTotalElements(),
                 posts.getTotalPages(), posts.isLast());
     }
 
     // 프로젝트 내 포스트 조회
-    private PagedResponse<PostDTO.PostResponse> searchPostsByProject(Long projectId, Sort.Direction sort, String cop,
-                                                                    Long cursor, int size, User currentUser) {
+    private PagedResponse<PostResult> searchPostsByProject(Long projectId, Sort.Direction sort, String cop,
+                                                                     Long cursor, int size, User currentUser) {
         Project project = projectService.findOne(projectId);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
@@ -112,9 +110,9 @@ public class PostService {
                 posts = postRepository.findAllByProjectAndCursor(project, cursor, cop, AccessModifier.PUBLIC, pageable);
         }
 
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        List<PostResult> resultList = new ArrayList<>();
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post, currentUser));
+            resultList.add(convertToPostResult(post, currentUser));
         }
 
         long totalElements = 0;
@@ -124,18 +122,18 @@ public class PostService {
         else
             totalElements = postRepository.getPostsCount(project, AccessModifier.PUBLIC);
 
-        return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
+        return new PagedResponse<>(resultList, 0, posts.getSize(), totalElements,
                 0, posts.isLast());
     }
 
     // 키워드로 게시물 조회
-    private PagedResponse<PostDTO.PostResponse> searchPostsInProjectByKeyword(Long projectId,
-                                                                             String keyword,
-                                                                             Sort.Direction sort,
-                                                                             String cop,
-                                                                             Long cursor,
-                                                                             int size,
-                                                                             User currentUser) {
+    private PagedResponse<PostResult> searchPostsInProjectByKeyword(Long projectId,
+                                                                              String keyword,
+                                                                              Sort.Direction sort,
+                                                                              String cop,
+                                                                              Long cursor,
+                                                                              int size,
+                                                                              User currentUser) {
         Project project = projectService.findOne(projectId);
 
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
@@ -154,9 +152,9 @@ public class PostService {
                 posts = postRepository.searchPostsInProjectByCursor(project, cursor, keyword, cop, AccessModifier.PUBLIC, pageable);
         }
 
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        List<PostResult> resultList = new ArrayList<>();
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post, currentUser));
+            resultList.add(convertToPostResult(post, currentUser));
         }
 
         long totalElements;
@@ -165,12 +163,12 @@ public class PostService {
         else
             totalElements = postRepository.getPostsCountByKeyword(project, keyword, AccessModifier.PUBLIC);
 
-        return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
+        return new PagedResponse<>(resultList, 0, posts.getSize(), totalElements,
                 0, posts.isLast());
     }
 
     // FIXME: QueryDsl 도입 후 중복 로직을 제거해보자
-    public PagedResponse<PostDTO.PostResponse> search(Long projectId, PostReadByProjectInput input, User currentUser) {
+    public PagedResponse<PostResult> search(Long projectId, PostReadByProjectInput input, User currentUser) {
         input.convertPagingInfo();
 
         final String keyword = input.getKeyword();
@@ -190,16 +188,16 @@ public class PostService {
             return searchPostsByProject(projectId, sort, comparisonOperator, cursor, size, currentUser);
         }
     }
-    
+
     // 해시태그 선별 조회 + 키워드 검색
-    private PagedResponse<PostDTO.PostResponse> searchPostsInProjectByHashtagAndKeyword(Long projectId,
-                                                                                       String keyword,
-                                                                                       List<String> names,
-                                                                                       Sort.Direction sort,
-                                                                                       String cop,
-                                                                                       Long cursor,
-                                                                                       int size,
-                                                                                       User currentUser) {
+    private PagedResponse<PostResult> searchPostsInProjectByHashtagAndKeyword(Long projectId,
+                                                                                        String keyword,
+                                                                                        List<String> names,
+                                                                                        Sort.Direction sort,
+                                                                                        String cop,
+                                                                                        Long cursor,
+                                                                                        int size,
+                                                                                        User currentUser) {
         Project project = projectService.findOne(projectId);
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
@@ -218,9 +216,9 @@ public class PostService {
                 posts = postRepository.searchPublicPostsInProjectByHashtagAndKeywordAndCursor(project, cursor, names,
                         keyword, cop, AccessModifier.PUBLIC, pageable);
         }
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        List<PostResult> resultList = new ArrayList<>();
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post, currentUser));
+            resultList.add(convertToPostResult(post, currentUser));
         }
         long totalElements = 0;
         if (isUserMemberOfProject) {
@@ -229,13 +227,13 @@ public class PostService {
             postRepository.getPostsCountByHashtagAndKeyword(project, names, keyword, AccessModifier.PUBLIC, pageable).getTotalElements();
         }
 
-        return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
+        return new PagedResponse<>(resultList, 0, posts.getSize(), totalElements,
                 0, posts.isLast());
     }
 
     // 해시태그 선별 조회
-    private PagedResponse<PostDTO.PostResponse> searchPostsInProjectByHashtag(Long projectId, List<String> names, Sort.Direction sort,
-                                                                             String cop, Long cursor, int size, User currentUser) {
+    private PagedResponse<PostResult> searchPostsInProjectByHashtag(Long projectId, List<String> names, Sort.Direction sort,
+                                                                              String cop, Long cursor, int size, User currentUser) {
         Project project = projectService.findOne(projectId);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
@@ -252,9 +250,9 @@ public class PostService {
             else
                 posts = postRepository.getPostsInProjectByHashTagAndCursor(project, cursor, names, cop, AccessModifier.PUBLIC, pageable);
         }
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        List<PostResult> resultList = new ArrayList<>();
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post, currentUser));
+            resultList.add(convertToPostResult(post, currentUser));
         }
         long totalElements = 0;
         if (isUserMemberOfProject)
@@ -263,7 +261,7 @@ public class PostService {
             totalElements = postRepository.getPostsCountByHashTag(project, names, AccessModifier.PUBLIC, pageable).getTotalElements();
 
 
-        return new PagedResponse<>(responses, 0, posts.getSize(), totalElements,
+        return new PagedResponse<>(resultList, 0, posts.getSize(), totalElements,
                 0, posts.isLast());
     }
 
@@ -289,14 +287,14 @@ public class PostService {
     }
 
     // 위치정보가 있는 Public 포스트들 조회
-    public List<PostDTO.PostResponse> readAllWithLocation(User currentUser) {
+    public List<PostResult> readAllWithLocation(User currentUser) {
         List<Post> posts = postRepository.findAllByLocationIsNotNullAndAccessModifier(AccessModifier.PUBLIC);
 
-        return posts.stream().map(post -> convertToPostResponse(post, currentUser)).collect(Collectors.toList());
+        return posts.stream().map(post -> convertToPostResult(post, currentUser)).collect(Collectors.toList());
     }
 
     // 위치정보가 있는 프로젝트의 포스트들 조회
-    public List<PostDTO.PostResponse> readAllWithLocation(Long projectId, User currentUser) {
+    public List<PostResult> readAllWithLocation(Long projectId, User currentUser) {
         Project project = projectService.findOne(projectId);
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
 
@@ -306,12 +304,12 @@ public class PostService {
         else
             posts = postRepository.findAllPostsWithLocationByProject(project, AccessModifier.PUBLIC);
 
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
+        List<PostResult> resultList = new ArrayList<>();
         for (Post post : posts) {
-            responses.add(convertToPostResponse(post, currentUser));
+            resultList.add(convertToPostResult(post, currentUser));
         }
 
-        return responses;
+        return resultList;
     }
 
 
@@ -382,7 +380,7 @@ public class PostService {
         updatePostTagList(input.getHashtags(), post);
 
         postUpdateHistoryService.createPostUpdateHistory(currentUser, post);
-        
+
         return post.getId();
     }
 
@@ -439,75 +437,43 @@ public class PostService {
         return new ApiResponse(Boolean.TRUE, "포스트 삭제 성공");
     }
 
-    // Post to PostResponse
-    private PostDTO.PostResponse convertToPostResponse(Post post, User currentUser) {
-        UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(post.getWriter());
+    // Post to PostResult
+    private PostResult convertToPostResult(Post post, User currentUser) {
+        final PostResult result = PostResult.of(post);
 
-        List<String> hashtags = new ArrayList<>();
+        // 해시태그 설정
         List<PostTag> hashtagList = postTagRepository.findAllByPost(post);
-        if (hashtagList != null) {
-            for (PostTag tag : post.getHashtags())
-                hashtags.add(tag.getName());
-        }
+        List<String> hashtagNameList
+                = !CollectionUtils.isEmpty(hashtagList) ?
+                hashtagList.stream().map(PostTag::getName).collect(Collectors.toList()) :
+                Collections.emptyList();
+        result.setHashtags(hashtagNameList);
+        
+        // 좋아요 여부 설정
+        Boolean isILikeIt = currentUser != null ? isILikeIt(post, currentUser) : Boolean.FALSE;
+        result.setIsILikeIt(isILikeIt);
+        
+        // 미디어 정보 설정
+        List<PostMediaResult> mediaList = new ArrayList<>();
+        List<PostMediaResult> fileList = new ArrayList<>();
 
-        List<FileDTO.FileInfo> media = new ArrayList<>();
-        List<FileDTO.FileInfo> files = new ArrayList<>();
-        List<PostMedia> mediaList = postMediaRepository.findAllByPost(post);
-        if (mediaList != null) {
-            for (PostMedia temp : mediaList) {
-                FileDTO.FileInfo fileInfo = FileDTO.FileInfo.builder()
-                        .id(temp.getId())
-                        .contentType(temp.getContentType())
-                        .fileName(temp.getFileName())
-                        .build();
-                if (temp.getIsMedia()) {
-                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                            .path("/resources/")
-                            .path(temp.getStoredFileName())
-                            .toUriString();
-                    fileInfo.setFileDownloadUri(fileDownloadUri);
-                    media.add(fileInfo);
-                } else {
-                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                            .path("/api/downloadFile/")
-                            .path(temp.getStoredFileName())
-                            .toUriString();
-                    fileInfo.setFileDownloadUri(fileDownloadUri);
-                    files.add(fileInfo);
-                }
+        List<PostMedia> postMediaList = postMediaRepository.findAllByPost(post);
+        for (PostMedia postMedia : postMediaList) {
+            final PostMediaResult postMediaResult = PostMediaResult.from(postMedia);
+
+            if (postMedia.getIsMedia()) {
+                postMediaResult.setFileDownloadUri(makeFileDownloadUri(postMedia, "/resources/"));
+                mediaList.add(postMediaResult);
+            } else {
+                postMediaResult.setFileDownloadUri(makeFileDownloadUri(postMedia, "/api/downloadFile/"));
+                fileList.add(postMediaResult);
             }
         }
-
-        int likeCount = 0;
-        if (post.getPostLikers() != null) likeCount = post.getPostLikers().size();
-        int commentCount = 0;
-        if (post.getComments() != null) commentCount = post.getComments().size();
-
-        Boolean isIlikeIt = Boolean.FALSE;
-        if (currentUser != null) isIlikeIt = isILikeIt(post, currentUser);
-        PostDTO.PostResponse postResponse = PostDTO.PostResponse.builder()
-                .isILikeIt(isIlikeIt)
-                .id(post.getId())
-                .project(new ProjectDTO.ProjectSimpleInfo(post.getProject()))
-                .writer(writer)
-                .accessModifier(post.getAccessModifier())
-                .commentModifier(post.getCommentModifier())
-                .contents(post.getContents())
-                .hashtags(hashtags)
-                .media(media)
-                .files(files)
-                .likeCount(likeCount)
-                .commentCount(commentCount)
-                .writeTime(post.getCreateTime())
-                .writeTimeStr(post.getCreateTime().toString())
-                .build();
-        if (post.getLocation() != null) {
-            postResponse.setLatitude(post.getLocation().getX());
-            postResponse.setLongitude(post.getLocation().getY());
-            postResponse.setAddress(post.getAddress());
-        }
-
-        return postResponse;
+        
+        result.setMedia(mediaList);
+        result.setFiles(fileList);
+        
+        return result;
     }
 
     @Transactional
@@ -571,6 +537,13 @@ public class PostService {
             response.add(temp);
         }
         return response;
+    }
+
+    private String makeFileDownloadUri(PostMedia postMedia, String path) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(path)
+                .path(postMedia.getStoredFileName())
+                .toUriString();
     }
 
     private Boolean isILikeIt(Post post, User currentUser) {

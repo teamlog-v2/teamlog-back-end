@@ -17,6 +17,9 @@ public class PostReadByProjectInput {
     private String comparisonOperator = "<";
 
     public void convertPagingInfo() {
+        // FIXME: NPE 방지를 위한 임시 조치. 추후 개선 필요
+        if (order == null) return;
+
         if (order == -1) {
             sort = Sort.Direction.ASC;
             comparisonOperator = ">";

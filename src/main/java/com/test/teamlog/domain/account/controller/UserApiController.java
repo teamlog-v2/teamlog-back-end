@@ -2,11 +2,12 @@ package com.test.teamlog.domain.account.controller;
 
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.service.UserService;
+import com.test.teamlog.domain.post.dto.PostResponse;
+import com.test.teamlog.domain.post.dto.PostResult;
 import com.test.teamlog.domain.post.service.PostService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.CommentDTO;
-import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
@@ -114,12 +116,14 @@ public class UserApiController {
 
     @Operation(summary = "개인 작성 이력 조회 (게시물)")
     @GetMapping("/user/posts")
-    public ResponseEntity<List<PostDTO.PostResponse>> getPostsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostDTO.PostResponse> response = null;
+    public ResponseEntity<List<PostResponse>> getPostsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<PostResponse> response = null;
         if (currentUser == null) {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         } else {
-            response = postService.getPostsByUser(currentUser.getUser());
+            final List<PostResult> resultList = postService.getPostsByUser(currentUser.getUser());
+            response = resultList.stream().map(PostResponse::from).collect(Collectors.toList());
+
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
     }

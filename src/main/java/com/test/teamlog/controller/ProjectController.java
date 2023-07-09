@@ -1,9 +1,10 @@
 package com.test.teamlog.controller;
 
+import com.test.teamlog.domain.post.dto.PostResponse;
+import com.test.teamlog.domain.post.dto.PostResult;
 import com.test.teamlog.domain.post.service.PostService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -139,9 +141,11 @@ public class ProjectController {
 
     @Operation(summary = "위치정보가 있는 프로젝트 게시물 조회")
     @GetMapping("/projects/{projectId}/posts/with-location")
-    public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts(@PathVariable("projectId") long projectId,
+    public ResponseEntity<List<PostResponse>> getLocationPosts(@PathVariable("projectId") long projectId,
                                                                        @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostDTO.PostResponse> response = postService.readAllWithLocation(projectId, currentUser.getUser());
+        List<PostResult> resultList = postService.readAllWithLocation(projectId, currentUser.getUser());
+        final List<PostResponse> response = resultList.stream().map(PostResponse::from).collect(Collectors.toList());
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
