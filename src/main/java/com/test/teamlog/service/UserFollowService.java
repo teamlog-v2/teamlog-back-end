@@ -113,4 +113,7 @@ public class UserFollowService {
         return userFollowRepository.findByFromUserAndToUser(fromUser, targetUser).isPresent();
     }
 
+    public List<UserFollow> readUserFollowList(User currentUser) {
+        return userFollowRepository.findByFromUser(currentUser);
+    }
 }

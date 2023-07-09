@@ -414,4 +414,9 @@ public class ProjectService {
         projectMemberRepository.findByProjectAndUser(project, currentUser)
                 .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다.\n(프로젝트 멤버 아님)"));
     }
+
+    public Project findOne(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+    }
 }

@@ -6,6 +6,7 @@ import com.test.teamlog.domain.post.dto.PostCreateInput;
 import com.test.teamlog.domain.post.dto.PostReadByProjectInput;
 import com.test.teamlog.domain.post.dto.PostUpdateInput;
 import com.test.teamlog.domain.post.repository.PostRepository;
+import com.test.teamlog.domain.postupdatehistory.service.PostUpdateHistoryService;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
@@ -13,6 +14,7 @@ import com.test.teamlog.payload.*;
 import com.test.teamlog.repository.*;
 import com.test.teamlog.service.FileStorageService;
 import com.test.teamlog.service.ProjectService;
+import com.test.teamlog.service.UserFollowService;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -35,15 +37,16 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PostService {
+    private final PostUpdateHistoryService postUpdateHistoryService;
+    private final UserFollowService userFollowService;
+    private final FileStorageService fileStorageService;
+    private final ProjectService projectService;
     private final PostRepository postRepository;
     private final PostTagRepository postTagRepository;
     private final PostMediaRepository postMediaRepository;
     private final PostLikerRepository postLikerRepository;
     private final PostUpdateHistoryRepository postUpdateHistoryRepository;
     private final ProjectRepository projectRepository;
-    private final UserFollowRepository userFollowRepository;
-    private final FileStorageService fileStorageService;
-    private final ProjectService projectService;
 
     public List<PostDTO.PostResponse> getPostsByUser(User currentUser) {
         List<PostDTO.PostResponse> responses = new ArrayList<>();
@@ -56,7 +59,7 @@ public class PostService {
     }
 
     public List<PostDTO.PostResponse> readAllByFollowingUser(User currentUser) {
-        List<UserFollow> userFollowingList = readUserFollowList(currentUser);
+        List<UserFollow> userFollowingList = userFollowService.readUserFollowList(currentUser);
         if (CollectionUtils.isEmpty(userFollowingList)) return Collections.emptyList();
 
         List<User> userFollowings = userFollowingList.stream().map(UserFollow::getToUser).collect(Collectors.toList());
@@ -92,8 +95,7 @@ public class PostService {
     // 프로젝트 내 포스트 조회
     private PagedResponse<PostDTO.PostResponse> searchPostsByProject(Long projectId, Sort.Direction sort, String cop,
                                                                     Long cursor, int size, User currentUser) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        Project project = projectService.findOne(projectId);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
 
@@ -134,8 +136,7 @@ public class PostService {
                                                                              Long cursor,
                                                                              int size,
                                                                              User currentUser) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        Project project = projectService.findOne(projectId);
 
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
@@ -199,8 +200,7 @@ public class PostService {
                                                                                        Long cursor,
                                                                                        int size,
                                                                                        User currentUser) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        Project project = projectService.findOne(projectId);
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
 
@@ -236,8 +236,7 @@ public class PostService {
     // 해시태그 선별 조회
     private PagedResponse<PostDTO.PostResponse> searchPostsInProjectByHashtag(Long projectId, List<String> names, Sort.Direction sort,
                                                                              String cop, Long cursor, int size, User currentUser) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        Project project = projectService.findOne(projectId);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
 
@@ -270,8 +269,7 @@ public class PostService {
 
     // 프로젝트의 해시태그들 조회
     public List<String> getHashTagsInProjectPosts(Long id) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
+        Project project = projectService.findOne(id);
 
         List<String> hashtags = postTagRepository.getHashTagsInProjectPosts(project);
 
@@ -280,8 +278,7 @@ public class PostService {
 
     // 해시태그 추천
     public List<String> getRecommendedHashTags(Long id) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
+        Project project = projectService.findOne(id);
 
         List<PostTagInfo> hashtags = postTagRepository.getRecommendedHashTags(id);
         List<String> response = new ArrayList<>();
@@ -300,8 +297,7 @@ public class PostService {
 
     // 위치정보가 있는 프로젝트의 포스트들 조회
     public List<PostDTO.PostResponse> readAllWithLocation(Long projectId, User currentUser) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+        Project project = projectService.findOne(projectId);
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
 
         List<Post> posts = null;
@@ -325,8 +321,7 @@ public class PostService {
                        MultipartFile[] media,
                        MultipartFile[] files,
                        User currentUser) {
-        Project project = projectRepository.findById(input.getProjectId())
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", input.getProjectId()));
+        Project project = projectService.findOne(input.getProjectId());
         projectService.validateUserIsMemberOfProject(project, currentUser);
 
         input.setLocation(makeLocation(input.getLatitude(), input.getLongitude()));
@@ -345,7 +340,7 @@ public class PostService {
         storeMediaFiles(media, post);
         storeFiles(files, post);
 
-        createPostUpdateHistory(currentUser, post);
+        postUpdateHistoryService.createPostUpdateHistory(currentUser, post);
 
         project.setUpdateTime(LocalDateTime.now());
         return newPost.getId();
@@ -386,8 +381,8 @@ public class PostService {
 
         updatePostTagList(input.getHashtags(), post);
 
-        createPostUpdateHistory(currentUser, post);
-
+        postUpdateHistoryService.createPostUpdateHistory(currentUser, post);
+        
         return post.getId();
     }
 
@@ -580,19 +575,5 @@ public class PostService {
 
     private Boolean isILikeIt(Post post, User currentUser) {
         return postLikerRepository.findByPostAndUser(post, currentUser).isPresent();
-    }
-
-    // TODO: PostUpdateHistoryService로 이동
-    private void createPostUpdateHistory(User currentUser, Post post) {
-        PostUpdateHistory history = PostUpdateHistory.builder()
-                .post(post)
-                .user(currentUser)
-                .build();
-        postUpdateHistoryRepository.save(history);
-    }
-
-    // TODO: UserFollowService로 이동
-    private List<UserFollow> readUserFollowList(User currentUser) {
-        return userFollowRepository.findByFromUser(currentUser);
     }
 }
