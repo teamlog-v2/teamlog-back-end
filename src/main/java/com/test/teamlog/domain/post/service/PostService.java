@@ -269,18 +269,14 @@ public class PostService {
     }
 
     // 위치정보가 있는 Public 포스트들 조회
-    public List<PostDTO.PostResponse> getLocationPosts(User currentUser) {
+    public List<PostDTO.PostResponse> readAllWithLocation(User currentUser) {
         List<Post> posts = postRepository.findAllByLocationIsNotNullAndAccessModifier(AccessModifier.PUBLIC);
 
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
-        for (Post post : posts) {
-            responses.add(convertToPostResponse(post, currentUser));
-        }
-        return responses;
+        return posts.stream().map(post -> convertToPostResponse(post, currentUser)).collect(Collectors.toList());
     }
 
     // 위치정보가 있는 프로젝트의 포스트들 조회
-    public List<PostDTO.PostResponse> getLocationPosts(Long projectId, User currentUser) {
+    public List<PostDTO.PostResponse> readAllWithLocation(Long projectId, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);

@@ -141,7 +141,7 @@ public class ProjectController {
     @GetMapping("/projects/{projectId}/posts/with-location")
     public ResponseEntity<List<PostDTO.PostResponse>> getLocationPosts(@PathVariable("projectId") long projectId,
                                                                        @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostDTO.PostResponse> response = postService.getLocationPosts(projectId, currentUser.getUser());
+        List<PostDTO.PostResponse> response = postService.readAllWithLocation(projectId, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

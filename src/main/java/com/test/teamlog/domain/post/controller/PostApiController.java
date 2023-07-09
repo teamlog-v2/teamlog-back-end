@@ -92,8 +92,8 @@ public class PostApiController {
 
     @Operation(summary = "위치정보가 있는 프로젝트 게시물 조회")
     @GetMapping("/with-location")
-    public ResponseEntity<List<PostDTO.PostResponse>> readLocationPosts(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostDTO.PostResponse> response = postService.getLocationPosts(currentUser.getUser());
+    public ResponseEntity<List<PostDTO.PostResponse>> readAllWithLocation(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<PostDTO.PostResponse> response = postService.readAllWithLocation(currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
