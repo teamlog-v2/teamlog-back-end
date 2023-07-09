@@ -3,6 +3,7 @@ package com.test.teamlog.service;
 import com.test.teamlog.domain.account.model.User;
 
 import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
@@ -412,5 +413,10 @@ public class ProjectService {
         if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다.\n로그인 해주세요.");
         projectMemberRepository.findByProjectAndUser(project, currentUser)
                 .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다.\n(프로젝트 멤버 아님)"));
+    }
+
+    public Project findOne(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
     }
 }

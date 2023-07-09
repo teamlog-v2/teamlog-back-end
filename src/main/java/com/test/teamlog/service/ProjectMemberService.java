@@ -9,7 +9,7 @@ import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.domain.account.dto.UserRequest;
-import com.test.teamlog.repository.PostRepository;
+import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.repository.ProjectJoinRepository;
 import com.test.teamlog.repository.ProjectMemberRepository;
 import com.test.teamlog.repository.ProjectRepository;

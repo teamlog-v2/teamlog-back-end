@@ -1,22 +1,20 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.model.User;
-
 import com.test.teamlog.config.FileConfig;
 import com.test.teamlog.entity.Post;
 import com.test.teamlog.entity.PostMedia;
 import com.test.teamlog.exception.FileStorageException;
 import com.test.teamlog.exception.MyFileNotFoundException;
-import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.FileDTO;
 import com.test.teamlog.repository.PostMediaRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,9 +27,13 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -125,10 +127,30 @@ public class FileStorageService {
     }
 
     @Transactional
-    public void deleteFileById(Long id) {
-        PostMedia media = postMediaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("PostMedia", "id", id));
-        postMediaRepository.delete(media);
+    public void deleteFileById(List<Long> mediaIdList) {
+        if (CollectionUtils.isEmpty(mediaIdList)) return;
+
+        final List<PostMedia> postMediaList = postMediaRepository.findAllByIdIn(mediaIdList);
+        Set<Long> postMediaIdSet = postMediaList.stream()
+                .map(PostMedia::getId)
+                .collect(Collectors.toSet());
+
+        List<Long> validPostMediaIdList = new ArrayList<>();
+        List<Long> invalidPostMediaIdList = new ArrayList<>();
+
+        for (Long mediaId : mediaIdList) {
+            if (postMediaIdSet.contains(mediaId)) {
+                validPostMediaIdList.add(mediaId);
+            } else {
+                invalidPostMediaIdList.add(mediaId);
+            }
+        }
+
+        if (CollectionUtils.isEmpty(invalidPostMediaIdList)) {
+            log.warn("존재하지 않는 파일 id 목록입니다. invalidPostMediaIdList: ({})", invalidPostMediaIdList);
+        }
+
+        postMediaRepository.deleteAllByIdIn(validPostMediaIdList);
     }
 
     public void deleteFile(String storedFileName) {
