@@ -9,18 +9,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class PostDTO {
-    @Getter
-    public static class PostUpdateRequest {
-        private String contents;
-        private AccessModifier accessModifier;
-        private AccessModifier commentModifier;
-        private Double latitude;
-        private Double longitude;
-        private String address;
-        private Long projectId;
-        private List<String> hashtags;
-        private List<Long> deletedFileIdList;
-    }
 
     @Data
     @Builder

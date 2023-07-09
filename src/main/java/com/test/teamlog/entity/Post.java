@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.BatchSize;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class Post extends BaseTimeEntity {
     @Column(length = 1000, nullable = false)
     private String contents;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_user_id", nullable = false)
     private User writer;
 
@@ -42,7 +43,7 @@ public class Post extends BaseTimeEntity {
 
     private String address;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
@@ -72,11 +73,25 @@ public class Post extends BaseTimeEntity {
     private List<PostUpdateHistory> postUpdateHistories = new ArrayList<>();
 
     public void addHashTags(List<PostTag> tags) {
+        if (CollectionUtils.isEmpty(tags)) return;
         this.hashtags.addAll(tags);
     }
 
     public void removeHashTags(List<PostTag> tags) {
+        if (CollectionUtils.isEmpty(tags)) return;
         this.hashtags.removeAll(tags);
+    }
+
+    public void update(String contents,
+                       AccessModifier accessModifier,
+                       AccessModifier commentModifier,
+                       Point location,
+                       String address) {
+        this.contents = contents;
+        this.accessModifier = accessModifier;
+        this.commentModifier = commentModifier;
+        this.location = location;
+        this.address = address;
     }
 
     public void setProject(Project project) {

@@ -3,6 +3,7 @@ package com.test.teamlog.domain.post.service;
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.post.dto.PostInput;
+import com.test.teamlog.domain.post.dto.PostUpdateInput;
 import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
@@ -25,7 +26,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -314,7 +314,8 @@ public class PostService {
         if (!CollectionUtils.isEmpty(input.getHashtags())) {
             final List<PostTag> postTagList
                     = input.getHashtags()
-                    .stream().map(hashTag -> PostTag.builder().name(hashTag).build()).collect(Collectors.toList());
+                    .stream().map(hashTag -> PostTag.builder().name(hashTag).build())
+                    .collect(Collectors.toList());
             postTagList.forEach(tag -> tag.addPost(post));
         }
 
@@ -347,88 +348,67 @@ public class PostService {
 
     // 포스트 수정
     @Transactional
-    public ApiResponse updatePost(Long id, PostDTO.PostUpdateRequest request, MultipartFile[] media, MultipartFile[] files, User currentUser) {
+    public Long updatePost(Long id,
+                           PostUpdateInput input,
+                           MultipartFile[] media,
+                           MultipartFile[] files, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         projectService.validateUserIsMemberOfProject(post.getProject(), currentUser);
 
-        post.setContents(request.getContents());
-        post.setAccessModifier(request.getAccessModifier());
-        post.setCommentModifier(request.getCommentModifier());
+        post.update(input.getContents(), input.getAccessModifier(), input.getCommentModifier(), makeLocation(input), input.getAddress());
 
-        Point point = null;
-        if (request.getLatitude() != null && request.getLongitude() != null) {
-            GeometryFactory geometryFactory = new GeometryFactory();
-            point = geometryFactory.createPoint(new Coordinate(request.getLatitude(), request.getLongitude()));
-        }
-        post.setLocation(point);
-        post.setAddress(request.getAddress());
+        // 취소한 파일 삭제 후 새로운 파일 저장
+        fileStorageService.deleteFileById(input.getDeletedFileIdList());
+        storeMediaFiles(media, post);
+        storeFiles(files, post);
 
-        postRepository.save(post);
+        updatePostTagList(input.getHashtags(), post);
 
-        // 취소한 파일 삭제
-        if (request.getDeletedFileIdList() != null) {
-            List<Long> fileIdList = request.getDeletedFileIdList();
-            for (Long fileId : fileIdList) {
-                fileStorageService.deleteFileById(fileId);
-            }
-        }
-        // 새로운 미디어 추가
-        if (media != null) {
-            Arrays.asList(media)
-                    .stream()
-                    .map(file -> fileStorageService.storeFile(file, post, Boolean.TRUE))
-                    .collect(Collectors.toList());
-        }
-
-        if (files != null) {
-            Arrays.asList(files)
-                    .stream()
-                    .map(file -> fileStorageService.storeFile(file, post, Boolean.FALSE))
-                    .collect(Collectors.toList());
-        }
-
-        List<PostTag> originalHashTags = null;
-        if (post.getHashtags() != null) {
-            originalHashTags = post.getHashtags();
-        }
-
-        if (request.getHashtags() == null) {
-            if (originalHashTags != null) post.removeHashTags(originalHashTags);
-        } else {
-            List<String> newHashTagNames = request.getHashtags();
-            List<String> maintainedHashTagNames = new ArrayList<>();
-            if (originalHashTags != null) {
-                List<PostTag> deletedHashTags = new ArrayList<>();
-                for (PostTag tag : originalHashTags) {
-                    if (newHashTagNames.contains(tag.getName())) {
-                        maintainedHashTagNames.add(tag.getName());
-                    } else {
-                        deletedHashTags.add(tag);
-                    }
-                }
-                post.removeHashTags(deletedHashTags);
-            }
-
-            newHashTagNames.removeAll(maintainedHashTagNames); // new
-            System.out.println(request.getHashtags());
-            System.out.println(newHashTagNames);
-            if (newHashTagNames.size() > 0) {
-                List<PostTag> hashtags = new ArrayList<>();
-                for (String tagName : newHashTagNames) {
-                    PostTag newTag = PostTag.builder()
-                            .name(tagName)
-                            .post(post)
-                            .build();
-                    hashtags.add(newTag);
-                }
-                post.addHashTags(hashtags);
-            }
-        }
-        // 포스트 수정내역 생성
         createPostUpdateHistory(currentUser, post);
 
-        return new ApiResponse(Boolean.TRUE, "포스트 수정 성공");
+        return post.getId();
+    }
+
+    private static Point makeLocation(PostUpdateInput input) {
+        Point location = null;
+        if (input.getLatitude() != null && input.getLongitude() != null) {
+            location = new GeometryFactory().createPoint(new Coordinate(input.getLatitude(), input.getLongitude()));
+        }
+
+        return location;
+    }
+
+    private void updatePostTagList(List<String> inputHashTagNameList, Post post) {
+        List<PostTag> originalHashTags = post.getHashtags();
+
+        if (CollectionUtils.isEmpty(inputHashTagNameList)) {
+            post.removeHashTags(originalHashTags);
+        } else {
+            List<String> maintainedHashTagNameList = new ArrayList<>(); // 기존 해시태그
+            List<PostTag> deletedHashTags = new ArrayList<>(); // 삭제된 해시태그
+
+            for (PostTag tag : originalHashTags) {
+                final String tagName = tag.getName();
+
+                if (inputHashTagNameList.contains(tagName)) {
+                    maintainedHashTagNameList.add(tagName);
+                } else {
+                    deletedHashTags.add(tag);
+                }
+            }
+
+            inputHashTagNameList.removeAll(maintainedHashTagNameList);
+            List<PostTag> hashtags = inputHashTagNameList.stream()
+                    .map(tagName -> PostTag.builder()
+                            .name(tagName)
+                            .post(post)
+                            .build()).collect(Collectors.toList());
+
+            // FIXME: N번 쿼리 날리는 현상. 추후 수정 필요
+            post.removeHashTags(deletedHashTags);
+            post.addHashTags(hashtags);
+        }
     }
 
     // 포스트 삭제
