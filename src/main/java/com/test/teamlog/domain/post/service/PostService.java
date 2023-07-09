@@ -75,9 +75,12 @@ public class PostService {
     public PostDTO.PostResponse readOne(Long id, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+
+        // 비공개일 경우 프로젝트 멤버 권한 체크
         if (post.getAccessModifier() == AccessModifier.PRIVATE) {
             projectService.validateUserIsMemberOfProject(post.getProject(), currentUser);
         }
+
         return convertToPostResponse(post, currentUser);
     }
 
@@ -496,18 +499,15 @@ public class PostService {
     }
 
     @Transactional
-    public List<PostDTO.PostHistoryInfo> getPostUpdateHistory(Long postId, User currentUser) {
+    public List<PostDTO.PostHistoryInfo> readPostUpdateHistory(Long postId, User currentUser) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
         projectService.validateUserIsMemberOfProject(post.getProject(), currentUser);
 
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
         List<PostUpdateHistory> historyList = postUpdateHistoryRepository.findAllByPost(post, sort);
-        List<PostDTO.PostHistoryInfo> historyResponse = new ArrayList<>();
-        for (PostUpdateHistory history : historyList) {
-            historyResponse.add(new PostDTO.PostHistoryInfo(history));
-        }
-        return historyResponse;
+
+        return historyList.stream().map(PostDTO.PostHistoryInfo::new).collect(Collectors.toList());
     }
 
 

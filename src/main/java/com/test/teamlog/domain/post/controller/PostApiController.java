@@ -71,11 +71,12 @@ public class PostApiController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    // TODO: API 위치 고민해보기
     @Operation(summary = "게시물 수정 내역 조회")
     @GetMapping("/{id}/historys")
     public ResponseEntity<List<PostDTO.PostHistoryInfo>> readPostUpdateHistory(@PathVariable("id") long id,
                                                                                @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostDTO.PostHistoryInfo> response = postService.getPostUpdateHistory(id, currentUser.getUser());
+        List<PostDTO.PostHistoryInfo> response = postService.readPostUpdateHistory(id, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
