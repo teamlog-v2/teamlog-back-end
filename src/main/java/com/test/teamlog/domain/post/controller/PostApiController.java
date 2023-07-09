@@ -107,8 +107,8 @@ public class PostApiController {
 
     @Operation(summary = "팔로우 중인 사람들의 게시물 조회")
     @GetMapping("/following-users")
-    public ResponseEntity<List<PostDTO.PostResponse>> readPostsByFollowingUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostDTO.PostResponse> response = postService.getPostsByFollowingUser(currentUser.getUser());
+    public ResponseEntity<List<PostDTO.PostResponse>> readAllByFollowingUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<PostDTO.PostResponse> response = postService.readAllByFollowingUser(currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

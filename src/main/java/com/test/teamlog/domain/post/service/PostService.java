@@ -27,6 +27,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,22 +55,14 @@ public class PostService {
         return responses;
     }
 
-    public List<PostDTO.PostResponse> getPostsByFollowingUser(User currentUser) {
-        List<UserFollow> userFollowingList = userFollowRepository.findByFromUser(currentUser);
-        List<PostDTO.PostResponse> responses = new ArrayList<>();
-        if (userFollowingList == null) return responses;
+    public List<PostDTO.PostResponse> readAllByFollowingUser(User currentUser) {
+        List<UserFollow> userFollowingList = readUserFollowList(currentUser);
+        if (CollectionUtils.isEmpty(userFollowingList)) return Collections.emptyList();
 
-        List<User> userFollowings = new ArrayList<>();
-        for (UserFollow userFollow : userFollowingList) {
-            userFollowings.add(userFollow.getToUser());
-        }
+        List<User> userFollowings = userFollowingList.stream().map(UserFollow::getToUser).collect(Collectors.toList());
         List<Post> posts = postRepository.findAllByWriters(userFollowings);
 
-        for (Post post : posts) {
-            responses.add(convertToPostResponse(post, currentUser));
-        }
-
-        return responses;
+        return posts.stream().map(post -> convertToPostResponse(post, currentUser)).collect(Collectors.toList());
     }
 
     // 단일 포스트 조회
@@ -585,7 +578,7 @@ public class PostService {
         return response;
     }
 
-    public Boolean isILikeIt(Post post, User currentUser) {
+    private Boolean isILikeIt(Post post, User currentUser) {
         return postLikerRepository.findByPostAndUser(post, currentUser).isPresent();
     }
 
@@ -596,5 +589,10 @@ public class PostService {
                 .user(currentUser)
                 .build();
         postUpdateHistoryRepository.save(history);
+    }
+
+    // TODO: UserFollowService로 이동
+    private List<UserFollow> readUserFollowList(User currentUser) {
+        return userFollowRepository.findByFromUser(currentUser);
     }
 }
