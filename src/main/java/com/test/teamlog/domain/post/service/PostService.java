@@ -3,6 +3,7 @@ package com.test.teamlog.domain.post.service;
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.post.dto.PostCreateInput;
+import com.test.teamlog.domain.post.dto.PostReadByProjectInput;
 import com.test.teamlog.domain.post.dto.PostUpdateInput;
 import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.entity.*;
@@ -96,8 +97,8 @@ public class PostService {
     }
 
     // 프로젝트 내 포스트 조회
-    public PagedResponse<PostDTO.PostResponse> getPostsByProject(Long projectId, Sort.Direction sort, String cop,
-                                                                 Long cursor, int size, User currentUser) {
+    private PagedResponse<PostDTO.PostResponse> searchPostsByProject(Long projectId, Sort.Direction sort, String cop,
+                                                                    Long cursor, int size, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         Pageable pageable = PageRequest.of(0, size, sort, "id");
@@ -133,14 +134,20 @@ public class PostService {
     }
 
     // 키워드로 게시물 조회
-    public PagedResponse<PostDTO.PostResponse> searchPostsInProject(Long projectId, String keyword, Sort.Direction sort,
-                                                                    String cop, Long cursor, int size, User currentUser) {
+    private PagedResponse<PostDTO.PostResponse> searchPostsInProjectByKeyword(Long projectId,
+                                                                             String keyword,
+                                                                             Sort.Direction sort,
+                                                                             String cop,
+                                                                             Long cursor,
+                                                                             int size,
+                                                                             User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
 
-        Slice<Post> posts = null;
+        Slice<Post> posts;
         if (cursor == null) {
             if (isUserMemberOfProject)
                 posts = postRepository.searchPostsInProject(project, keyword, pageable);
@@ -157,7 +164,8 @@ public class PostService {
         for (Post post : posts) {
             responses.add(convertToPostResponse(post, currentUser));
         }
-        long totalElements = 0;
+
+        long totalElements;
         if (isUserMemberOfProject)
             totalElements = postRepository.getPostsCountByKeyword(project, keyword);
         else
@@ -167,8 +175,30 @@ public class PostService {
                 0, posts.isLast());
     }
 
+    // FIXME: QueryDsl 도입 후 중복 로직을 제거해보자
+    public PagedResponse<PostDTO.PostResponse> search(Long projectId, PostReadByProjectInput input, User currentUser) {
+        input.convertPagingInfo();
+
+        final String keyword = input.getKeyword();
+        final List<String> hashtagList = input.getHashtagList();
+        final Sort.Direction sort = input.getSort();
+        final String comparisonOperator = input.getComparisonOperator();
+        final Long cursor = input.getCursor();
+        final int size = input.getSize();
+
+        if (keyword != null && hashtagList != null) {
+            return searchPostsInProjectByHashtagAndKeyword(projectId, keyword, hashtagList, sort, comparisonOperator, cursor, size, currentUser);
+        } else if (keyword != null) {
+            return searchPostsInProjectByKeyword(projectId, keyword, sort, comparisonOperator, cursor, size, currentUser);
+        } else if (hashtagList != null) {
+            return searchPostsInProjectByHashtag(projectId, hashtagList, sort, comparisonOperator, cursor, size, currentUser);
+        } else {
+            return searchPostsByProject(projectId, sort, comparisonOperator, cursor, size, currentUser);
+        }
+    }
+    
     // 해시태그 선별 조회 + 키워드 검색
-    public PagedResponse<PostDTO.PostResponse> searchPostsInProjectByHashtagAndKeyword(Long projectId,
+    private PagedResponse<PostDTO.PostResponse> searchPostsInProjectByHashtagAndKeyword(Long projectId,
                                                                                        String keyword,
                                                                                        List<String> names,
                                                                                        Sort.Direction sort,
@@ -211,8 +241,8 @@ public class PostService {
     }
 
     // 해시태그 선별 조회
-    public PagedResponse<PostDTO.PostResponse> getPostsInProjectByHashtag(Long projectId, List<String> names, Sort.Direction sort,
-                                                                          String cop, Long cursor, int size, User currentUser) {
+    private PagedResponse<PostDTO.PostResponse> searchPostsInProjectByHashtag(Long projectId, List<String> names, Sort.Direction sort,
+                                                                             String cop, Long cursor, int size, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         Pageable pageable = PageRequest.of(0, size, sort, "id");

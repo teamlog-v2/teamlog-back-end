@@ -1,5 +1,6 @@
 package com.test.teamlog.domain.post.controller;
 
+import com.test.teamlog.domain.post.dto.PostReadByProjectRequest;
 import com.test.teamlog.domain.post.dto.PostRequest;
 import com.test.teamlog.domain.post.dto.PostUpdateRequest;
 import com.test.teamlog.domain.post.service.PostService;
@@ -11,14 +12,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -99,33 +98,10 @@ public class PostApiController {
 
     @Operation(summary = "프로젝트의 게시물 조회(검색)")
     @GetMapping("/project/{projectId}")
-    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> readPostsByProject(@PathVariable("projectId") long projectId,
-                                                                                  @RequestParam(value = "hashtag", required = false) String[] hashtag,
-                                                                                  @RequestParam(value = "keyword", required = false) String keyword,
-                                                                                  @RequestParam(value = "order", required = false, defaultValue = "1") Integer order,
-                                                                                  @RequestParam(value = "cursor", required = false) Long cursor,
-                                                                                  @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-                                                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<String> hashtagList = null;
-        if (hashtag != null) hashtagList = Arrays.asList(hashtag);
-
-        Sort.Direction sort = Sort.Direction.DESC;
-        String comparisonOperator = "<";
-        if (order == -1) {
-            sort = Sort.Direction.ASC;
-            comparisonOperator = ">";
-        }
-        PagedResponse<PostDTO.PostResponse> response = null;
-        if (keyword != null & hashtagList != null) {
-            response = postService.searchPostsInProjectByHashtagAndKeyword(projectId, keyword, hashtagList, sort, comparisonOperator, cursor, size, currentUser.getUser());
-        } else if (keyword != null) {
-            response = postService.searchPostsInProject(projectId, keyword, sort, comparisonOperator, cursor, size, currentUser.getUser());
-        } else if (hashtagList != null) {
-            response = postService.getPostsInProjectByHashtag(projectId, hashtagList, sort, comparisonOperator, cursor, size, currentUser.getUser());
-        } else {
-            response = postService.getPostsByProject(projectId, sort, comparisonOperator, cursor, size, currentUser.getUser());
-        }
-
+    public ResponseEntity<PagedResponse<PostDTO.PostResponse>> search(@PathVariable("projectId") long projectId,
+                                                                      @ModelAttribute PostReadByProjectRequest request,
+                                                                      @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        final PagedResponse<PostDTO.PostResponse> response = postService.search(projectId, request.toInput(), currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
