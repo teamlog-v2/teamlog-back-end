@@ -104,7 +104,7 @@ public class TeamMemberService {
     public ApiResponse expelMember(Long teamId, String userId, User currentUser) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         teamService.validateUserIsMaster(team, currentUser);
         TeamMember member = teamMemberRepository.findByTeamAndUser(team, user)

@@ -33,7 +33,7 @@ public class TeamJoinService {
     public ApiResponse inviteUserForTeam(Long teamId, String userId) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         if (teamService.isUserMemberOfTeam(team, user))

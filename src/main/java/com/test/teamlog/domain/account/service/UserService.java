@@ -44,11 +44,11 @@ public class UserService {
         return response;
     }
 
-    public UserRequest.UserResponse getUser(String id, User currentUser) {
+    public UserRequest.UserResponse getUser(String identification, User currentUser) {
         UserRequest.UserResponse response = null;
-        if (currentUser == null || !id.equals(currentUser.getIdentification())) {
-            User user = userRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+        if (currentUser == null || !identification.equals(currentUser.getIdentification())) {
+            User user = userRepository.findByIdentification(identification)
+                    .orElseThrow(() -> new ResourceNotFoundException("USER", "id", identification));
             response = new UserRequest.UserResponse(user);
             response.setIsMe(Boolean.FALSE);
             if (currentUser == null) response.setIsMe(null);
