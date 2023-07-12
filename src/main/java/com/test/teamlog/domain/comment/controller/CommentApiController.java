@@ -1,6 +1,7 @@
 package com.test.teamlog.domain.comment.controller;
 
 import com.test.teamlog.domain.comment.dto.CommentCreateRequest;
+import com.test.teamlog.domain.comment.dto.CommentUpdateRequest;
 import com.test.teamlog.domain.comment.service.CommentService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api")
 @Tag(name = "댓글 관리")
-public class CommentController {
+public class CommentApiController {
     private final CommentService commentService;
 
     @Operation(summary = "댓글 생성")
@@ -33,9 +34,9 @@ public class CommentController {
     @Operation(summary = "댓글 수정")
     @PutMapping("/comments/{id}")
     public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
-                                                     @RequestBody CommentDTO.CommentUpdateRequest request,
+                                                     @RequestBody CommentUpdateRequest request,
                                                      @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = commentService.updateComment(id, request);
+        ApiResponse apiResponse = commentService.update(id, request.toInput(), currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

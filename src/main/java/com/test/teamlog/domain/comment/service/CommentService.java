@@ -2,15 +2,16 @@ package com.test.teamlog.domain.comment.service;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.repository.UserRepository;
 import com.test.teamlog.domain.account.service.UserService;
 import com.test.teamlog.domain.comment.dto.CommentCreateInput;
+import com.test.teamlog.domain.comment.dto.CommentUpdateInput;
 import com.test.teamlog.domain.comment.repository.CommentRepository;
 import com.test.teamlog.domain.commentmention.service.CommentMentionService;
 import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.entity.Comment;
 import com.test.teamlog.entity.CommentMention;
 import com.test.teamlog.entity.Post;
+import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.CommentDTO;
@@ -22,10 +23,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -38,14 +38,13 @@ public class CommentService {
 
     private final UserService userService;
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
 
     // 유저가 작성한 댓글 조회
     public List<CommentDTO.CommentInfo> getCommentByUser(User currentUser) {
         List<Comment> commentList = commentRepository.findAllByWriter(currentUser);
 
         List<CommentDTO.CommentInfo> responses = new ArrayList<>();
-        if(commentList.size() != 0) {
+        if (commentList.size() != 0) {
             UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(currentUser);
 
             for (Comment comment : commentList) {
@@ -55,7 +54,8 @@ public class CommentService {
                 }
 
                 Boolean isMyComment = Boolean.TRUE;
-                if (currentUser==null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification())) isMyComment = Boolean.FALSE;
+                if (currentUser == null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification()))
+                    isMyComment = Boolean.FALSE;
 
                 CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
                         .isMyComment(isMyComment)
@@ -89,7 +89,8 @@ public class CommentService {
             }
 
             Boolean isMyComment = Boolean.TRUE;
-            if (currentUser==null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification())) isMyComment = Boolean.FALSE;
+            if (currentUser == null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification()))
+                isMyComment = Boolean.FALSE;
 
             CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
                     .isMyComment(isMyComment)
@@ -132,7 +133,8 @@ public class CommentService {
             }
 
             Boolean isMyComment = Boolean.TRUE;
-            if (currentUser==null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification())) isMyComment = Boolean.FALSE;
+            if (currentUser == null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification()))
+                isMyComment = Boolean.FALSE;
 
             CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
                     .isMyComment(isMyComment)
@@ -205,18 +207,19 @@ public class CommentService {
 
         Comment parentComment = input.getParentCommentId() != null ?
                 commentRepository.findById(input.getParentCommentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", input.getParentCommentId())) :
+                        .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", input.getParentCommentId())) :
                 null;
 
         Comment comment = input.toComment(currentUser, post, parentComment);
         commentRepository.save(comment);
 
-        createCommentMentionList(input.getCommentMentions(), comment);
-
+        commentMentionService.createAll(makeCommentMentionList(input.getCommentMentions(), comment));
         return new ApiResponse(Boolean.TRUE, "댓글 생성 성공");
     }
 
-    private void createCommentMentionList(List<String> commentMentionIdentificationList, Comment comment) {
+    private List<CommentMention> makeCommentMentionList(List<String> commentMentionIdentificationList, Comment comment) {
+        if (CollectionUtils.isEmpty(commentMentionIdentificationList)) return Collections.emptyList();
+
         final List<User> userList = userService.findAllByIdentificationIn(commentMentionIdentificationList);
         final Map<String, User> userMap
                 = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
@@ -241,57 +244,40 @@ public class CommentService {
             throw new ResourceNotFoundException("User", "identification", invalidUserIdentificationList.toString());
         }
 
-        commentMentionService.createAll(commentMentions);
+        return commentMentions;
     }
 
     // 댓글 수정
     @Transactional
-    public ApiResponse updateComment(Long id, CommentDTO.CommentUpdateRequest request) {
+    public ApiResponse update(Long id, CommentUpdateInput input, User user) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
-        comment.setContents(request.getContents());
-
-        List<CommentMention> originalCommentMentions = null;
-        if (comment.getCommentMentions() != null) {
-            originalCommentMentions = comment.getCommentMentions();
+        if (!comment.getWriter().getIdentification().equals(user.getIdentification())) {
+            throw new ResourceForbiddenException("권한이 없습니다.\n( 댓글 작성자 아님 )");
         }
 
-        if (request.getCommentMentions() == null) {
-            if (originalCommentMentions != null) comment.removeCommentMentions(originalCommentMentions);
-        } else {
-            List<String> newCommentMentions = request.getCommentMentions();
-            List<String> maintainedCommentMentions = new ArrayList<>();
-            if (originalCommentMentions != null) {
-                List<CommentMention> deletedCommentMentions = new ArrayList<>();
-                for (CommentMention commentMention : originalCommentMentions) {
-                    if (newCommentMentions.contains(commentMention.getTargetUser().getIdentification())) {
-                        maintainedCommentMentions.add(commentMention.getTargetUser().getIdentification());
-                    } else {
-                        deletedCommentMentions.add(commentMention);
-                    }
-                }
-                comment.removeCommentMentions(deletedCommentMentions);
-            }
+        List<CommentMention> originalCommentMentions
+                = comment.getCommentMentions() != null ? comment.getCommentMentions() : Collections.emptyList(); // 기존 댓글에 멘션된 사용자들
+        Set<String> newCommentMentionSet = new HashSet<>(input.getCommentMentions()); // 새로 멘션된 사람들
+        List<CommentMention> deletedCommentMentions = new ArrayList<>(); // 수정 후 멘션 목록에서 사라진 사람들
 
-            newCommentMentions.removeAll(maintainedCommentMentions); // new
-            if (newCommentMentions.size() > 0) {
-                List<CommentMention> commentMentions = new ArrayList<>();
-                for (String targetId : newCommentMentions) {
-                    User target = userRepository.findByIdentification(targetId)
-                            .orElseThrow(() -> new ResourceNotFoundException("USER", "id", targetId));
-
-                    CommentMention commentMention = CommentMention.builder()
-                            .comment(comment)
-                            .targetUser(target)
-                            .build();
-                    commentMentions.add(commentMention);
-                }
-                comment.addCommentMentions(commentMentions);
+        // 새 멘션 대상과 멘션 대상에서 제외된 사람들 목록 설정
+        for (CommentMention commentMention : originalCommentMentions) {
+            final String targetUserIdentification = commentMention.getTargetUser().getIdentification();
+            if (newCommentMentionSet.contains(targetUserIdentification)) {
+                newCommentMentionSet.remove(targetUserIdentification);
+            } else {
+                deletedCommentMentions.add(commentMention);
             }
         }
+
+        comment.update(input.getContents());
+        comment.removeCommentMentions(deletedCommentMentions);
+        comment.addCommentMentions(makeCommentMentionList(new ArrayList<>(newCommentMentionSet), comment));
+
         commentRepository.save(comment);
         return new ApiResponse(Boolean.TRUE, "댓글 수정 성공");
-    }
+}
 
     // 댓글 삭제
     @Transactional

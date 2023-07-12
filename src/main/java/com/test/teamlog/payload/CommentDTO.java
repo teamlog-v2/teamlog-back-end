@@ -1,22 +1,14 @@
 package com.test.teamlog.payload;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
-
 import com.test.teamlog.entity.Comment;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class CommentDTO {
-
-    @Getter
-    public static class CommentUpdateRequest {
-        private String contents;
-        private List<String> commentMentions;
-    }
 
     @Data
     @Builder
