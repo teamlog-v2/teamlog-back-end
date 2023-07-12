@@ -1,8 +1,13 @@
-package com.test.teamlog.service;
+package com.test.teamlog.domain.comment.service;
 
+import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-
 import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.service.UserService;
+import com.test.teamlog.domain.comment.dto.CommentCreateInput;
+import com.test.teamlog.domain.comment.repository.CommentRepository;
+import com.test.teamlog.domain.commentmention.service.CommentMentionService;
+import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.entity.Comment;
 import com.test.teamlog.entity.CommentMention;
 import com.test.teamlog.entity.Post;
@@ -10,10 +15,6 @@ import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.CommentDTO;
 import com.test.teamlog.payload.PagedResponse;
-import com.test.teamlog.domain.account.dto.UserRequest;
-import com.test.teamlog.repository.CommentMentionRepository;
-import com.test.teamlog.repository.CommentRepository;
-import com.test.teamlog.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,13 +25,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
-    private final CommentMentionRepository commentMentionRepository;
+    private final CommentMentionService commentMentionService;
+
+    private final UserService userService;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
@@ -193,40 +199,49 @@ public class CommentService {
 
     // 댓글 생성
     @Transactional
-    public ApiResponse createComment(CommentDTO.CommentRequest request, User currentUser) {
-        Post post = postRepository.findById(request.getPostId())
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", request.getPostId()));
+    public ApiResponse create(CommentCreateInput input, User currentUser) {
+        Post post = postRepository.findById(input.getPostId())
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", input.getPostId()));
 
-        Comment parentComment = null;
-        if (request.getParentCommentId() != null) {
-            parentComment = commentRepository.findById(request.getParentCommentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", request.getParentCommentId()));
-        }
+        Comment parentComment = input.getParentCommentId() != null ?
+                commentRepository.findById(input.getParentCommentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", input.getParentCommentId())) :
+                null;
 
-        Comment comment = Comment.builder()
-                .writer(currentUser)
-                .post(post)
-                .contents(request.getContents())
-                .parentComment(parentComment)
-                .build();
-
+        Comment comment = input.toComment(currentUser, post, parentComment);
         commentRepository.save(comment);
 
+        createCommentMentionList(input.getCommentMentions(), comment);
+
+        return new ApiResponse(Boolean.TRUE, "댓글 생성 성공");
+    }
+
+    private void createCommentMentionList(List<String> commentMentionIdentificationList, Comment comment) {
+        final List<User> userList = userService.findAllByIdentificationIn(commentMentionIdentificationList);
+        final Map<String, User> userMap
+                = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
+
         List<CommentMention> commentMentions = new ArrayList<>();
-        for (String targetId : request.getCommentMentions()) {
-            User target = userRepository.findByIdentification(targetId)
-                    .orElseThrow(() -> new ResourceNotFoundException("USER", "id", targetId));
+        List<String> invalidUserIdentificationList = new ArrayList<>(); // 존재하지 않는 사용자 목록
+
+        for (String identification : commentMentionIdentificationList) {
+            if (!userMap.containsKey(identification)) {
+                invalidUserIdentificationList.add(identification);
+                continue;
+            }
 
             CommentMention commentMention = CommentMention.builder()
                     .comment(comment)
-                    .targetUser(target)
+                    .targetUser(userMap.get(identification))
                     .build();
             commentMentions.add(commentMention);
         }
 
-        commentMentionRepository.saveAll(commentMentions);
+        if (!invalidUserIdentificationList.isEmpty()) {
+            throw new ResourceNotFoundException("User", "identification", invalidUserIdentificationList.toString());
+        }
 
-        return new ApiResponse(Boolean.TRUE, "댓글 생성 성공");
+        commentMentionService.createAll(commentMentions);
     }
 
     // 댓글 수정

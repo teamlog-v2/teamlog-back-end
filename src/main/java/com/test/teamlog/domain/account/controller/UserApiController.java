@@ -8,7 +8,7 @@ import com.test.teamlog.domain.post.service.PostService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.CommentDTO;
-import com.test.teamlog.service.CommentService;
+import com.test.teamlog.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

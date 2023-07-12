@@ -1,4 +1,4 @@
-package com.test.teamlog.repository;
+package com.test.teamlog.domain.commentmention.repository;
 
 import com.test.teamlog.domain.account.model.User;
 

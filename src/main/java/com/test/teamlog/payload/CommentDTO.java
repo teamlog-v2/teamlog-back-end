@@ -11,13 +11,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class CommentDTO {
-    @Getter
-    public static class CommentRequest {
-        private Long parentCommentId;
-        private Long postId;
-        private String contents;
-        private List<String> commentMentions;
-    }
 
     @Getter
     public static class CommentUpdateRequest {

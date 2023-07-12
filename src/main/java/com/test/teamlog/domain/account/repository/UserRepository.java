@@ -23,4 +23,6 @@ public interface UserRepository extends JpaRepository<User, String> {
     List<User> getUsersNotInTeamMember(@Param("teamId") Long teamId);
 
     Optional<User> findByIdentification(String identification);
+
+    List<User> findAllByIdentificationIn(List<String> identificationList);
 }

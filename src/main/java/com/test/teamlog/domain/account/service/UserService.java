@@ -153,4 +153,8 @@ public class UserService {
         userRepository.delete(currentUser);
         return new ApiResponse(Boolean.TRUE, "회원 탈퇴 성공");
     }
+
+    public List<User> findAllByIdentificationIn(List<String> identificationList) {
+        return userRepository.findAllByIdentificationIn(identificationList);
+    }
 }

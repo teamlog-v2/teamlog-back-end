@@ -1,10 +1,11 @@
-package com.test.teamlog.controller;
+package com.test.teamlog.domain.comment.controller;
 
+import com.test.teamlog.domain.comment.dto.CommentCreateRequest;
+import com.test.teamlog.domain.comment.service.CommentService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.CommentDTO;
 import com.test.teamlog.payload.PagedResponse;
-import com.test.teamlog.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,9 +24,9 @@ public class CommentController {
 
     @Operation(summary = "댓글 생성")
     @PostMapping("/comments")
-    public ResponseEntity<ApiResponse> createProject(@RequestBody CommentDTO.CommentRequest request,
-                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = commentService.createComment(request, currentUser.getUser());
+    public ResponseEntity<ApiResponse> create(@RequestBody CommentCreateRequest request,
+                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = commentService.create(request.toInput(), currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
