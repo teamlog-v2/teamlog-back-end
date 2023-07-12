@@ -1,11 +1,11 @@
 package com.test.teamlog.domain.comment.controller;
 
 import com.test.teamlog.domain.comment.dto.CommentCreateRequest;
+import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
 import com.test.teamlog.domain.comment.dto.CommentUpdateRequest;
 import com.test.teamlog.domain.comment.service.CommentService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.CommentDTO;
 import com.test.teamlog.payload.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -50,22 +50,21 @@ public class CommentApiController {
 
     @Operation(summary = "부모 댓글 조회")
     @GetMapping("/posts/{postId}/parent-comments")
-    public ResponseEntity<PagedResponse<CommentDTO.CommentInfo>> getParentCommentsByPost(@PathVariable("postId") long postId,
-                                                                                         @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                                         @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-                                                                                         @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        PagedResponse<CommentDTO.CommentInfo> response = commentService.getParentComments(postId, page, size, currentUser.getUser());
+    public ResponseEntity<PagedResponse<CommentInfoResponse>> getParentCommentsByPost(@PathVariable("postId") long postId,
+                                                                                      @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                                      @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+                                                                                      @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        final PagedResponse<CommentInfoResponse> response = commentService.getParentComments(postId, page, size, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "대댓글 조회")
     @GetMapping("/comments/{commentId}/child-comments")
-    public ResponseEntity<PagedResponse<CommentDTO.CommentInfo>> getChildComments(@PathVariable("commentId") long commentId,
-                                                                                  @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                                                  @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-                                                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-
-        PagedResponse<CommentDTO.CommentInfo> response = commentService.getChildComments(commentId, page, size, currentUser.getUser());
+    public ResponseEntity<PagedResponse<CommentInfoResponse>> getChildComments(@PathVariable("commentId") long commentId,
+                                                                               @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                               @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+                                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        PagedResponse<CommentInfoResponse> response = commentService.getChildComments(commentId, page, size, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

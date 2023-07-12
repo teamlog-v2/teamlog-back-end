@@ -1,4 +1,4 @@
-package com.test.teamlog.payload;
+package com.test.teamlog.domain.comment.dto;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.entity.Comment;

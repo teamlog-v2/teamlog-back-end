@@ -4,6 +4,7 @@ import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.UserService;
 import com.test.teamlog.domain.comment.dto.CommentCreateInput;
+import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
 import com.test.teamlog.domain.comment.dto.CommentUpdateInput;
 import com.test.teamlog.domain.comment.repository.CommentRepository;
 import com.test.teamlog.domain.commentmention.service.CommentMentionService;
@@ -14,7 +15,7 @@ import com.test.teamlog.entity.Post;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.CommentDTO;
+import com.test.teamlog.domain.comment.dto.CommentDTO;
 import com.test.teamlog.payload.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -72,84 +73,64 @@ public class CommentService {
     }
 
     // 게시물의 부모 댓글 조회
-    public PagedResponse<CommentDTO.CommentInfo> getParentComments(Long postId, int page, int size, User currentUser) {
+    public PagedResponse<CommentInfoResponse> getParentComments(Long postId, int page, int size, User currentUser) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
-        Page<Comment> parentComments = commentRepository.getParentCommentsByPost(post, pageable);
+        Page<Comment> parentComments = commentRepository.findParentCommentListByPost(post, pageable);
 
-        List<CommentDTO.CommentInfo> responses = new ArrayList<>();
-        for (Comment comment : parentComments) {
-            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(comment.getWriter());
-
-            List<String> commentMentions = new ArrayList<>();
-            for (CommentMention targetUSer : comment.getCommentMentions()) {
-                commentMentions.add(targetUSer.getTargetUser().getIdentification());
-            }
-
-            Boolean isMyComment = Boolean.TRUE;
-            if (currentUser == null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification()))
-                isMyComment = Boolean.FALSE;
-
-            CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
-                    .isMyComment(isMyComment)
-                    .id(comment.getId())
-                    .contents(comment.getContents())
-                    .writer(writer)
-                    .writeTime(comment.getCreateTime())
-                    .commentMentions(commentMentions)
-                    .build();
-            responses.add(temp);
-        }
-
-        return new PagedResponse<>(responses, parentComments.getNumber(), parentComments.getSize(),
+        final List<CommentInfoResponse> responseList = makeCommentInfoResponseList(currentUser, parentComments.getContent());
+        return new PagedResponse<>(responseList, parentComments.getNumber(), parentComments.getSize(),
                 parentComments.getTotalElements(), parentComments.getTotalPages(), parentComments.isLast());
     }
 
     // 대댓글 조회
-    public PagedResponse<CommentDTO.CommentInfo> getChildComments(Long parentCommentId, int page, int size, User currentUser) {
+    public PagedResponse<CommentInfoResponse> getChildComments(Long parentCommentId, int page, int size, User currentUser) {
         Comment comment = commentRepository.findById(parentCommentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", parentCommentId));
-
-        List<CommentDTO.CommentInfo> responses = new ArrayList<>();
 
         if (size == 0) {
             Pageable pageable = PageRequest.of(page, 1, Sort.Direction.DESC, "createTime");
             Page<Comment> childComments = commentRepository.getChildCommentsByParentComment(comment, pageable);
-            return new PagedResponse<>(responses, 0, 0,
-                    childComments.getTotalElements(), 0, true);
+            return new PagedResponse<>(Collections.emptyList(), 0, 0, childComments.getTotalElements(), 0, true);
         }
+
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
         Page<Comment> childComments = commentRepository.getChildCommentsByParentComment(comment, pageable);
 
-        responses = new ArrayList<>();
-        for (Comment childComment : childComments) {
-            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(childComment.getWriter());
+        final List<CommentInfoResponse> responseList
+                = makeCommentInfoResponseList(currentUser, comment, childComments.getContent());
 
-            List<String> commentMentions = new ArrayList<>();
-            for (CommentMention targetUSer : childComment.getCommentMentions()) {
-                commentMentions.add(targetUSer.getTargetUser().getIdentification());
-            }
-
-            Boolean isMyComment = Boolean.TRUE;
-            if (currentUser == null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification()))
-                isMyComment = Boolean.FALSE;
-
-            CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
-                    .isMyComment(isMyComment)
-                    .id(childComment.getId())
-                    .contents(childComment.getContents())
-                    .writer(writer)
-                    .writeTime(childComment.getCreateTime())
-                    .commentMentions(commentMentions)
-                    .build();
-            responses.add(temp);
-        }
-
-        return new PagedResponse<>(responses, childComments.getNumber(), childComments.getSize(),
+        return new PagedResponse<>(responseList, childComments.getNumber(), childComments.getSize(),
                 childComments.getTotalElements(), childComments.getTotalPages(), childComments.isLast());
     }
+
+    private List<CommentInfoResponse> makeCommentInfoResponseList(User currentUser, List<Comment> commentList) {
+        if (CollectionUtils.isEmpty(commentList)) return Collections.emptyList();
+
+        return makeCommentInfoResponseList(currentUser, commentList.get(0), commentList);
+    }
+    private List<CommentInfoResponse> makeCommentInfoResponseList(User currentUser, Comment comment, List<Comment> commentList) {
+        if (CollectionUtils.isEmpty(commentList)) return Collections.emptyList();
+
+        List<CommentInfoResponse> responseList = new ArrayList<>();
+
+        for (Comment childComment : commentList) {
+            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(childComment.getWriter());
+            Boolean isMyComment
+                    = currentUser != null && comment.getWriter().getIdentification().equals(currentUser.getIdentification()) ? Boolean.TRUE : Boolean.FALSE;
+
+            final CommentInfoResponse response = CommentInfoResponse.of(childComment);
+            response.setIsMyComment(isMyComment);
+            response.setWriter(writer);
+
+            responseList.add(response);
+        }
+
+        return responseList;
+    }
+
 
     // 게시물 댓글 조회
     public List<CommentDTO.CommentResponse> getComments(Long postId) {
