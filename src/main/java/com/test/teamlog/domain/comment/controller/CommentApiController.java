@@ -44,7 +44,7 @@ public class CommentApiController {
     @DeleteMapping("/comments/{id}")
     public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
                                                   @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = commentService.deleteComment(id);
+        ApiResponse apiResponse = commentService.deleteComment(id, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

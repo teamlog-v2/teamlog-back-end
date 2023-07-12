@@ -277,13 +277,17 @@ public class CommentService {
 
         commentRepository.save(comment);
         return new ApiResponse(Boolean.TRUE, "댓글 수정 성공");
-}
+    }
 
     // 댓글 삭제
     @Transactional
-    public ApiResponse deleteComment(Long id) {
+    public ApiResponse deleteComment(Long id, User user) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
+        if (!comment.getWriter().getIdentification().equals(user.getIdentification())) {
+            throw new ResourceForbiddenException("권한이 없습니다.\n( 댓글 작성자 아님 )");
+        }
+
         commentRepository.delete(comment);
         return new ApiResponse(Boolean.TRUE, "댓글 삭제 성공");
     }
