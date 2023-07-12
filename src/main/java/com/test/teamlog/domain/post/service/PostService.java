@@ -330,7 +330,7 @@ public class PostService {
                     = input.getHashtags()
                     .stream().map(hashTag -> PostTag.builder().name(hashTag).build())
                     .collect(Collectors.toList());
-            postTagList.forEach(tag -> tag.addPost(post));
+            postTagList.forEach(tag -> tag.setPost(post));
         }
 
         Post newPost = postRepository.save(post);
