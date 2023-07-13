@@ -19,7 +19,7 @@ public class Comment extends BaseTimeEntity {
     @GeneratedValue
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     private Comment parentComment;
 
@@ -27,14 +27,14 @@ public class Comment extends BaseTimeEntity {
     @OneToMany(mappedBy = "parentComment", orphanRemoval = true)
     private List<Comment> childComments = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
     @Column(nullable = false)
     private String contents;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_user_id", nullable = false)
     private User writer;
 
@@ -48,6 +48,10 @@ public class Comment extends BaseTimeEntity {
         }
         this.post = post;
         post.getComments().add(this);
+    }
+
+    public void update(String contents) {
+        this.contents = contents;
     }
 
     public void addCommentMentions(List<CommentMention> mentions) {
