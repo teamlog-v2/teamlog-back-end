@@ -2,13 +2,13 @@ package com.test.teamlog.domain.account.controller;
 
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.service.UserService;
+import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
+import com.test.teamlog.domain.comment.service.CommentService;
 import com.test.teamlog.domain.post.dto.PostResponse;
 import com.test.teamlog.domain.post.dto.PostResult;
 import com.test.teamlog.domain.post.service.PostService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.domain.comment.dto.CommentDTO;
-import com.test.teamlog.domain.comment.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -130,8 +130,8 @@ public class UserApiController {
 
     @Operation(summary = "개인 작성 이력 조회 (댓글)")
     @GetMapping("/user/comments")
-    public ResponseEntity<List<CommentDTO.CommentInfo>> getCommentsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<CommentDTO.CommentInfo> response = null;
+    public ResponseEntity<List<CommentInfoResponse>> getCommentsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<CommentInfoResponse> response = null;
 
         if (currentUser == null) {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);

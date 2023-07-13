@@ -15,7 +15,6 @@ import com.test.teamlog.entity.Post;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.domain.comment.dto.CommentDTO;
 import com.test.teamlog.payload.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -41,35 +40,9 @@ public class CommentService {
     private final PostRepository postRepository;
 
     // 유저가 작성한 댓글 조회
-    public List<CommentDTO.CommentInfo> getCommentByUser(User currentUser) {
+    public List<CommentInfoResponse> getCommentByUser(User currentUser) {
         List<Comment> commentList = commentRepository.findAllByWriter(currentUser);
-
-        List<CommentDTO.CommentInfo> responses = new ArrayList<>();
-        if (commentList.size() != 0) {
-            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(currentUser);
-
-            for (Comment comment : commentList) {
-                List<String> commentMentions = new ArrayList<>();
-                for (CommentMention targetUSer : comment.getCommentMentions()) {
-                    commentMentions.add(targetUSer.getTargetUser().getIdentification());
-                }
-
-                Boolean isMyComment = Boolean.TRUE;
-                if (currentUser == null || !comment.getWriter().getIdentification().equals(currentUser.getIdentification()))
-                    isMyComment = Boolean.FALSE;
-
-                CommentDTO.CommentInfo temp = CommentDTO.CommentInfo.builder()
-                        .isMyComment(isMyComment)
-                        .id(comment.getId())
-                        .contents(comment.getContents())
-                        .writer(writer)
-                        .writeTime(comment.getCreateTime())
-                        .commentMentions(commentMentions)
-                        .build();
-                responses.add(temp);
-            }
-        }
-        return responses;
+        return  makeCommentInfoResponseList(currentUser, commentList);
     }
 
     // 게시물의 부모 댓글 조회
@@ -116,12 +89,12 @@ public class CommentService {
 
         List<CommentInfoResponse> responseList = new ArrayList<>();
 
-        for (Comment childComment : commentList) {
-            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(childComment.getWriter());
+        for (Comment cmt : commentList) {
+            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(cmt.getWriter());
             Boolean isMyComment
                     = currentUser != null && comment.getWriter().getIdentification().equals(currentUser.getIdentification()) ? Boolean.TRUE : Boolean.FALSE;
 
-            final CommentInfoResponse response = CommentInfoResponse.of(childComment);
+            final CommentInfoResponse response = CommentInfoResponse.of(cmt);
             response.setIsMyComment(isMyComment);
             response.setWriter(writer);
 
@@ -129,55 +102,6 @@ public class CommentService {
         }
 
         return responseList;
-    }
-
-
-    // 게시물 댓글 조회
-    public List<CommentDTO.CommentResponse> getComments(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-
-        List<Comment> parentComments = commentRepository.findByPostAndParentCommentIsNull(post);
-        List<CommentDTO.CommentResponse> responses = new ArrayList<>();
-
-        for (Comment comment : parentComments) {
-            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(comment.getWriter());
-
-            List<String> commentMentions = new ArrayList<>();
-            for (CommentMention targetUSer : comment.getCommentMentions()) {
-                commentMentions.add(targetUSer.getTargetUser().getIdentification());
-            }
-
-            List<CommentDTO.CommentInfo> childComments = new ArrayList<>();
-            for (Comment childComment : comment.getChildComments()) {
-                UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(childComment.getWriter());
-
-                List<String> childCommentMentions = new ArrayList<>();
-                for (CommentMention targetUSer : childComment.getCommentMentions()) {
-                    childCommentMentions.add(targetUSer.getTargetUser().getIdentification());
-                }
-
-                CommentDTO.CommentInfo childTemp = CommentDTO.CommentInfo.builder()
-                        .id(childComment.getId())
-                        .contents(childComment.getContents())
-                        .writer(user)
-                        .writeTime(childComment.getCreateTime())
-                        .commentMentions(childCommentMentions)
-                        .build();
-                childComments.add(childTemp);
-            }
-
-            CommentDTO.CommentResponse temp = CommentDTO.CommentResponse.builder()
-                    .id(comment.getId())
-                    .contents(comment.getContents())
-                    .writer(writer)
-                    .childComments(childComments)
-                    .writeTime(comment.getCreateTime())
-                    .commentMentions(commentMentions)
-                    .build();
-            responses.add(temp);
-        }
-        return responses;
     }
 
     // 댓글 생성

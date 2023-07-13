@@ -1,37 +1,9 @@
 package com.test.teamlog.domain.comment.dto;
 
-import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.entity.Comment;
-import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 public class CommentDTO {
-
-    @Data
-    @Builder
-    public static class CommentResponse {
-        private Long id;
-        private String contents;
-        private UserRequest.UserSimpleInfo writer;
-        private List<String> commentMentions;
-        private List<CommentInfo> childComments;
-        private LocalDateTime writeTime;
-    }
-
-    @Data
-    @Builder
-    public static class CommentInfo {
-        private Boolean isMyComment;
-        private Long id;
-        private String contents;
-        private UserRequest.UserSimpleInfo writer;
-        private List<String> commentMentions;
-        private LocalDateTime writeTime;
-    }
-
     @Data
     public static class CommentNotification {
         private Long commentId;
