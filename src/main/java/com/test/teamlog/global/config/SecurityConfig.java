@@ -1,4 +1,4 @@
-package com.test.teamlog.config;
+package com.test.teamlog.global.config;
 
 import com.test.teamlog.global.security.JwtAuthenticationEntryPoint;
 import com.test.teamlog.global.security.JwtAuthenticationFilter;

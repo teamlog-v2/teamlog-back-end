@@ -1,4 +1,4 @@
-package com.test.teamlog.config;
+package com.test.teamlog.global.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;

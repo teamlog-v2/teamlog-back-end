@@ -1,4 +1,4 @@
-package com.test.teamlog.config;
+package com.test.teamlog.global.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
