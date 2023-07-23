@@ -65,7 +65,7 @@ public class Post extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<PostLiker> postLikers = new ArrayList<>();
+    private List<PostLike> postLikes = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
