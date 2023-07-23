@@ -1,16 +1,24 @@
 package com.test.teamlog.domain.post.service;
 
-import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.post.dto.*;
+import com.test.teamlog.domain.post.dto.PostCreateInput;
+import com.test.teamlog.domain.post.dto.PostReadByProjectInput;
+import com.test.teamlog.domain.post.dto.PostResult;
+import com.test.teamlog.domain.post.dto.PostUpdateInput;
 import com.test.teamlog.domain.post.repository.PostRepository;
+import com.test.teamlog.domain.postlike.dto.PostLikerResult;
+import com.test.teamlog.domain.postlike.service.PostLikeService;
 import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
 import com.test.teamlog.domain.postupdatehistory.service.PostUpdateHistoryService;
 import com.test.teamlog.entity.*;
-import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.*;
-import com.test.teamlog.repository.*;
+import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.payload.PagedResponse;
+import com.test.teamlog.payload.PostDTO;
+import com.test.teamlog.payload.PostTagInfo;
+import com.test.teamlog.repository.PostMediaRepository;
+import com.test.teamlog.repository.PostTagRepository;
+import com.test.teamlog.repository.PostUpdateHistoryRepository;
 import com.test.teamlog.service.FileStorageService;
 import com.test.teamlog.service.ProjectService;
 import com.test.teamlog.service.UserFollowService;
@@ -18,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +50,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostTagRepository postTagRepository;
     private final PostMediaRepository postMediaRepository;
-    private final PostLikerRepository postLikerRepository;
+
+    private final PostLikeService postLikeService;
     private final PostUpdateHistoryRepository postUpdateHistoryRepository;
 
     public List<PostResult> getPostsByUser(User currentUser) {
@@ -92,7 +100,7 @@ public class PostService {
 
     // 프로젝트 내 포스트 조회
     private PagedResponse<PostResult> searchPostsByProject(Long projectId, Sort.Direction sort, String cop,
-                                                                     Long cursor, int size, User currentUser) {
+                                                           Long cursor, int size, User currentUser) {
         Project project = projectService.findOne(projectId);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
@@ -128,12 +136,12 @@ public class PostService {
 
     // 키워드로 게시물 조회
     private PagedResponse<PostResult> searchPostsInProjectByKeyword(Long projectId,
-                                                                              String keyword,
-                                                                              Sort.Direction sort,
-                                                                              String cop,
-                                                                              Long cursor,
-                                                                              int size,
-                                                                              User currentUser) {
+                                                                    String keyword,
+                                                                    Sort.Direction sort,
+                                                                    String cop,
+                                                                    Long cursor,
+                                                                    int size,
+                                                                    User currentUser) {
         Project project = projectService.findOne(projectId);
 
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
@@ -191,13 +199,13 @@ public class PostService {
 
     // 해시태그 선별 조회 + 키워드 검색
     private PagedResponse<PostResult> searchPostsInProjectByHashtagAndKeyword(Long projectId,
-                                                                                        String keyword,
-                                                                                        List<String> names,
-                                                                                        Sort.Direction sort,
-                                                                                        String cop,
-                                                                                        Long cursor,
-                                                                                        int size,
-                                                                                        User currentUser) {
+                                                                              String keyword,
+                                                                              List<String> names,
+                                                                              Sort.Direction sort,
+                                                                              String cop,
+                                                                              Long cursor,
+                                                                              int size,
+                                                                              User currentUser) {
         Project project = projectService.findOne(projectId);
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
@@ -233,7 +241,7 @@ public class PostService {
 
     // 해시태그 선별 조회
     private PagedResponse<PostResult> searchPostsInProjectByHashtag(Long projectId, List<String> names, Sort.Direction sort,
-                                                                              String cop, Long cursor, int size, User currentUser) {
+                                                                    String cop, Long cursor, int size, User currentUser) {
         Project project = projectService.findOne(projectId);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
         Boolean isUserMemberOfProject = projectService.isUserMemberOfProject(project, currentUser);
@@ -448,11 +456,11 @@ public class PostService {
                 hashtagList.stream().map(PostTag::getName).collect(Collectors.toList()) :
                 Collections.emptyList();
         result.setHashtags(hashtagNameList);
-        
+
         // 좋아요 여부 설정
-        Boolean isILikeIt = currentUser != null ? isILikeIt(post, currentUser) : Boolean.FALSE;
+        Boolean isILikeIt = currentUser != null ? postLikeService.existsByPostAndUser(post, currentUser) : Boolean.FALSE;
         result.setIsILikeIt(isILikeIt);
-        
+
         // 미디어 정보 설정
         List<PostMediaResult> mediaList = new ArrayList<>();
         List<PostMediaResult> fileList = new ArrayList<>();
@@ -469,10 +477,10 @@ public class PostService {
                 fileList.add(postMediaResult);
             }
         }
-        
+
         result.setMedia(mediaList);
         result.setFiles(fileList);
-        
+
         return result;
     }
 
@@ -489,54 +497,49 @@ public class PostService {
     }
 
 
-    // -------------------------------
-    // ------- 포스트 좋아요 관리 -------
-    // -------------------------------
-    // 좋아요
+    /**
+     * 좋아요
+     *
+     * @param postId
+     * @param currentUser
+     * @return
+     */
     @Transactional
     public ApiResponse likePost(Long postId, User currentUser) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        PostLiker postLiker = PostLiker.builder()
-                .post(post)
-                .user(currentUser)
-                .build();
-
-        try {
-            postLikerRepository.saveAndFlush(postLiker);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResourceAlreadyExistsException("좋아요는 한번만 가능합니다.");
-        }
-
+        postLikeService.create(post, currentUser);
         return new ApiResponse(Boolean.TRUE, "포스트 좋아요 성공");
     }
 
-    // 좋아요 취소
+    /**
+     * 좋아요 취소
+     *
+     * @param postId
+     * @param currentUser
+     * @return
+     */
     @Transactional
     public ApiResponse unlikePost(Long postId, User currentUser) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        PostLiker postLiker = postLikerRepository.findByPostAndUser(post, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("PostLiker", "UserId", currentUser.getIdentification()));
-
-        postLikerRepository.delete(postLiker);
+        postLikeService.delete(post, currentUser);
         return new ApiResponse(Boolean.TRUE, "포스트 좋아요 취소 성공");
     }
 
-    // 포스트 좋아요 목록 조회
-    public List<UserRequest.UserSimpleInfo> getPostLikerList(Long postId) {
+    /**
+     * 게시물 좋아요 목록 조회
+     * @param postId
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public List<PostLikerResult> readPostLikerList(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        List<PostLiker> postLikers = postLikerRepository.findAllByPost(post);
-        List<UserRequest.UserSimpleInfo> response = new ArrayList<>();
-        for (PostLiker postLiker : postLikers) {
-            UserRequest.UserSimpleInfo temp = new UserRequest.UserSimpleInfo(postLiker.getUser());
-            response.add(temp);
-        }
-        return response;
+        return postLikeService.readAllByPost(post);
     }
 
     private String makeFileDownloadUri(PostMedia postMedia, String path) {
@@ -544,9 +547,5 @@ public class PostService {
                 .path(path)
                 .path(postMedia.getStoredFileName())
                 .toUriString();
-    }
-
-    private Boolean isILikeIt(Post post, User currentUser) {
-        return postLikerRepository.findByPostAndUser(post, currentUser).isPresent();
     }
 }

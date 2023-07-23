@@ -42,7 +42,7 @@ public class PostResult {
         result.setCommentModifier(post.getCommentModifier());
         result.setContents(post.getContents());
         result.setAddress(post.getAddress());
-        result.setLikeCount(post.getPostLikers().size());
+        result.setLikeCount(post.getPostLikes().size());
         result.setCommentCount(post.getComments().size());
         result.setWriteTime(post.getCreateTime());
         result.setWriteTimeStr(post.getCreateTime().toString());

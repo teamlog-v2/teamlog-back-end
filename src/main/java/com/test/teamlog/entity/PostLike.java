@@ -12,14 +12,14 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
-        name = "post_liker",
+        name = "post_like",
         uniqueConstraints={
                 @UniqueConstraint(
                         columnNames={"user_id","post_id"}
                 )
         }
 )
-public class PostLiker {
+public class PostLike {
     @Id @GeneratedValue
     private Long id;
 
@@ -33,17 +33,17 @@ public class PostLiker {
 
     public void setPost(Post post) {
         if(this.post != null) {
-            this.post.getPostLikers().remove(this);
+            this.post.getPostLikes().remove(this);
         }
         this.post = post;
-        post.getPostLikers().add(this);
+        post.getPostLikes().add(this);
     }
 
     public void setUser(User user) {
         if(this.user != null) {
-            this.user.getPostLikers().remove(this);
+            this.user.getPostLikes().remove(this);
         }
         this.user = user;
-        post.getPostLikers().add(this);
+        post.getPostLikes().add(this);
     }
 }
