@@ -1,6 +1,6 @@
 package com.test.teamlog.service;
 
-import com.test.teamlog.config.FileConfig;
+import com.test.teamlog.global.config.FileConfig;
 import com.test.teamlog.entity.Post;
 import com.test.teamlog.entity.PostMedia;
 import com.test.teamlog.exception.FileStorageException;

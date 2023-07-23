@@ -3,15 +3,13 @@ server:
 
 spring:
     jpa:
-        show-sql: true
         generate-ddl: true
         database: postgresql
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.PostgreSQLDialect
-                show_sql: true
-                format_sql: true
-                use_sql_comments: true
+                # show_sql: true
+                # format_sql: true
         hibernate:
             ddl-auto: update
     datasource:
@@ -64,4 +62,4 @@ springdoc:
 decorator:
     datasource:
         p6spy:
-            enable-logging: true # SQL 로그 찍기
+            enable-logging: true # SQL 로그 찍기, 운영 환경에서는 false로 설정하기

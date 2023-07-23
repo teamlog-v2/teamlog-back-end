@@ -1,4 +1,4 @@
-package com.test.teamlog.config;
+package com.test.teamlog.global.config;
 
 import lombok.*;
 import org.springframework.boot.context.properties.ConfigurationProperties;
