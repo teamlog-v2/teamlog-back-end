@@ -3,7 +3,7 @@ package com.test.teamlog.domain.token.service;
 import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.entity.Token;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.global.security.JwtComponent;
+import com.test.teamlog.global.security.JwtTokenProvider;
 import com.test.teamlog.repository.TokenRepository;
 import com.test.teamlog.service.CustomUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,14 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TokenService {
-    private final JwtComponent jwtComponent;
+    private final JwtTokenProvider jwtTokenProvider;
     private final TokenRepository tokenRepository;
     private final UserDetailsService userDetailsService;
 
-    public TokenService(JwtComponent jwtComponent,
+    public TokenService(JwtTokenProvider jwtTokenProvider,
                         TokenRepository tokenRepository,
                         CustomUserDetailsService userDetailsService) {
-        this.jwtComponent = jwtComponent;
+        this.jwtTokenProvider = jwtTokenProvider;
         this.tokenRepository = tokenRepository;
         this.userDetailsService = userDetailsService;
     }
@@ -48,10 +48,10 @@ public class TokenService {
 
     @Transactional
     public String reissue(String refreshToken) {
-        final String userId = jwtComponent.getUserId(refreshToken);
+        final String userId = jwtTokenProvider.getUserId(refreshToken);
 
         final Token token = tokenRepository.findByIdentification(userId).orElse(null);
-        if (!jwtComponent.validateToken(refreshToken, userDetailsService.loadUserByUsername(userId)) ||
+        if (jwtTokenProvider.isTokenExpired(refreshToken) ||
                 token == null ||
                 !token.getRefreshToken().equals(refreshToken)) {
             throw new ResourceNotFoundException("토큰이 유효하지 않습니다");
@@ -64,10 +64,10 @@ public class TokenService {
     }
 
     private String createAccessToken(String identification) {
-        return jwtComponent.generateAccessToken(identification);
+        return jwtTokenProvider.generateAccessToken(identification);
     }
 
     private String createRefreshToken(String identification) {
-        return jwtComponent.generateRefreshToken(identification);
+        return jwtTokenProvider.generateRefreshToken(identification);
     }
 }

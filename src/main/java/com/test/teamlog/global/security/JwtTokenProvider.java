@@ -4,19 +4,26 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
 @Component
-public class JwtComponent {
+@RequiredArgsConstructor
+public class JwtTokenProvider {
     private static final long ACCESS_TOKEN_VALIDATION_SECOND = 1000L * 60 * 60 * 24; // 1일
     private static final long REFRESH_TOKEN_VALIDATION_SECOND = 1000L * 60 * 60 * 24 * 7 * 2; // 2주
 
     @Value("${app.jwtSecret}")
     private String JWT_SECRET;
+
+    private final UserDetailsService userDetailsService;
 
     public String generateAccessToken(String identification) {
         return doGenerateToken(identification, ACCESS_TOKEN_VALIDATION_SECOND);
@@ -28,17 +35,6 @@ public class JwtComponent {
 
     public String getUserId(String token) {
         return extractAllClaims(token).get("userId", String.class);
-    }
-
-    /**
-     * 토큰 유효성 검사
-     * @param token
-     * @param userDetails
-     * @return boolean 유효한 토큰인지 여부
-     */
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String userId = getUserId(token);
-        return (userId.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
     /**
@@ -63,7 +59,7 @@ public class JwtComponent {
      * @param token
      * @return boolean 토큰 만료 여부
      */
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         final Date expiration = extractAllClaims(token).getExpiration();
         return expiration.before(new Date());
     }
@@ -80,5 +76,17 @@ public class JwtComponent {
                 .setSigningKey(JWT_SECRET)
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    /**
+     * 요청 토큰을 이용해 유효한 사용자인지 검증한다.
+     * @param token
+     * @return
+     */
+    public Authentication authenticate(String token) {
+        final String userId = getUserId(token);
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 }
