@@ -2,7 +2,7 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.domain.account.model.User;
 
-import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.entity.Team;
 import com.test.teamlog.entity.TeamFollower;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
@@ -25,14 +25,14 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TeamFollowService {
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final ProjectRepository projectRepository;
     private final TeamRepository teamRepository;
     private final TeamFollowerRepository teamFollowerRepository;
 
     // 유저가 팔로우하는 팀 목록 조회
     public List<TeamDTO.TeamListResponse> getTeamListByTeamFollower(String userId) {
-        User user = userRepository.findByIdentification(userId)
+        User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<TeamFollower> teamFollowers = teamFollowerRepository.findAllByUser(user);
 

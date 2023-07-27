@@ -98,7 +98,7 @@ public class ProjectController {
     }
 
     @Operation(summary = "연관 프로젝트 추천")
-    @GetMapping("/account/recommended-projects")
+    @GetMapping("/recommended")
     public ResponseEntity<List<ProjectDTO.ProjectSimpleInfo>> getRecommendedProjects(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<ProjectDTO.ProjectSimpleInfo> response = null;
         if(currentUser != null) {
@@ -117,7 +117,7 @@ public class ProjectController {
     }
 
     @Operation(summary = "유저 프로젝트 리스트 조회")
-    @GetMapping("/projects/account/{userId}")
+    @GetMapping("/projects/accounts/{userId}")
     public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByUser(@PathVariable("userId") String userId,
                                                                                   @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<ProjectDTO.ProjectListResponse> response = projectService.getProjectsByUser(userId, currentUser.getUser());

@@ -2,7 +2,7 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.domain.account.model.User;
 
-import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.entity.Team;
 import com.test.teamlog.entity.TeamJoin;
 import com.test.teamlog.entity.TeamMember;
@@ -24,7 +24,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TeamMemberService {
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamJoinRepository teamJoinRepository;
@@ -32,7 +32,7 @@ public class TeamMemberService {
 
     // 팀 멤버 아닌 유저 리스트
     public List<UserRequest.UserSimpleInfo> getUsersNotInTeamMember(Long teamId) {
-        List<User> userList = userRepository.getUsersNotInTeamMember(teamId);
+        List<User> userList = accountRepository.getUsersNotInTeamMember(teamId);
         List<UserRequest.UserSimpleInfo> response = new ArrayList<>();
         for(User user : userList) {
             response.add(new UserRequest.UserSimpleInfo(user));
@@ -104,7 +104,7 @@ public class TeamMemberService {
     public ApiResponse expelMember(Long teamId, String userId, User currentUser) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
-        User user = userRepository.findByIdentification(userId)
+        User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         teamService.validateUserIsMaster(team, currentUser);
         TeamMember member = teamMemberRepository.findByTeamAndUser(team, user)

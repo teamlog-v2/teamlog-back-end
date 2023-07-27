@@ -78,7 +78,7 @@ public class TeamController {
     }
 
     @Operation(summary = "유저 팀 리스트 조회")
-    @GetMapping("/account/{userId}")
+    @GetMapping("/accounts/{userId}")
     public ResponseEntity<List<TeamDTO.TeamListResponse>> getTeamsByUser(@PathVariable("userId") String userId,
                                                                          @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<TeamDTO.TeamListResponse> response = teamService.getTeamsByUser(userId, currentUser.getUser());

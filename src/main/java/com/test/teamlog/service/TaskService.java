@@ -2,7 +2,7 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.domain.account.model.User;
 
-import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
@@ -26,7 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final ProjectRepository projectRepository;
     private final ProjectService projectService;
 
@@ -88,7 +88,7 @@ public class TaskService {
         List<TaskPerformer> performers = new ArrayList<>();
         if (request.getPerformersId() != null) {
             for (String userId : request.getPerformersId()) {
-                User tempUser = userRepository.findByIdentification(userId)
+                User tempUser = accountRepository.findByIdentification(userId)
                         .orElseThrow(() -> new ResourceNotFoundException("USER", "id", userId));
                 TaskPerformer performer = TaskPerformer.builder()
                         .task(task)
@@ -146,7 +146,7 @@ public class TaskService {
             if (newTaskPerformersId.size() > 0) {
                 List<TaskPerformer> taskPerformers = new ArrayList<>();
                 for (String performerId : newTaskPerformersId) {
-                    User performer = userRepository.findByIdentification(performerId)
+                    User performer = accountRepository.findByIdentification(performerId)
                             .orElseThrow(() -> new ResourceNotFoundException("USER", "id", performerId));
                     TaskPerformer newPerformer = TaskPerformer.builder()
                             .task(task)
