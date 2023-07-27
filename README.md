@@ -61,14 +61,14 @@ const submitPost = () => {
 #### Payload
 
 - __Request__
-    - __request dto__  ( ex) payload/user/UserRequest.java)
+    - __request dto__  ( ex) payload/account/UserRequest.java)
     
         create, update에서 사용 ( 이 또한 분리해야할지 고민 됨. )
 
 <br/>
     
 - __Response__
-    - __response dto__ ( ex) payload/user/UserResponse.java)
+    - __response dto__ ( ex) payload/account/UserResponse.java)
     
         create, update, read에서 사용 
   

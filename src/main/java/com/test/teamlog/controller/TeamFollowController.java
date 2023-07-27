@@ -47,7 +47,7 @@ public class TeamFollowController {
     }
 
     @Operation(summary = "유저가 팔로우하는 팀 조회")
-    @GetMapping("/users/{userId}/team-follow")
+    @GetMapping("/accounts/{userId}/team-follow")
     public ResponseEntity<List<TeamDTO.TeamListResponse>> getFollowingTeamListByUser(@PathVariable("userId") String userId) {
         List<TeamDTO.TeamListResponse> response = teamFollowService.getTeamListByTeamFollower(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);

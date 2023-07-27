@@ -30,13 +30,13 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/accounts")
 @Tag(name = "유저 관리")
-public class UserApiController {
+public class AccountApiController {
 
     @Value("${cookie.domain}")
     private String cookieDomain;
-    private final UserService userService;
+    private final UserService accountService;
     private final PostService postService;
     private final CommentService commentService;
 
@@ -44,7 +44,7 @@ public class UserApiController {
     @PostMapping("/sign-in")
     public ResponseEntity<SignInResponse> signIn(@Valid @RequestBody SignInRequest request,
                                                  HttpServletResponse httpServletResponse) {
-        final SignInResult result = userService.signIn(request.toInput());
+        final SignInResult result = accountService.signIn(request.toInput());
 
         ResponseCookie cookie = ResponseCookie.from("Refresh-Token", result.getRefreshToken())
                 .domain(cookieDomain)
@@ -69,53 +69,53 @@ public class UserApiController {
     }
 
     @Operation(summary = "회원 가입")
-    @PostMapping("/users")
+    @PostMapping("/sign-up")
     public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest request) {
-        final SignUpResult result = userService.signUp(request.toInput());
+        final SignUpResult result = accountService.signUp(request.toInput());
         return new ResponseEntity<>(SignUpResponse.from(result), HttpStatus.CREATED);
     }
 
     @Operation(summary = "회원 정보 조회")
-    @GetMapping("/users/{identification}")
+    @GetMapping("/{identification}")
     public ResponseEntity<UserRequest.UserResponse> getUserById(@PathVariable("identification") String identification,
                                                                 @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        UserRequest.UserResponse userResponse = userService.getUser(identification, currentUser.getUser());
+        UserRequest.UserResponse userResponse = accountService.getUser(identification, currentUser.getUser());
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "회원 정보 수정")
-    @PutMapping("/users")
+    @PutMapping
     public ResponseEntity<ApiResponse> updateUser(@Valid @RequestPart(value = "key", required = true) UserRequest.UserUpdateRequest userRequest,
                                                   @RequestPart(value = "profileImg", required = false) MultipartFile image,
                                                   @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = userService.updateUser(userRequest, image, currentUser.getUser());
+        ApiResponse apiResponse = accountService.updateUser(userRequest, image, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "회원 삭제")
-    @DeleteMapping("/users")
+    @DeleteMapping
     public ResponseEntity<ApiResponse> deleteUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = userService.deleteUser(currentUser.getUser());
+        ApiResponse apiResponse = accountService.deleteUser(currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "프로필 이미지 변경")
-    @PutMapping("/users/profile-image")
+    @PutMapping("/profile-image")
     public ResponseEntity<ApiResponse> updateUserProfileImage(@RequestPart(value = "profileImg", required = true) MultipartFile image,
                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = userService.updateUserProfileImage(image, currentUser.getUser());
+        ApiResponse apiResponse = accountService.updateUserProfileImage(image, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "프로필 이미지 삭제")
-    @DeleteMapping("/users/profile-image")
+    @DeleteMapping("/profile-image")
     public ResponseEntity<ApiResponse> deleteUserProfileImage(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = userService.deleteUserProfileImage(currentUser.getUser());
+        ApiResponse apiResponse = accountService.deleteUserProfileImage(currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "개인 작성 이력 조회 (게시물)")
-    @GetMapping("/user/posts")
+    @GetMapping("/posts")
     public ResponseEntity<List<PostResponse>> getPostsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<PostResponse> response = null;
         if (currentUser == null) {
@@ -129,7 +129,7 @@ public class UserApiController {
     }
 
     @Operation(summary = "개인 작성 이력 조회 (댓글)")
-    @GetMapping("/user/comments")
+    @GetMapping("/comments")
     public ResponseEntity<List<CommentInfoResponse>> getCommentsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<CommentInfoResponse> response = null;
 
@@ -142,11 +142,11 @@ public class UserApiController {
     }
 
     @Operation(summary = "회원 검색")
-    @GetMapping("/users")
+    @GetMapping
     public ResponseEntity<List<UserRequest.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String identification,
                                                                        @RequestParam(value = "name", required = false, defaultValue = "") String name,
                                                                        @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<UserRequest.UserSimpleInfo> response = userService.searchUser(identification, name);
+        List<UserRequest.UserSimpleInfo> response = accountService.searchUser(identification, name);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -47,7 +47,7 @@ public class ProjectFollowController {
     }
 
     @Operation(summary = "유저가 팔로우하는 프로젝트 조회")
-    @GetMapping("/users/{userId}/project-follow")
+    @GetMapping("/accounts/{userId}/project-follow")
     public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getFollowingProjectListByUser(@PathVariable("userId") String userId) {
         List<ProjectDTO.ProjectListResponse> response = projectFollowService.getProjectListByProjectFollower(userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
