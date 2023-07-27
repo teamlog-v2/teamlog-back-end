@@ -23,7 +23,7 @@ public class UserFollowController {
     private final UserFollowService userFollowService;
 
     @Operation(summary = "유저 팔로우")
-    @PostMapping("/userfollows/{targetId}")
+    @PostMapping("/accountfollows/{targetId}")
     public ResponseEntity<ApiResponse> followUser(@PathVariable("targetId") String toUserId,
                                                   @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         ApiResponse apiResponse = userFollowService.followUser(currentUser.getUser(), toUserId);
@@ -31,7 +31,7 @@ public class UserFollowController {
     }
 
     @Operation(summary = "유저 언팔로우")
-    @DeleteMapping("/userfollows/{targetId}")
+    @DeleteMapping("/accountfollows/{targetId}")
     public ResponseEntity<ApiResponse> unfollowUser(@PathVariable("targetId") String fromUserId,
                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         ApiResponse apiResponse = userFollowService.unfollowUser(fromUserId, currentUser.getUser());
@@ -39,7 +39,7 @@ public class UserFollowController {
     }
 
     @Operation(summary = "유저 팔로워 조회")
-    @GetMapping("/users/{id}/follower")
+    @GetMapping("/accounts/{id}/follower")
     public ResponseEntity<List<UserRequest.UserFollowInfo>> getFollowerList(@PathVariable("id") String id,
                                                                             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<UserRequest.UserFollowInfo> response = userFollowService.getFollowerList(id, currentUser.getUser());
@@ -47,7 +47,7 @@ public class UserFollowController {
     }
 
     @Operation(summary = "유저 팔로잉 조회")
-    @GetMapping("/users/{id}/following")
+    @GetMapping("/accounts/{id}/following")
     public ResponseEntity<List<UserRequest.UserFollowInfo>> getFollowingList(@PathVariable("id") String id,
                                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<UserRequest.UserFollowInfo> response = userFollowService.getFollowingList(id, currentUser.getUser());

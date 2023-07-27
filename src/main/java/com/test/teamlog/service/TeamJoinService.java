@@ -2,7 +2,7 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.domain.account.model.User;
 
-import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.entity.Team;
 import com.test.teamlog.entity.TeamJoin;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
@@ -23,7 +23,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TeamJoinService {
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final TeamRepository teamRepository;
     private final TeamJoinRepository teamJoinRepository;
     private final TeamService teamService;
@@ -33,7 +33,7 @@ public class TeamJoinService {
     public ApiResponse inviteUserForTeam(Long teamId, String userId) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", teamId));
-        User user = userRepository.findByIdentification(userId)
+        User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         if (teamService.isUserMemberOfTeam(team, user))

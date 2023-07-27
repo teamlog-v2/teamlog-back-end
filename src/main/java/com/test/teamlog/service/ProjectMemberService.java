@@ -2,7 +2,7 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.domain.account.model.User;
 
-import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceForbiddenException;
@@ -24,7 +24,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectMemberService {
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final ProjectRepository projectRepository;
     private final PostRepository postRepository;
     private final ProjectMemberRepository projectMemberRepository;
@@ -34,7 +34,7 @@ public class ProjectMemberService {
 
     // 프로젝트 멤버 아닌 유저 리스트
     public List<UserRequest.UserSimpleInfo> getUsersNotInProjectMember(Long projectId) {
-        List<User> userList = userRepository.getUsersNotInProjectMember(projectId);
+        List<User> userList = accountRepository.getUsersNotInProjectMember(projectId);
         List<UserRequest.UserSimpleInfo> response = new ArrayList<>();
         for (User user : userList) {
             response.add(new UserRequest.UserSimpleInfo(user));
@@ -116,7 +116,7 @@ public class ProjectMemberService {
     public ApiResponse expelMember(Long projectId, String userId, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        User user = userRepository.findByIdentification(userId)
+        User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         projectService.validateUserIsMaster(project, currentUser);
         ProjectMember member = projectMemberRepository.findByProjectAndUser(project, user)

@@ -98,7 +98,7 @@ public class ProjectController {
     }
 
     @Operation(summary = "연관 프로젝트 추천")
-    @GetMapping("/user/recommended-projects")
+    @GetMapping("/account/recommended-projects")
     public ResponseEntity<List<ProjectDTO.ProjectSimpleInfo>> getRecommendedProjects(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<ProjectDTO.ProjectSimpleInfo> response = null;
         if(currentUser != null) {
@@ -117,7 +117,7 @@ public class ProjectController {
     }
 
     @Operation(summary = "유저 프로젝트 리스트 조회")
-    @GetMapping("/projects/user/{userId}")
+    @GetMapping("/projects/account/{userId}")
     public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByUser(@PathVariable("userId") String userId,
                                                                                   @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<ProjectDTO.ProjectListResponse> response = projectService.getProjectsByUser(userId, currentUser.getUser());
@@ -125,7 +125,7 @@ public class ProjectController {
     }
 
     @Operation(summary = "유저 팔로잉 프로젝트 조회")
-    @GetMapping("/users/{id}/following-projects")
+    @GetMapping("/accounts/{id}/following-projects")
     public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getUserFollowingProjects(@PathVariable("id") String id,
                                                                                          @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<ProjectDTO.ProjectListResponse> response = projectService.getUserFollowingProjects(id, currentUser.getUser());

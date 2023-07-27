@@ -2,7 +2,7 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.domain.account.model.User;
 
-import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.entity.UserFollow;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
@@ -21,12 +21,12 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserFollowService {
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final UserFollowRepository userFollowRepository;
 
     // 팔로워 리스트 조회
     public List<UserRequest.UserFollowInfo> getFollowerList(String userId, User currentUser) {
-        User user = userRepository.findByIdentification(userId)
+        User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<UserFollow> currentUserFollowings = userFollowRepository.findByFromUser(currentUser);
         List<UserFollow> followers = user.getFollowers();
@@ -54,7 +54,7 @@ public class UserFollowService {
 
     // 팔로잉 리스트 조회
     public List<UserRequest.UserFollowInfo> getFollowingList(String userId, User currentUser) {
-        User user = userRepository.findByIdentification(userId)
+        User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<UserFollow> currentUserFollowings = userFollowRepository.findByFromUser(currentUser);
         List<UserFollow> followings = user.getFollowing();
@@ -83,7 +83,7 @@ public class UserFollowService {
     // 팔로우
     @Transactional
     public ApiResponse followUser(User currentUser, String targetUserID) {
-        User targetUser = userRepository.findByIdentification(targetUserID)
+        User targetUser = accountRepository.findByIdentification(targetUserID)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", targetUserID));
 
         UserFollow newFollow = UserFollow.builder()
@@ -101,7 +101,7 @@ public class UserFollowService {
     // 언팔로우
     @Transactional
     public ApiResponse unfollowUser(String targetUserId, User currentUser) {
-        User targetUser = userRepository.findByIdentification(targetUserId)
+        User targetUser = accountRepository.findByIdentification(targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", targetUserId));
         UserFollow userFollow = userFollowRepository.findByFromUserAndToUser(currentUser, targetUser)
                 .orElseThrow(() -> new ResourceNotFoundException("UserFollow", "FromUserId", currentUser.getIdentification()));
