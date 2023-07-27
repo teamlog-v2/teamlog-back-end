@@ -2,7 +2,7 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.domain.account.model.User;
 
-import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.entity.Project;
 import com.test.teamlog.entity.ProjectJoin;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
@@ -24,7 +24,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectJoinService {
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final ProjectRepository projectRepository;
     private final ProjectJoinRepository projectJoinRepository;
     private final ProjectService projectService;
@@ -38,7 +38,7 @@ public class ProjectJoinService {
     public ApiResponse inviteUserForProject(Long projectId, String userId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        User user = userRepository.findByIdentification(userId)
+        User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         if (projectService.isUserMemberOfProject(project, user))

@@ -1,7 +1,7 @@
 package com.test.teamlog.domain.account.controller;
 
 import com.test.teamlog.domain.account.dto.*;
-import com.test.teamlog.domain.account.service.UserService;
+import com.test.teamlog.domain.account.service.AccountService;
 import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
 import com.test.teamlog.domain.comment.service.CommentService;
 import com.test.teamlog.domain.post.dto.PostResponse;
@@ -36,7 +36,7 @@ public class AccountApiController {
 
     @Value("${cookie.domain}")
     private String cookieDomain;
-    private final UserService accountService;
+    private final AccountService accountService;
     private final PostService postService;
     private final CommentService commentService;
 

@@ -1,8 +1,7 @@
 package com.test.teamlog.service;
 
 import com.test.teamlog.domain.account.model.User;
-
-import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceForbiddenException;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectService {
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final ProjectRepository projectRepository;
     private final TeamRepository teamRepository;
     private final ProjectMemberRepository projectMemberRepository;
@@ -116,14 +115,14 @@ public class ProjectService {
         User user = null;
         boolean isMyProjectList = false;
         if (currentUser == null) {
-            user = userRepository.findByIdentification(id)
+            user = accountRepository.findByIdentification(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
             isMyProjectList = currentUser.getIdentification().equals(id);
             if (isMyProjectList)
                 user = currentUser;
             else
-                user = userRepository.findByIdentification(id)
+                user = accountRepository.findByIdentification(id)
                         .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         }
         List<ProjectFollower> userFollowingProjects = projectFollowerRepository.findAllByUser(user);
@@ -238,14 +237,14 @@ public class ProjectService {
         User user = null;
         boolean isMyProjectList = false;
         if (currentUser == null) {
-            user = userRepository.findByIdentification(id)
+            user = accountRepository.findByIdentification(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
             isMyProjectList = currentUser.getIdentification().equals(id);
             if (isMyProjectList)
                 user = currentUser;
             else
-                user = userRepository.findByIdentification(id)
+                user = accountRepository.findByIdentification(id)
                         .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         }
         List<Project> userProjectList = projectRepository.getProjectByUser(user);
@@ -333,7 +332,7 @@ public class ProjectService {
         project.setIntroduction(request.getIntroduction());
 
         if (request.getMasterId() != null) {
-            User newMaster = userRepository.findByIdentification(request.getMasterId())
+            User newMaster = accountRepository.findByIdentification(request.getMasterId())
                     .orElseThrow(() -> new ResourceNotFoundException("Project", "id", request.getMasterId()));
             project.setMaster(newMaster);
         }
@@ -374,7 +373,7 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
         validateUserIsMaster(project, currentUser);
 
-        User newMaster = userRepository.findByIdentification(newMasterId)
+        User newMaster = accountRepository.findByIdentification(newMasterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", newMasterId));
         project.setMaster(newMaster);
         projectRepository.save(project);

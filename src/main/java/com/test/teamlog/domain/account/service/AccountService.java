@@ -2,7 +2,7 @@ package com.test.teamlog.domain.account.service;
 
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.domain.token.service.TokenService;
 import com.test.teamlog.entity.ProjectMember;
@@ -27,16 +27,16 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class UserService {
+public class AccountService {
     private final TokenService tokenService;
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final FileStorageService fileStorageService;
     private final UserFollowService userFollowService;
     private final ProjectMemberRepository projectMemberRepository;
     private final TeamMemberRepository teamMemberRepository;
 
     public List<UserRequest.UserSimpleInfo> searchUser(String id, String name) {
-        List<User> userList = userRepository.searchUserByIdentificationAndName(id, name);
+        List<User> userList = accountRepository.searchUserByIdentificationAndName(id, name);
         List<UserRequest.UserSimpleInfo> response = new ArrayList<>();
         for (User user : userList) {
             response.add(new UserRequest.UserSimpleInfo(user));
@@ -47,7 +47,7 @@ public class UserService {
     public UserRequest.UserResponse getUser(String identification, User currentUser) {
         UserRequest.UserResponse response = null;
         if (currentUser == null || !identification.equals(currentUser.getIdentification())) {
-            User user = userRepository.findByIdentification(identification)
+            User user = accountRepository.findByIdentification(identification)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", identification));
             response = new UserRequest.UserResponse(user);
             response.setIsMe(Boolean.FALSE);
@@ -64,7 +64,7 @@ public class UserService {
     @Transactional
     public SignInResult signIn(SignInInput input) {
         final String identification = input.getIdentification();
-        User user = userRepository.findByIdentification(identification).orElse(null);
+        User user = accountRepository.findByIdentification(identification).orElse(null);
 
         // FIXME: 추후 Exception 바꿀 예정. 프론트와 같이 바꿔야 한다.
         if (user == null || !PasswordUtil.matches(input.getPassword(), user.getPassword())) {
@@ -81,14 +81,14 @@ public class UserService {
         checkIdDuplication(input.getIdentification());
 
         final User user = input.toUser();
-        userRepository.save(user);
+        accountRepository.save(user);
 
         return SignUpResult.from(user);
     }
 
     // identification 중복 체크
     private void checkIdDuplication(String identification) {
-        if (userRepository.findByIdentification(identification).isPresent()) {
+        if (accountRepository.findByIdentification(identification).isPresent()) {
             throw new ResourceAlreadyExistsException("이미 존재하는 회원입니다.");
         }
     }
@@ -112,7 +112,7 @@ public class UserService {
         }
         currentUser.setName(userRequest.getName());
         currentUser.setIntroduction(userRequest.getIntroduction());
-        userRepository.save(currentUser);
+        accountRepository.save(currentUser);
         return new ApiResponse(Boolean.TRUE, "사용자 정보 수정 성공");
     }
 
@@ -124,7 +124,7 @@ public class UserService {
         }
         String profileImgPath = fileStorageService.storeFile(image, null, null);
         currentUser.setProfileImgPath(profileImgPath);
-        userRepository.save(currentUser);
+        accountRepository.save(currentUser);
         return new ApiResponse(Boolean.TRUE, "프로필 이미지 수정 성공");
     }
 
@@ -134,7 +134,7 @@ public class UserService {
             fileStorageService.deleteFile(currentUser.getProfileImgPath());
             currentUser.setProfileImgPath(null);
         }
-        userRepository.save(currentUser);
+        accountRepository.save(currentUser);
         return new ApiResponse(Boolean.TRUE, "프로필 이미지 삭제 성공");
     }
 
@@ -150,11 +150,11 @@ public class UserService {
             throw new BadRequestException("가입된 프로젝트가 있습니다.\n모든 프로젝트 탈퇴 후 진행해주세요.");
         }
 
-        userRepository.delete(currentUser);
+        accountRepository.delete(currentUser);
         return new ApiResponse(Boolean.TRUE, "회원 탈퇴 성공");
     }
 
     public List<User> findAllByIdentificationIn(List<String> identificationList) {
-        return userRepository.findAllByIdentificationIn(identificationList);
+        return accountRepository.findAllByIdentificationIn(identificationList);
     }
 }

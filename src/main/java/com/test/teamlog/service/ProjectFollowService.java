@@ -1,7 +1,7 @@
 package com.test.teamlog.service;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.entity.Project;
 import com.test.teamlog.entity.ProjectFollower;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
@@ -24,14 +24,14 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectFollowService {
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final PostRepository postRepository;
     private final ProjectRepository projectRepository;
     private final ProjectFollowerRepository projectFollowerRepository;
 
     // 유저가 팔로우하는 프로젝트 목록 조회
     public List<ProjectDTO.ProjectListResponse> getProjectListByProjectFollower(String userId) {
-        User user = userRepository.findByIdentification(userId)
+        User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
         List<ProjectFollower> projectFollowers = projectFollowerRepository.findAllByUser(user);
 

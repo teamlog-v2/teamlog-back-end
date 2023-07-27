@@ -2,7 +2,7 @@ package com.test.teamlog.domain.comment.service;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.service.UserService;
+import com.test.teamlog.domain.account.service.AccountService;
 import com.test.teamlog.domain.comment.dto.CommentCreateInput;
 import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
 import com.test.teamlog.domain.comment.dto.CommentUpdateInput;
@@ -36,7 +36,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentMentionService commentMentionService;
 
-    private final UserService userService;
+    private final AccountService userService;
     private final PostRepository postRepository;
 
     // 유저가 작성한 댓글 조회

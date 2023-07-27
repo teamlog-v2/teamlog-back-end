@@ -2,7 +2,7 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.domain.account.model.User;
 
-import com.test.teamlog.domain.account.repository.UserRepository;
+import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TeamService {
-    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final TeamJoinRepository teamJoinRepository;
@@ -85,14 +85,14 @@ public class TeamService {
         User user = null;
         boolean isMyTeamList = false;
         if (currentUser == null) {
-            user = userRepository.findByIdentification(id)
+            user = accountRepository.findByIdentification(id)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         } else {
             isMyTeamList = currentUser.getIdentification().equals(id);
             if (isMyTeamList)
                 user = currentUser;
             else
-                user = userRepository.findByIdentification(id)
+                user = accountRepository.findByIdentification(id)
                         .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
         }
         List<Team> teams = teamRepository.getTeamsByUser(user);
@@ -148,7 +148,7 @@ public class TeamService {
         team.setAccessModifier(request.getAccessModifier());
 
         if (request.getMasterId() != null) {
-            User newMaster = userRepository.findByIdentification(request.getMasterId())
+            User newMaster = accountRepository.findByIdentification(request.getMasterId())
                     .orElseThrow(() -> new ResourceNotFoundException("Project", "id", request.getMasterId()));
             team.setMaster(newMaster);
         }
@@ -164,7 +164,7 @@ public class TeamService {
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
         validateUserIsMaster(team, currentUser);
 
-        User newMaster = userRepository.findByIdentification(newMasterId)
+        User newMaster = accountRepository.findByIdentification(newMasterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", newMasterId));
         team.setMaster(newMaster);
         teamRepository.save(team);
