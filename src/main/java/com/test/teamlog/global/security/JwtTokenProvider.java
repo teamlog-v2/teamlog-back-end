@@ -1,5 +1,7 @@
 package com.test.teamlog.global.security;
 
+import com.test.teamlog.entity.Token;
+import com.test.teamlog.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -25,12 +27,33 @@ public class JwtTokenProvider {
 
     private final UserDetailsService userDetailsService;
 
+    // FIXME: 레디스로 변경
+    private final TokenRepository tokenRepository;
+
+    // access token은 stateless
     public String generateAccessToken(String identification) {
         return doGenerateToken(identification, ACCESS_TOKEN_VALIDATION_SECOND);
     }
 
     public String generateRefreshToken(String identification) {
-        return doGenerateToken(identification, REFRESH_TOKEN_VALIDATION_SECOND);
+        final String refreshToken = doGenerateToken(identification, REFRESH_TOKEN_VALIDATION_SECOND);
+        final Token token = Token.builder()
+                .identification(identification)
+                .refreshToken(refreshToken)
+                .build();
+        tokenRepository.save(token);
+
+        return refreshToken;
+    }
+
+    public void invalidateToken(String token) {
+        final Date expiration = extractAllClaims(token).getExpiration();
+        extractAllClaims(token).setExpiration(new Date(expiration.getTime() + 1));
+    }
+
+    public String getRefreshToken(String identification) {
+        final Token token = tokenRepository.findByIdentification(identification).orElse(null);
+        return token != null ? token.getRefreshToken() : null;
     }
 
     public String getUserId(String token) {
@@ -39,6 +62,7 @@ public class JwtTokenProvider {
 
     /**
      * 토큰 생성
+     *
      * @param userId
      * @param expireTime
      * @return 토큰, Access Token, Refersh Token 생성 시 사용
@@ -56,17 +80,22 @@ public class JwtTokenProvider {
 
     /**
      * 토큰 만료 여부 검사
+     *
      * @param token
      * @return boolean 토큰 만료 여부
      */
     public boolean isTokenExpired(String token) {
-        final Date expiration = extractAllClaims(token).getExpiration();
-        return expiration.before(new Date());
+        try {
+            final Date expiration = extractAllClaims(token).getExpiration();
+            return expiration.before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
-
 
     /**
      * 토큰 내 정보 추출
+     *
      * @param token
      * @return Claims 토큰에 저장된 정보
      * @throws ExpiredJwtException
@@ -80,6 +109,7 @@ public class JwtTokenProvider {
 
     /**
      * 요청 토큰을 이용해 유효한 사용자인지 검증한다.
+     *
      * @param token
      * @return
      */

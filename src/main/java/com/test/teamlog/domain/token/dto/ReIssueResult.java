@@ -8,13 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ReIssueResponse {
+public class ReIssueResult {
     private String accessToken;
-
-    public static ReIssueResponse of(ReIssueResult result) {
-        ReIssueResponse response = new ReIssueResponse();
-        response.setAccessToken(result.getAccessToken());
-
-        return response;
-    }
+    private String refreshToken;
 }
