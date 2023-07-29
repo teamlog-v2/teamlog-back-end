@@ -60,14 +60,14 @@ public class TeamJoinController {
     }
 
     @Operation(summary = "유저가 가입 신청한 팀 조회")
-    @GetMapping("users/team-apply")
+    @GetMapping("accounts/team-apply")
     public ResponseEntity<List<TeamJoinDTO.TeamJoinForUser>> getTeamApplyListForUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<TeamJoinDTO.TeamJoinForUser> response = teamJoinService.getTeamApplyListForUser(currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "유저가 받은 팀 초대 조회")
-    @GetMapping("users/team-invitation")
+    @GetMapping("accounts/team-invitation")
     public ResponseEntity<List<TeamJoinDTO.TeamJoinForUser>> getTeamInvitationListForUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<TeamJoinDTO.TeamJoinForUser> response = teamJoinService.getTeamInvitationListForUser(currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);

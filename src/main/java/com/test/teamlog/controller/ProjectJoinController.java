@@ -60,14 +60,14 @@ public class ProjectJoinController {
     }
 
     @Operation(summary = "유저가 가입 신청한 프로젝트 조회")
-    @GetMapping("users/project-apply")
+    @GetMapping("accounts/project-apply")
     public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForUser>> getProjectApplyListForUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<ProjectJoinDTO.ProjectJoinForUser> response = projectJoinService.getProjectApplyListForUser(currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "유저가 받은 프로젝트 초대 조회")
-    @GetMapping("users/project-invitation")
+    @GetMapping("accounts/project-invitation")
     public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForUser>> getProjectInvitationListForUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<ProjectJoinDTO.ProjectJoinForUser> response = projectJoinService.getProjectInvitationListForUser(currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
