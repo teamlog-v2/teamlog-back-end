@@ -1,12 +1,9 @@
 package com.test.teamlog.global.security;
 
-import com.test.teamlog.service.CustomUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -15,44 +12,40 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private final String SIGN_IN_ENDPOINT = "/api/accounts/sign-in";
+    private final String SIGN_UP_ENDPOINT = "/api/accounts/sign-up";
+    private final String REISSUE_ENDPOINT = "/api/tokens/reissue";
+    private final Set<String> EXCLUDE_ENDPOINTS = Set.of(SIGN_IN_ENDPOINT, SIGN_UP_ENDPOINT, REISSUE_ENDPOINT);
 
-    private final CustomUserDetailsService userDetailsService;
-
-    private final JwtComponent jwtComponent;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
         // TODO: 프론트 파악 후 리팩토링
-        String jwt = request.getHeader("Authorization");
+        String jwtToken = request.getHeader("Authorization");
 
         try {
-            String userId = jwtComponent.getUserId(jwt);
+            final Authentication authentication = jwtTokenProvider.authenticate(jwtToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            if (userId != null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
-
-                if (jwtComponent.validateToken(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                            = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                    usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                }
-            }
+            filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
 
         } catch (Exception e) {
-
+            // 이렇게 하면 유효 기간이 지난 건지 아니면 토큰이 잘못된 건지 알 수 없다.
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
+    }
 
-        filterChain.doFilter(request, response);
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return EXCLUDE_ENDPOINTS.contains(request.getServletPath());
     }
 }

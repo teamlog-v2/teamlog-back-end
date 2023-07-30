@@ -8,6 +8,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * AuthenticationEntryPoint: ExceptionTranslationManager에서 사용
+ * ExceptionTranslationManager: 필터 체인에서 투척된 모든 AccessDeniedException 및 AuthenticationException 처리
+ */
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 

@@ -17,15 +17,5 @@ public class Token {
     @Column(nullable = false)
     private String identification;
 
-    private String accessToken;
-
     private String refreshToken;
-
-    public void updateAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
 }
