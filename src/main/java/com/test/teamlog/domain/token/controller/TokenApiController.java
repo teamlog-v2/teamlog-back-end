@@ -5,6 +5,7 @@ import com.test.teamlog.domain.token.dto.ReIssueResult;
 import com.test.teamlog.domain.token.service.TokenService;
 import com.test.teamlog.exception.BadRequestException;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -14,8 +15,6 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletResponse;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 

@@ -101,8 +101,9 @@ public class JwtTokenProvider {
      * @throws ExpiredJwtException
      */
     private Claims extractAllClaims(String token) throws ExpiredJwtException {
-        return Jwts.parser()
+        return Jwts.parserBuilder()
                 .setSigningKey(JWT_SECRET)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
     }

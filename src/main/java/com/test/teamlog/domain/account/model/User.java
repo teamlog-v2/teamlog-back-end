@@ -1,10 +1,10 @@
 package com.test.teamlog.domain.account.model;
 
 import com.test.teamlog.entity.*;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
