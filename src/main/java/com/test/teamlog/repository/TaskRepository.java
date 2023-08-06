@@ -1,10 +1,9 @@
 package com.test.teamlog.repository;
 
-import com.test.teamlog.domain.account.model.User;
-
 import com.test.teamlog.entity.Project;
 import com.test.teamlog.entity.Task;
 import com.test.teamlog.entity.TaskStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -14,10 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.LockModeType;
-import javax.swing.text.html.Option;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {

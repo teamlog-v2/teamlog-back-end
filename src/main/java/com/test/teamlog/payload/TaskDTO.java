@@ -1,14 +1,14 @@
 package com.test.teamlog.payload;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
-
 import com.test.teamlog.entity.Task;
 import com.test.teamlog.entity.TaskPerformer;
 import com.test.teamlog.entity.TaskStatus;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+import lombok.Getter;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;

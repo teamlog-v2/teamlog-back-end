@@ -23,10 +23,8 @@ import com.test.teamlog.service.FileStorageService;
 import com.test.teamlog.service.ProjectService;
 import com.test.teamlog.service.UserFollowService;
 import lombok.RequiredArgsConstructor;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.*;
+import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -395,7 +393,7 @@ public class PostService {
     private static Point makeLocation(Double latitude, Double longitude) {
         Point location = null;
         if (latitude != null && longitude != null) {
-            location = new GeometryFactory().createPoint(new Coordinate(latitude, longitude));
+            location = new Point(longitude, latitude);
         }
 
         return location;

@@ -2,12 +2,12 @@ package com.test.teamlog.payload;
 
 import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Team;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 public class TeamDTO {

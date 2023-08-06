@@ -1,14 +1,12 @@
 package com.test.teamlog.domain.account.dto;
 
 import com.test.teamlog.domain.account.model.User;
-
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import javax.validation.constraints.NotBlank;
 
 public class UserRequest {
 
