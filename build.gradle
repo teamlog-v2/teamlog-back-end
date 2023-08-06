@@ -36,7 +36,7 @@ dependencies {
 	// swagger
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.15'
 
-	implementation group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.2'
+	implementation group: 'org.locationtech.jts', name: 'jts-core', version: '1.15.0'
 
 	// jwt
 	implementation "io.jsonwebtoken:jjwt-api:${jwtVersion}"

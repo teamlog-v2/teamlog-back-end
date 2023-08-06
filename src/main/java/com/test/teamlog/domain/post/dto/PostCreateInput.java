@@ -5,7 +5,7 @@ import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Post;
 import com.test.teamlog.entity.Project;
 import lombok.Data;
-import org.springframework.data.geo.Point;
+import org.locationtech.jts.geom.Point;
 
 import java.util.List;
 
