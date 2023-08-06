@@ -30,7 +30,7 @@ spring:
 
 # json web token properties
 app:
-    jwtSecret: secret
+    jwtSecret: secretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkeysecretkey
 
 # cookie
 cookie:
