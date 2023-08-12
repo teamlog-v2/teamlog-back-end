@@ -125,7 +125,7 @@ public class CommentService {
     private List<CommentMention> makeCommentMentionList(List<String> commentMentionIdentificationList, Comment comment) {
         if (CollectionUtils.isEmpty(commentMentionIdentificationList)) return Collections.emptyList();
 
-        final List<User> userList = userService.findAllByIdentificationIn(commentMentionIdentificationList);
+        final List<User> userList = userService.readAllByIdentificationIn(commentMentionIdentificationList);
         final Map<String, User> userMap
                 = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
 

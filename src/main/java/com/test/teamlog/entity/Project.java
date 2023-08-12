@@ -76,6 +76,10 @@ public class Project extends BaseTimeEntity {
         team.getProjects().add(this);
     }
 
+    public void delegateMaster(User master) {
+        this.master = master;
+    }
+
     public void update(String name,
                        String introduction, AccessModifier accessModifier) {
         this.name = name;

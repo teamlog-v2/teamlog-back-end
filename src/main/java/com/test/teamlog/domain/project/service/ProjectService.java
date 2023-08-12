@@ -2,6 +2,7 @@ package com.test.teamlog.domain.project.service;
 
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.account.service.AccountService;
 import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.domain.project.dto.*;
 import com.test.teamlog.entity.*;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectService {
+    private final AccountService accountService;
     private final AccountRepository accountRepository;
     private final ProjectRepository projectRepository;
     private final TeamRepository teamRepository;
@@ -346,18 +348,16 @@ public class ProjectService {
         return result;
     }
 
-
     // 프로젝트 마스터 위임
     @Transactional
-    public ApiResponse delegateProjectMaster(Long id, String newMasterId, User currentUser) {
+    public ApiResponse delegateMaster(Long id, String newMasterIdentification, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
         validateMasterUser(project, currentUser);
 
-        User newMaster = accountRepository.findByIdentification(newMasterId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", newMasterId));
-        project.setMaster(newMaster);
-        projectRepository.save(project);
+        final User newMaster = accountService.readByIdentification(newMasterIdentification); // 존재하는지 검증
+        project.delegateMaster(newMaster);
+
         return new ApiResponse(Boolean.TRUE, "프로젝트 마스터 위임 성공");
     }
 

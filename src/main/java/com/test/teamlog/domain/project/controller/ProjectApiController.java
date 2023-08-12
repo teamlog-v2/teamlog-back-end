@@ -68,10 +68,10 @@ public class ProjectApiController {
 
     @Operation(summary = "프로젝트 마스터 위임")
     @PutMapping("/projects/{id}/master")
-    public ResponseEntity<ApiResponse> delegateProjectMaster(@PathVariable("id") long id,
-                                                             @RequestParam(value = "new-master", required = true) String newMasterId,
-                                                             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = projectService.delegateProjectMaster(id, newMasterId, currentUser.getUser());
+    public ResponseEntity<ApiResponse> delegateMaster(@PathVariable("id") long id,
+                                                      @RequestParam(value = "new-master", required = true) String newMasterId,
+                                                      @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = projectService.delegateMaster(id, newMasterId, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
