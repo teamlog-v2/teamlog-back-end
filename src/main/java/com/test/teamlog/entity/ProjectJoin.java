@@ -14,7 +14,8 @@ import lombok.*;
 @Table(name = "project_join",
         uniqueConstraints =@UniqueConstraint(columnNames = {"project_id", "user_id"}))
 public class ProjectJoin extends BaseTimeEntity {
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

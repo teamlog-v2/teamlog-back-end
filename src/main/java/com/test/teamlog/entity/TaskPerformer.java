@@ -14,7 +14,7 @@ import lombok.*;
 @Table(name = "task_performer")
 public class TaskPerformer {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

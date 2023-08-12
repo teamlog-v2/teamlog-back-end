@@ -21,7 +21,7 @@ import lombok.*;
 )
 public class ProjectFollower {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

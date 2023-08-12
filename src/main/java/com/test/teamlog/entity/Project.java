@@ -10,11 +10,13 @@ import java.util.List;
 
 @Entity
 @Builder
-@Setter @Getter
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Project extends BaseTimeEntity{
-    @Id @GeneratedValue
+public class Project extends BaseTimeEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -23,7 +25,7 @@ public class Project extends BaseTimeEntity{
     private String introduction;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "access_modifier",nullable = false, columnDefinition = "smallint")
+    @Column(name = "access_modifier", nullable = false, columnDefinition = "smallint")
     private AccessModifier accessModifier;
 
     @ManyToOne
@@ -62,11 +64,11 @@ public class Project extends BaseTimeEntity{
     private List<Task> tasks = new ArrayList<Task>();
 
     public void setTeam(Team team) {
-        if(team == null) {
+        if (team == null) {
             this.team = null;
             return;
         }
-        if(this.team != null) {
+        if (this.team != null) {
             this.team.getProjects().remove(this);
         }
         this.team = team;

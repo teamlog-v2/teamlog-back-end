@@ -14,7 +14,7 @@ import lombok.*;
 @Table(name = "post_tag")
 public class PostTag {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
