@@ -50,20 +50,20 @@ public class ProjectApiController {
         return new ResponseEntity<>(ProjectUpdateResponse.from(result), HttpStatus.OK);
     }
 
+    @Operation(summary = "프로젝트 삭제")
+    @DeleteMapping("/projects/{id}")
+    public ResponseEntity<ApiResponse> delete(@PathVariable("id") Long id,
+                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = projectService.delete(id, currentUser.getUser());
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
     @Operation(summary = "단일 프로젝트 조회")
     @GetMapping("/projects/{id}")
     public ResponseEntity<ProjectDTO.ProjectResponse> getProjectById(@PathVariable("id") long id,
                                                                      @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         ProjectDTO.ProjectResponse response = projectService.getProject(id, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @Operation(summary = "프로젝트 삭제")
-    @DeleteMapping("/projects/{id}")
-    public ResponseEntity<ApiResponse> deleteProject(@PathVariable("id") Long id,
-                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = projectService.deleteProject(id, currentUser.getUser());
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "프로젝트 마스터 위임")

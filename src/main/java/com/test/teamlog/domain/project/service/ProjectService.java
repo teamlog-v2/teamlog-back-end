@@ -368,7 +368,7 @@ public class ProjectService {
 
     // 프로젝트 삭제
     @Transactional
-    public ApiResponse deleteProject(Long id, User currentUser) {
+    public ApiResponse delete(Long id, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
         validateMasterUser(project, currentUser);
