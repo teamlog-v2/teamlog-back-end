@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
         uniqueConstraints =@UniqueConstraint(columnNames = {"team_id", "user_id"}))
 public class TeamMember {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

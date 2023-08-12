@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Task extends BaseTimeEntity{
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "task_name", nullable = false)

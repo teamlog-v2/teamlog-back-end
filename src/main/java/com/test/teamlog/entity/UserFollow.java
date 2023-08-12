@@ -21,7 +21,7 @@ import lombok.*;
 )
 public class UserFollow {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

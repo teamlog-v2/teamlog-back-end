@@ -13,7 +13,7 @@ import lombok.*;
 @Table(name = "post_media")
 public class PostMedia {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name="file_name",nullable = false)
