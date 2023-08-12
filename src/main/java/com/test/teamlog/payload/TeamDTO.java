@@ -4,9 +4,7 @@ import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Team;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -55,12 +53,23 @@ public class TeamDTO {
     }
 
     @Data
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class TeamSimpleInfo {
         private Long id;
         private String name;
         public TeamSimpleInfo(Team team) {
             this.id = team.getId();
             this.name = team.getName();
+        }
+
+        public static TeamSimpleInfo of(Team team) {
+            if (team == null) return null;
+
+            TeamSimpleInfo teamSimpleInfo = new TeamSimpleInfo();
+            teamSimpleInfo.setId(team.getId());
+            teamSimpleInfo.setName(team.getName());
+
+            return teamSimpleInfo;
         }
     }
 }

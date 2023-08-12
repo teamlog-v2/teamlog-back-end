@@ -74,4 +74,12 @@ public class Project extends BaseTimeEntity {
         this.team = team;
         team.getProjects().add(this);
     }
+
+    public void addProjectMember(ProjectMember projectMember) {
+        this.projectMembers.add(projectMember);
+
+        if (projectMember.getProject() != this) {
+            projectMember.setProject(this);
+        }
+    }
 }

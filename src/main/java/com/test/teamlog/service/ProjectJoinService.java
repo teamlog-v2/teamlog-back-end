@@ -3,6 +3,7 @@ package com.test.teamlog.service;
 import com.test.teamlog.domain.account.model.User;
 
 import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.entity.Project;
 import com.test.teamlog.entity.ProjectJoin;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;

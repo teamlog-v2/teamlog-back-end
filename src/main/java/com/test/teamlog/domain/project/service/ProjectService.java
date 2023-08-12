@@ -1,8 +1,10 @@
-package com.test.teamlog.service;
+package com.test.teamlog.domain.project.service;
 
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.post.repository.PostRepository;
+import com.test.teamlog.domain.project.dto.ProjectCreateInput;
+import com.test.teamlog.domain.project.dto.ProjectCreateResult;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
@@ -10,6 +12,7 @@ import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.payload.Relation;
 import com.test.teamlog.repository.*;
+import com.test.teamlog.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -286,33 +289,25 @@ public class ProjectService {
         return projects;
     }
 
-    // 프로젝트 생성
+    /**
+     * 프로젝트 생성
+     * @param input
+     * @param currentUser
+     * @return
+     */
     @Transactional
-    public ProjectDTO.ProjectResponse createProject(ProjectDTO.ProjectRequest request, User currentUser) {
+    public ProjectCreateResult create(ProjectCreateInput input, User currentUser) {
         Team team = null;
-        if (request.getTeamId() != null) {
-            team = teamRepository.findById(request.getTeamId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Team", "id", request.getTeamId()));
+        if (input.getTeamId() != null) {
+            team = teamRepository.findById(input.getTeamId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Team", "id", input.getTeamId()));
         }
-        Project project = Project.builder()
-                .name(request.getName())
-                .introduction(request.getIntroduction())
-                .accessModifier(request.getAccessModifier())
-                .master(currentUser)
-                .team(team)
-                .build();
-        projectRepository.save(project);
 
+        final Project project = input.toProject(currentUser, team);
+        project.addProjectMember(ProjectMember.create(project, currentUser));
 
-        ProjectMember member = ProjectMember.builder()
-                .user(currentUser)
-                .project(project)
-                .build();
-        project.getProjectMembers().add(member);
-
-        ProjectDTO.ProjectResponse result = new ProjectDTO.ProjectResponse(project);
-        result.setRelation(Relation.MASTER);
-        return result;
+        final Project newProject = projectRepository.save(project);
+        return ProjectCreateResult.of(newProject, Relation.MASTER);
     }
 
     // 프로젝트 수정 ( 위임 일단 포함 )

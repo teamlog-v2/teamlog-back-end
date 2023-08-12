@@ -4,7 +4,7 @@ import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.payload.TeamDTO;
-import com.test.teamlog.service.ProjectService;
+import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.service.TeamService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

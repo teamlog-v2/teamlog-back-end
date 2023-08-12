@@ -20,7 +20,7 @@ import com.test.teamlog.repository.PostMediaRepository;
 import com.test.teamlog.repository.PostTagRepository;
 import com.test.teamlog.repository.PostUpdateHistoryRepository;
 import com.test.teamlog.service.FileStorageService;
-import com.test.teamlog.service.ProjectService;
+import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.service.UserFollowService;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
