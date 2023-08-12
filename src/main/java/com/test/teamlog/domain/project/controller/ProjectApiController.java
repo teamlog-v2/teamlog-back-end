@@ -60,10 +60,10 @@ public class ProjectApiController {
 
     @Operation(summary = "단일 프로젝트 조회")
     @GetMapping("/projects/{id}")
-    public ResponseEntity<ProjectDTO.ProjectResponse> getProjectById(@PathVariable("id") long id,
-                                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ProjectDTO.ProjectResponse response = projectService.getProject(id, currentUser.getUser());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<ProjectReadResponse> readOne(@PathVariable("id") long id,
+                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        final ProjectReadResult result = projectService.readOne(id, currentUser.getUser());
+        return new ResponseEntity<>(ProjectReadResponse.from(result), HttpStatus.OK);
     }
 
     @Operation(summary = "프로젝트 마스터 위임")

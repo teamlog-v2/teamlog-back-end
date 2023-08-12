@@ -3,10 +3,7 @@ package com.test.teamlog.domain.project.service;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.post.repository.PostRepository;
-import com.test.teamlog.domain.project.dto.ProjectCreateInput;
-import com.test.teamlog.domain.project.dto.ProjectCreateResult;
-import com.test.teamlog.domain.project.dto.ProjectUpdateInput;
-import com.test.teamlog.domain.project.dto.ProjectUpdateResult;
+import com.test.teamlog.domain.project.dto.*;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
@@ -38,6 +35,7 @@ public class ProjectService {
     private final ProjectJoinRepository projectJoinRepository;
     private final PostRepository postRepository;
     private final FileStorageService fileStorageService;
+
     private String[] defaultProjectImages = new String[]{"20210504(81931d0a-14c3-43bd-912d-c4bd687c31ea)",
             "20210504(97a31008-24f4-4dc0-98bd-c83cf8d57b95)",
             "20210504(171eb9ac-f7ce-4e30-b4c6-a19a28e45c75)",
@@ -137,7 +135,7 @@ public class ProjectService {
             Project project = userFollowingProject.getProject();
             if (!isMyProjectList) {
                 // 팀멤버도 아니고 private면 x
-                if (!isUserMemberOfProject(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
+                if (!isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
                     continue;
             }
 
@@ -172,7 +170,7 @@ public class ProjectService {
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
         for (Project project : projectList) {
-            if (!isUserMemberOfProject(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
+            if (!isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
                 continue;
 
             long postCount = project.getPosts().size();
@@ -200,41 +198,38 @@ public class ProjectService {
     }
 
     // 프로젝트와의 관계
-    public Relation getRelation(Project project, User currentUser) {
+    private Relation detectRelation(Project project, User currentUser) {
         if (currentUser == null) return Relation.NONE;
-        if (project.getMaster().getIdentification().equals(currentUser.getIdentification())) return Relation.MASTER;
-        if (isUserMemberOfProject(project, currentUser)) return Relation.MEMBER;
+        if (isProjectMaster(project, currentUser)) return Relation.MASTER;
+        if (isProjectMember(project, currentUser)) return Relation.MEMBER;
 
-        ProjectJoin join = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
-        if (join != null) {
-            if (join.getIsAccepted() == true && join.getIsInvited() == false) return Relation.APPLIED;
-            if (join.getIsAccepted() == false && join.getIsInvited() == true) return Relation.INVITED;
+        ProjectJoin projectJoin = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
+
+        if (projectJoin != null) {
+            if (projectJoin.getIsAccepted() && !projectJoin.getIsInvited()) return Relation.APPLIED;
+            if (!projectJoin.getIsAccepted() && projectJoin.getIsInvited()) return Relation.INVITED;
         }
+
         return Relation.NONE;
     }
 
     // 단일 프로젝트 조회
-    public ProjectDTO.ProjectResponse getProject(Long id, User currentUser) {
+    public ProjectReadResult readOne(Long id, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
+
         // Private 시 검증
         if (project.getAccessModifier() == AccessModifier.PRIVATE) {
-            validateUserIsMemberOfProject(project, currentUser);
+            validateProjectMember(project, currentUser);
         }
-        ProjectDTO.ProjectResponse projectResponse = new ProjectDTO.ProjectResponse(project);
-        String path = null;
-        if (project.getThumbnail() == null) {
-            path = defaultProjectImages[project.getId().intValue() % 4];
-        } else {
-            path = project.getThumbnail();
-        }
-        String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/resources/")
-                .path(path)
-                .toUriString();
-        projectResponse.setThumbnail(imgUri);
-        projectResponse.setRelation(getRelation(project, currentUser));
-        return projectResponse;
+
+        final ProjectReadResult result = ProjectReadResult.from(project);
+
+        // TODO: 프로젝트 썸네일 관련 로직 추가
+
+        result.setRelation(detectRelation(project, currentUser));
+
+        return result;
     }
 
     // 사용자 프로젝트 리스트 조회
@@ -259,7 +254,7 @@ public class ProjectService {
         for (Project project : sorted) {
             if (!isMyProjectList) {
                 // 팀멤버도 아니고 private면 x
-                if (!isUserMemberOfProject(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
+                if (!isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
                     continue;
             }
 
@@ -388,13 +383,22 @@ public class ProjectService {
         return projectJoinRepository.findByProjectAndUser(project, currentUser).isPresent();
     }
 
-    // 프로젝트 멤버인지 아닌지
-    public Boolean isUserMemberOfProject(Project project, User currentUser) {
+    // 프로젝트 마스터 여부
+    private boolean isProjectMaster(Project project, User currentUser) {
+        if (currentUser == null) return false;
+
+        return project.getMaster().getIdentification().equals(currentUser.getIdentification());
+    }
+
+    // 프로젝트 멤버 여부
+    public boolean isProjectMember(Project project, User currentUser) {
+        if (currentUser == null) return false;
+
         return projectMemberRepository.findByProjectAndUser(project, currentUser).isPresent();
     }
 
     // 프로젝트 멤버 검증
-    public void validateUserIsMemberOfProject(Project project, User currentUser) {
+    public void validateProjectMember(Project project, User currentUser) {
         if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다.\n로그인 해주세요.");
         projectMemberRepository.findByProjectAndUser(project, currentUser)
                 .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다.\n(프로젝트 멤버 아님)"));

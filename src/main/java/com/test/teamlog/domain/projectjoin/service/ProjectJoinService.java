@@ -1,4 +1,4 @@
-package com.test.teamlog.service;
+package com.test.teamlog.domain.projectjoin.service;
 
 import com.test.teamlog.domain.account.model.User;
 
@@ -42,7 +42,7 @@ public class ProjectJoinService {
         User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        if (projectService.isUserMemberOfProject(project, user))
+        if (projectService.isProjectMember(project, user))
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
 
         if (projectService.isJoinAlreadyExist(project, user))
@@ -65,7 +65,7 @@ public class ProjectJoinService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        if (projectService.isUserMemberOfProject(project, currentUser))
+        if (projectService.isProjectMember(project, currentUser))
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
 
         if (projectService.isJoinAlreadyExist(project, currentUser))

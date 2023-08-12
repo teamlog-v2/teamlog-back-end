@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class PostRequest {
+public class PostCreateRequest {
     private String contents;
     private AccessModifier accessModifier;
     private AccessModifier commentModifier;

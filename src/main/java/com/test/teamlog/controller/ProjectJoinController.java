@@ -3,7 +3,7 @@ package com.test.teamlog.controller;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectJoinDTO;
-import com.test.teamlog.service.ProjectJoinService;
+import com.test.teamlog.domain.projectjoin.service.ProjectJoinService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
