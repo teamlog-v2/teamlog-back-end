@@ -119,7 +119,7 @@ public class ProjectMemberService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-        projectService.validateUserIsMaster(project, currentUser);
+        projectService.validateMasterUser(project, currentUser);
         ProjectMember member = projectMemberRepository.findByProjectAndUser(project, user)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "UserId", userId));
 

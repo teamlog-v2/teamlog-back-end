@@ -5,6 +5,8 @@ import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.domain.project.dto.ProjectCreateInput;
 import com.test.teamlog.domain.project.dto.ProjectCreateResult;
+import com.test.teamlog.domain.project.dto.ProjectUpdateInput;
+import com.test.teamlog.domain.project.dto.ProjectUpdateResult;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
@@ -310,33 +312,22 @@ public class ProjectService {
         return ProjectCreateResult.of(newProject, Relation.MASTER);
     }
 
-    // 프로젝트 수정 ( 위임 일단 포함 )
+    /**
+     * 프로젝트 수정
+     * @param id
+     * @param input
+     * @param currentUser
+     * @return
+     */
     @Transactional
-    public ProjectDTO.ProjectResponse updateProject(Long id, ProjectDTO.ProjectRequest request, User currentUser) {
+    public ProjectUpdateResult update(Long id, ProjectUpdateInput input, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
-        validateUserIsMaster(project, currentUser);
+        validateMasterUser(project, currentUser);
 
-        if (request.getName() != null) {
-            project.setName(request.getName());
-        }
-        if (request.getAccessModifier() != null) {
-            project.setAccessModifier(request.getAccessModifier());
-        }
+        project.update(input.getName(), input.getIntroduction(), input.getAccessModifier());
 
-        project.setIntroduction(request.getIntroduction());
-
-        if (request.getMasterId() != null) {
-            User newMaster = accountRepository.findByIdentification(request.getMasterId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Project", "id", request.getMasterId()));
-            project.setMaster(newMaster);
-        }
-
-        projectRepository.save(project);
-
-        ProjectDTO.ProjectResponse result = new ProjectDTO.ProjectResponse(project);
-        result.setRelation(Relation.MASTER);
-        return result;
+        return ProjectUpdateResult.of(project, Relation.MASTER);
     }
 
     // 프로젝트 팀
@@ -344,7 +335,7 @@ public class ProjectService {
     public ProjectDTO.ProjectResponse setTeamInProject(Long id, ProjectDTO.ProjectRequest request, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
-        validateUserIsMaster(project, currentUser);
+        validateMasterUser(project, currentUser);
 
         Team team = null;
         if (request.getTeamId() != null) {
@@ -366,7 +357,7 @@ public class ProjectService {
     public ApiResponse delegateProjectMaster(Long id, String newMasterId, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
-        validateUserIsMaster(project, currentUser);
+        validateMasterUser(project, currentUser);
 
         User newMaster = accountRepository.findByIdentification(newMasterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", newMasterId));
@@ -380,14 +371,14 @@ public class ProjectService {
     public ApiResponse deleteProject(Long id, User currentUser) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
-        validateUserIsMaster(project, currentUser);
+        validateMasterUser(project, currentUser);
 
         projectRepository.delete(project);
         return new ApiResponse(Boolean.TRUE, "프로젝트 삭제 성공");
     }
 
     // 마스터 검증
-    public void validateUserIsMaster(Project project, User currentUser) {
+    public void validateMasterUser(Project project, User currentUser) {
         if (!project.getMaster().getIdentification().equals(currentUser.getIdentification()))
             throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 마스터 아님 )");
     }

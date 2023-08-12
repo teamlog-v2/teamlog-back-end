@@ -4,6 +4,7 @@ import com.test.teamlog.domain.account.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +29,11 @@ public class Project extends BaseTimeEntity {
     @Column(name = "access_modifier", nullable = false, columnDefinition = "smallint")
     private AccessModifier accessModifier;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "master_user_id", nullable = false)
     private User master;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
 
@@ -73,6 +74,16 @@ public class Project extends BaseTimeEntity {
         }
         this.team = team;
         team.getProjects().add(this);
+    }
+
+    public void update(String name,
+                       String introduction, AccessModifier accessModifier) {
+        this.name = name;
+        this.accessModifier = accessModifier;
+
+        if (StringUtils.hasText(introduction)) {
+            this.introduction = introduction;
+        }
     }
 
     public void addProjectMember(ProjectMember projectMember) {

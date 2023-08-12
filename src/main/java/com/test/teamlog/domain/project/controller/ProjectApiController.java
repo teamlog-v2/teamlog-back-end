@@ -3,6 +3,7 @@ package com.test.teamlog.domain.project.controller;
 import com.test.teamlog.domain.post.dto.PostResponse;
 import com.test.teamlog.domain.post.dto.PostResult;
 import com.test.teamlog.domain.post.service.PostService;
+import com.test.teamlog.domain.project.dto.*;
 import com.test.teamlog.domain.project.dto.ProjectCreateRequest;
 import com.test.teamlog.domain.project.dto.ProjectCreateResponse;
 import com.test.teamlog.domain.project.dto.ProjectCreateResult;
@@ -40,20 +41,20 @@ public class ProjectApiController {
         return new ResponseEntity<>(ProjectCreateResponse.from(result), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "프로젝트 수정")
+    @PutMapping("/projects/{id}")
+    public ResponseEntity<ProjectUpdateResponse> update(@PathVariable("id") long id,
+                                                             @Valid @RequestBody ProjectUpdateRequest request,
+                                                             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        final ProjectUpdateResult result = projectService.update(id, request.toInput(), currentUser.getUser());
+        return new ResponseEntity<>(ProjectUpdateResponse.from(result), HttpStatus.OK);
+    }
+
     @Operation(summary = "단일 프로젝트 조회")
     @GetMapping("/projects/{id}")
     public ResponseEntity<ProjectDTO.ProjectResponse> getProjectById(@PathVariable("id") long id,
                                                                      @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         ProjectDTO.ProjectResponse response = projectService.getProject(id, currentUser.getUser());
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @Operation(summary = "프로젝트 수정")
-    @PutMapping("/projects/{id}")
-    public ResponseEntity<ProjectDTO.ProjectResponse> updateProject(@PathVariable("id") long id,
-                                                                    @Valid @RequestBody ProjectDTO.ProjectRequest request,
-                                                                    @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ProjectDTO.ProjectResponse response = projectService.updateProject(id, request, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
