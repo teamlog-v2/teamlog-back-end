@@ -124,10 +124,11 @@ public class ProjectApiController {
 
     @Operation(summary = "유저 프로젝트 리스트 조회")
     @GetMapping("/projects/accounts/{userId}")
-    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getProjectsByUser(@PathVariable("userId") String userId,
-                                                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<ProjectDTO.ProjectListResponse> response = projectService.getProjectsByUser(userId, currentUser.getUser());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<List<ProjectReadByUserResponse>> readAllByUser(@PathVariable("userId") String userId,
+                                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        final List<ProjectReadByUserResult> resultList = projectService.readAllByUser(userId, currentUser.getUser());
+        final List<ProjectReadByUserResponse> responseList = resultList.stream().map(ProjectReadByUserResponse::from).collect(Collectors.toList());
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 
     @Operation(summary = "유저 팔로잉 프로젝트 조회")

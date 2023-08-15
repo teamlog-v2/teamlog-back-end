@@ -22,8 +22,9 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findAllByTeam(Team team);
 
-    @Query("select j.project from ProjectMember j where j.user = :user")
-    List<Project> getProjectByUser(@Param("user") User user);
+    // FIXME: QueryDsl 도입 후 order by는 파라미터로 받기
+    @Query("select j.project from ProjectMember j where j.user = :user order by j.project.updateTime desc")
+    List<Project> findProjectByUser(@Param("user") User user);
 
     @Query("select distinct p from Project p where p.team in (select t.team from TeamFollower t where t.user = :user)")
     List<Project> getProjectsByTeamFollower(@Param("user") User user);

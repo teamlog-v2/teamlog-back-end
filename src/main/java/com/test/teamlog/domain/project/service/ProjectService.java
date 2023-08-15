@@ -20,9 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -46,8 +44,8 @@ public class ProjectService {
     public List<ProjectDTO.ProjectSimpleInfo> getRecommendedProjects(User currentUser) {
         List<ProjectDTO.ProjectSimpleInfo> response = new ArrayList<>();
         List<Project> projectList = projectRepository.getProjectsByTeamFollower(currentUser);
-        if(projectList.size() != 0) {
-            for(Project project : projectList) {
+        if (projectList.size() != 0) {
+            for (Project project : projectList) {
                 response.add(new ProjectDTO.ProjectSimpleInfo(project));
             }
         }
@@ -118,30 +116,26 @@ public class ProjectService {
     }
 
     // 유저가 팔로우 중인 프로젝트
-    public List<ProjectDTO.ProjectListResponse> getUserFollowingProjects(String id, User currentUser) {
-        User user = null;
+    public List<ProjectDTO.ProjectListResponse> getUserFollowingProjects(String identification, User currentUser) {
+        User user;
         boolean isMyProjectList = false;
         if (currentUser == null) {
-            user = accountRepository.findByIdentification(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+            user = accountService.readByIdentification(identification);
         } else {
-            isMyProjectList = currentUser.getIdentification().equals(id);
+            isMyProjectList = currentUser.getIdentification().equals(identification);
             if (isMyProjectList)
                 user = currentUser;
             else
-                user = accountRepository.findByIdentification(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+                user = accountService.readByIdentification(identification);
         }
         List<ProjectFollower> userFollowingProjects = projectFollowerRepository.findAllByUser(user);
 
         List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
         for (ProjectFollower userFollowingProject : userFollowingProjects) {
             Project project = userFollowingProject.getProject();
-            if (!isMyProjectList) {
-                // 팀멤버도 아니고 private면 x
-                if (!isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
-                    continue;
-            }
+
+            if (!isMyProjectList && isNotMemberAndPrivateProject(currentUser, project))
+                continue;
 
             long postcount = postRepository.getPostsCount(project);
 
@@ -174,8 +168,7 @@ public class ProjectService {
         List<ProjectSearchResult> responseList = new ArrayList<>();
 
         for (Project project : projectList) {
-            // 본인이 속하지 않은 프로젝트 결과는 출력되지 않도록 한다.
-            if (!isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
+            if (isNotMemberAndPrivateProject(currentUser, project))
                 continue;
 
             responseList.add(ProjectSearchResult.from(project));
@@ -219,61 +212,41 @@ public class ProjectService {
     }
 
     // 사용자 프로젝트 리스트 조회
-    public List<ProjectDTO.ProjectListResponse> getProjectsByUser(String id, User currentUser) {
-        User user = null;
+    public List<ProjectReadByUserResult> readAllByUser(String identification, User currentUser) {
+        User user;
+
         boolean isMyProjectList = false;
         if (currentUser == null) {
-            user = accountRepository.findByIdentification(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+            user = accountService.readByIdentification(identification);
         } else {
-            isMyProjectList = currentUser.getIdentification().equals(id);
-            if (isMyProjectList)
-                user = currentUser;
-            else
-                user = accountRepository.findByIdentification(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("USER", "id", id));
+            isMyProjectList = currentUser.getIdentification().equals(identification);
+            user = isMyProjectList ? currentUser : accountService.readByIdentification(identification);
         }
-        List<Project> userProjectList = projectRepository.getProjectByUser(user);
-        List<Project> sorted =userProjectList.stream().sorted(Comparator.comparing(Project::getUpdateTime).reversed()).collect(Collectors.toList());
 
-        List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
-        for (Project project : sorted) {
+        List<Project> projectList = projectRepository.findProjectByUser(user);
+        List<ProjectReadByUserResult> resultList = new ArrayList<>();
+
+        for (Project project : projectList) {
             if (!isMyProjectList) {
-                // 팀멤버도 아니고 private면 x
-                if (!isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
+                if (isNotMemberAndPrivateProject(currentUser, project))
                     continue;
             }
 
-            long postcount = postRepository.getPostsCount(project);
-
-            String path = null;
-            if (project.getThumbnail() == null) {
-                path = defaultProjectImages[project.getId().intValue() % 4];
-            } else {
-                path = project.getThumbnail();
-            }
-            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/resources/")
-                    .path(path)
-                    .toUriString();
-            ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
-                    .id(project.getId())
-                    .masterId(project.getMaster().getIdentification())
-                    .name(project.getName())
-                    .postCount(postcount)
-                    .updateTime(project.getUpdateTime())
-                    .thumbnail(imgUri)
-                    .build();
-            if (project.getTeam() != null) {
-                item.setTeam(project.getTeam());
-            }
-            projects.add(item);
+            final ProjectReadByUserResult result = ProjectReadByUserResult.from(project);
+            resultList.add(result);
         }
-        return projects;
+
+        return resultList;
+    }
+
+    // 본인이 속하지 않은 비공개 프로젝트인지 확인
+    private boolean isNotMemberAndPrivateProject(User currentUser, Project project) {
+        return !isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE;
     }
 
     /**
      * 프로젝트 생성
+     *
      * @param input
      * @param currentUser
      * @return
@@ -295,6 +268,7 @@ public class ProjectService {
 
     /**
      * 프로젝트 수정
+     *
      * @param id
      * @param input
      * @param currentUser
