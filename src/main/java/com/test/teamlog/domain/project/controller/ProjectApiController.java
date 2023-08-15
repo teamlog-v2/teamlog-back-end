@@ -77,10 +77,10 @@ public class ProjectApiController {
 
     @Operation(summary = "프로젝트 썸네일 변경")
     @PutMapping("/projects/{projectId}/thumbnail")
-    public ResponseEntity<ApiResponse> updateUserProfileImage(@PathVariable("projectId") Long projectId,
-                                                              @RequestPart(value = "thumbnail", required = true) MultipartFile image,
-                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = projectService.updateProjectThumbnail(projectId, image, currentUser.getUser());
+    public ResponseEntity<ApiResponse> updateThumbnail(@PathVariable("projectId") Long projectId,
+                                                       @RequestPart(value = "thumbnail", required = true) MultipartFile image,
+                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = projectService.updateThumbnail(projectId, image, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

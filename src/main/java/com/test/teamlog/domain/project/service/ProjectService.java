@@ -55,16 +55,17 @@ public class ProjectService {
     }
 
     @Transactional
-    public ApiResponse updateProjectThumbnail(Long projectId, MultipartFile image, User currentUser) {
+    public ApiResponse updateThumbnail(Long projectId, MultipartFile image, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+
         if (project.getThumbnail() != null) {
             fileStorageService.deleteFile(project.getThumbnail());
-            project.setThumbnail(null);
         }
+
         String thumbnailPath = fileStorageService.storeFile(image, null, null);
         project.setThumbnail(thumbnailPath);
-        projectRepository.save(project);
+
         return new ApiResponse(Boolean.TRUE, "프로젝트 썸네일 수정 성공");
     }
 
