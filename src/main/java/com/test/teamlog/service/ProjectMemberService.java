@@ -3,6 +3,7 @@ package com.test.teamlog.service;
 import com.test.teamlog.domain.account.model.User;
 
 import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceForbiddenException;
@@ -118,7 +119,7 @@ public class ProjectMemberService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-        projectService.validateUserIsMaster(project, currentUser);
+        projectService.validateMasterUser(project, currentUser);
         ProjectMember member = projectMemberRepository.findByProjectAndUser(project, user)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "UserId", userId));
 

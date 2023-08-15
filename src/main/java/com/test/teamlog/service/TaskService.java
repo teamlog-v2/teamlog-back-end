@@ -2,6 +2,7 @@ package com.test.teamlog.service;
 
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.entity.Project;
 import com.test.teamlog.entity.Task;
 import com.test.teamlog.entity.TaskPerformer;
@@ -74,14 +75,14 @@ public class TaskService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
         // 멤버만 가능
-        projectService.validateUserIsMemberOfProject(project, currentUser);
+        projectService.validateProjectMember(project, currentUser);
 
         Task task = Task.builder()
                 .taskName(request.getTaskName())
                 .status(request.getStatus())
                 .project(project)
                 .build();
-        projectService.validateUserIsMemberOfProject(task.getProject(), currentUser);
+        projectService.validateProjectMember(task.getProject(), currentUser);
         if(request.getDeadline() == null)
             task.setDeadline(null);
         else
@@ -115,7 +116,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", taskId));
 
         // 멤버만 가능
-        projectService.validateUserIsMemberOfProject(task.getProject(), currentUser);
+        projectService.validateProjectMember(task.getProject(), currentUser);
         if(request.getDeadline() == null)
             task.setDeadline(null);
         else
@@ -178,7 +179,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
 
         // 멤버만 가능
-        projectService.validateUserIsMemberOfProject(task.getProject(), currentUser);
+        projectService.validateProjectMember(task.getProject(), currentUser);
 
         if (request.getStatus().equals(task.getStatus())) {
             if(request.getPriority() == task.getPriority()) return ;
@@ -204,7 +205,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
 
         // 멤버만 가능
-        projectService.validateUserIsMemberOfProject(task.getProject(), currentUser);
+        projectService.validateProjectMember(task.getProject(), currentUser);
 
         taskRepository.reorderInPreviousStatus(task.getProject(),task.getStatus(),task.getPriority()); // 기존 status 정리
         taskRepository.delete(task);

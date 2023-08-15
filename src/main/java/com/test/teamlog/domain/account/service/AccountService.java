@@ -154,7 +154,12 @@ public class AccountService {
         return new ApiResponse(Boolean.TRUE, "회원 탈퇴 성공");
     }
 
-    public List<User> findAllByIdentificationIn(List<String> identificationList) {
+    public User readByIdentification(String identification) {
+        return accountRepository.findByIdentification(identification)
+                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", identification));
+    }
+
+    public List<User> readAllByIdentificationIn(List<String> identificationList) {
         return accountRepository.findAllByIdentificationIn(identificationList);
     }
 }

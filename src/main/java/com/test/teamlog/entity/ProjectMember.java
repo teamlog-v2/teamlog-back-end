@@ -40,4 +40,11 @@ public class ProjectMember {
         this.project = project;
         project.getProjectMembers().add(this);
     }
+
+    public static ProjectMember create(Project project, User user) {
+        return ProjectMember.builder()
+                .project(project)
+                .user(user)
+                .build();
+    }
 }

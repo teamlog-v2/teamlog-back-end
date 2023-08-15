@@ -30,7 +30,7 @@ public class PostApiController {
 
     @Operation(summary = "게시물 생성")
     @PostMapping
-    public ResponseEntity<PostResponse> create(@RequestPart(value = "key") PostRequest request,
+    public ResponseEntity<PostResponse> create(@RequestPart(value = "key") PostCreateRequest request,
                                                @RequestPart(value = "media", required = false) MultipartFile[] media,
                                                @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
