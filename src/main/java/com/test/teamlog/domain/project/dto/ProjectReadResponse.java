@@ -33,6 +33,7 @@ public class ProjectReadResponse {
         response.setMemberCount(result.getMemberCount());
         response.setFollowerCount(result.getFollowerCount());
         response.setCreateTime(result.getCreateTime());
+        response.setRelation(result.getRelation());
 
         return response;
     }
