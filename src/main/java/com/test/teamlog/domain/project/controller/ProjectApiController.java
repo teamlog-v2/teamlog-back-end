@@ -133,9 +133,10 @@ public class ProjectApiController {
 
     @Operation(summary = "유저 팔로잉 프로젝트 조회")
     @GetMapping("/accounts/{id}/following-projects")
-    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getUserFollowingProjects(@PathVariable("id") String id,
-                                                                                         @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<ProjectDTO.ProjectListResponse> response = projectService.getUserFollowingProjects(id, currentUser.getUser());
+    public ResponseEntity<List<ProjectReadUserFollowingResponse>> readAllUserFollowing(@PathVariable("id") String identification,
+                                                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        final List<ProjectReadUserFollowingResult> resultList = projectService.readAllUserFollowing(identification, currentUser.getUser());
+        List<ProjectReadUserFollowingResponse> response = resultList.stream().map(ProjectReadUserFollowingResponse::from).collect(Collectors.toList());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

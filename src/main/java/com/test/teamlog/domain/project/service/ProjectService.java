@@ -116,50 +116,29 @@ public class ProjectService {
     }
 
     // 유저가 팔로우 중인 프로젝트
-    public List<ProjectDTO.ProjectListResponse> getUserFollowingProjects(String identification, User currentUser) {
+    public List<ProjectReadUserFollowingResult> readAllUserFollowing(String identification, User currentUser) {
         User user;
+
         boolean isMyProjectList = false;
         if (currentUser == null) {
             user = accountService.readByIdentification(identification);
         } else {
             isMyProjectList = currentUser.getIdentification().equals(identification);
-            if (isMyProjectList)
-                user = currentUser;
-            else
-                user = accountService.readByIdentification(identification);
+            user = isMyProjectList ? currentUser : accountService.readByIdentification(identification);
         }
-        List<ProjectFollower> userFollowingProjects = projectFollowerRepository.findAllByUser(user);
 
-        List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
-        for (ProjectFollower userFollowingProject : userFollowingProjects) {
+        List<ProjectFollower> userFollowingProjectList = projectFollowerRepository.findAllByUser(user);
+        List<ProjectReadUserFollowingResult> resultList = new ArrayList<>();
+
+        for (ProjectFollower userFollowingProject : userFollowingProjectList) {
             Project project = userFollowingProject.getProject();
-
             if (!isMyProjectList && isNotMemberAndPrivateProject(currentUser, project))
                 continue;
 
-            long postcount = postRepository.getPostsCount(project);
-
-            String path = null;
-            if (project.getThumbnail() == null) {
-                path = defaultProjectImages[project.getId().intValue() % 4];
-            } else {
-                path = project.getThumbnail();
-            }
-            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/resources/")
-                    .path(path)
-                    .toUriString();
-            ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
-                    .id(project.getId())
-                    .name(project.getName())
-                    .postCount(postcount)
-                    .updateTime(project.getUpdateTime())
-                    .thumbnail(imgUri)
-                    .build();
-            projects.add(item);
+            resultList.add(ProjectReadUserFollowingResult.from(project));
         }
 
-        return projects;
+        return resultList;
     }
 
     // 프로젝트 검색
@@ -227,13 +206,11 @@ public class ProjectService {
         List<ProjectReadByUserResult> resultList = new ArrayList<>();
 
         for (Project project : projectList) {
-            if (!isMyProjectList) {
-                if (isNotMemberAndPrivateProject(currentUser, project))
-                    continue;
+            if (!isMyProjectList && isNotMemberAndPrivateProject(currentUser, project)) {
+                continue;
             }
 
-            final ProjectReadByUserResult result = ProjectReadByUserResult.from(project);
-            resultList.add(result);
+            resultList.add(ProjectReadByUserResult.from(project));
         }
 
         return resultList;
