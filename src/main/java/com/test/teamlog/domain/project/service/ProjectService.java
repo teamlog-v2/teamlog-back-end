@@ -70,14 +70,15 @@ public class ProjectService {
     }
 
     @Transactional
-    public ApiResponse deleteProjectThumbnail(Long projectId, User currentUser) {
+    public ApiResponse deleteThumbnail(Long projectId, User currentUser) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+
         if (project.getThumbnail() != null) {
             fileStorageService.deleteFile(project.getThumbnail());
             project.setThumbnail(null);
         }
-        projectRepository.save(project);
+
         return new ApiResponse(Boolean.TRUE, "프로젝트 썸네일 삭제 성공");
     }
 

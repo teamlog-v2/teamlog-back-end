@@ -86,9 +86,9 @@ public class ProjectApiController {
 
     @Operation(summary = "프로젝트 썸네일 삭제")
     @DeleteMapping("/projects/{projectId}/thumbnail")
-    public ResponseEntity<ApiResponse> deleteUserProfileImage(@PathVariable("projectId") Long projectId,
-                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = projectService.deleteProjectThumbnail(projectId, currentUser.getUser());
+    public ResponseEntity<ApiResponse> deleteThumbnail(@PathVariable("projectId") Long projectId,
+                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = projectService.deleteThumbnail(projectId, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
