@@ -20,7 +20,7 @@ public class ProjectReadByUserResult {
     private TeamDTO.TeamSimpleInfo team;
 
     public void setTeam(Team team) {
-        this.team = new TeamDTO.TeamSimpleInfo(team);
+        this.team = TeamDTO.TeamSimpleInfo.of(team);
     }
 
     public static ProjectReadByUserResult from(Project project) {

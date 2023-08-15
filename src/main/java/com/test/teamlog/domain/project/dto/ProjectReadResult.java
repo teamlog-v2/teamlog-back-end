@@ -27,7 +27,7 @@ public class ProjectReadResult {
         ProjectReadResult response = new ProjectReadResult();
         response.setId(project.getId());
         if(project.getTeam() != null) {
-            response.setTeam(new TeamDTO.TeamSimpleInfo(project.getTeam()));
+            response.setTeam(TeamDTO.TeamSimpleInfo.of(project.getTeam()));
         }
         response.setName(project.getName());
         response.setIntroduction(project.getIntroduction());

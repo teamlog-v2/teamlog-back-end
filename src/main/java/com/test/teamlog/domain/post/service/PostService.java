@@ -273,15 +273,6 @@ public class PostService {
                 0, posts.isLast());
     }
 
-    // 프로젝트의 해시태그들 조회
-    public List<String> getHashTagsInProjectPosts(Long id) {
-        Project project = projectService.findOne(id);
-
-        List<String> hashtags = postTagRepository.getHashTagsInProjectPosts(project);
-
-        return hashtags;
-    }
-
     // 해시태그 추천
     public List<String> getRecommendedHashTags(Long id) {
         Project project = projectService.findOne(id);

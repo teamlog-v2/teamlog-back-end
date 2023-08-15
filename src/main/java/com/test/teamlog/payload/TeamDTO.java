@@ -57,10 +57,6 @@ public class TeamDTO {
     public static class TeamSimpleInfo {
         private Long id;
         private String name;
-        public TeamSimpleInfo(Team team) {
-            this.id = team.getId();
-            this.name = team.getName();
-        }
 
         public static TeamSimpleInfo of(Team team) {
             if (team == null) return null;

@@ -140,6 +140,7 @@ public class ProjectApiController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Deprecated
     @Operation(summary = "해시태그 추천")
     @GetMapping("/projects/{projectId}/recommended-hashtags")
     public ResponseEntity<List<String>> getRecommendedHashTags(@PathVariable("projectId") long projectId) {
@@ -147,6 +148,7 @@ public class ProjectApiController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    // TODO: post쪽 api랑 통합
     @Operation(summary = "위치정보가 있는 프로젝트 게시물 조회")
     @GetMapping("/projects/{projectId}/posts/with-location")
     public ResponseEntity<List<PostResponse>> getLocationPosts(@PathVariable("projectId") long projectId,
@@ -160,7 +162,7 @@ public class ProjectApiController {
     @Operation(summary = "프로젝트 내 게시물 전체 해시태그 조회")
     @GetMapping("/projects/{projectId}/hashtags")
     public ResponseEntity<List<String>> getHashTagsInProjectPosts(@PathVariable("projectId") long projectId) {
-        List<String> response = postService.getHashTagsInProjectPosts(projectId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        List<String> hashTagList = projectService.readHashTagsInProjectPosts(projectId);
+        return new ResponseEntity<>(hashTagList, HttpStatus.OK);
     }
 }

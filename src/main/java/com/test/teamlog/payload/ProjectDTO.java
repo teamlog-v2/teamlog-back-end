@@ -15,7 +15,7 @@ public class ProjectDTO {
     @Getter
     public static class ProjectRequest {
         @NotBlank(message = "빈문자열, 공백만 입력할 수 없습니다.")
-        @Size(min=1,max=20, message = "프로젝트 이름을 1자에서 20자 사이로 입력해주세요.")
+        @Size(min = 1, max = 20, message = "프로젝트 이름을 1자에서 20자 사이로 입력해주세요.")
         private String name;
         private String introduction;
         private AccessModifier accessModifier;
@@ -36,11 +36,10 @@ public class ProjectDTO {
         private String masterId;
         private int memberCount;
         private int followerCount;
+
         public ProjectResponse(Project project) {
             this.id = project.getId();
-            if(project.getTeam() != null) {
-                this.team = new TeamDTO.TeamSimpleInfo(project.getTeam());
-            }
+            this.team = TeamDTO.TeamSimpleInfo.of(project.getTeam());
             this.name = project.getName();
             this.introduction = project.getIntroduction();
             this.accessModifier = project.getAccessModifier();
@@ -62,8 +61,9 @@ public class ProjectDTO {
         private String updateTimeStr;
         private String thumbnail; // 대표 이미지
         private TeamDTO.TeamSimpleInfo team;
+
         public void setTeam(Team team) {
-            this.team = new TeamDTO.TeamSimpleInfo(team);
+            this.team = TeamDTO.TeamSimpleInfo.of(team);
         }
     }
 
@@ -71,6 +71,7 @@ public class ProjectDTO {
     public static class ProjectSimpleInfo {
         private Long id;
         private String name;
+
         public ProjectSimpleInfo(Project project) {
             this.id = project.getId();
             this.name = project.getName();

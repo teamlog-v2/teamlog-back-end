@@ -1,9 +1,9 @@
 package com.test.teamlog.domain.project.service;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.account.service.AccountService;
 import com.test.teamlog.domain.post.repository.PostRepository;
+import com.test.teamlog.domain.posttag.service.PostTagService;
 import com.test.teamlog.domain.project.dto.*;
 import com.test.teamlog.entity.*;
 import com.test.teamlog.exception.ResourceForbiddenException;
@@ -21,13 +21,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectService {
     private final AccountService accountService;
-    private final AccountRepository accountRepository;
+    private final PostTagService postTagService;
     private final ProjectRepository projectRepository;
     private final TeamRepository teamRepository;
     private final ProjectMemberRepository projectMemberRepository;
@@ -337,6 +338,15 @@ public class ProjectService {
         if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다.\n로그인 해주세요.");
         projectMemberRepository.findByProjectAndUser(project, currentUser)
                 .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다.\n(프로젝트 멤버 아님)"));
+    }
+
+    // 프로젝트의 해시태그들 조회
+    public List<String> readHashTagsInProjectPosts(Long projectId) {
+        Project project = findOne(projectId);
+        final List<Post> postList = project.getPosts();
+
+        final List<PostTag> hashTagList = postTagService.findAllByPostIdIn(postList.stream().map(Post::getId).collect(Collectors.toList()));
+        return hashTagList.stream().map(PostTag::getName).collect(Collectors.toList());
     }
 
     public Project findOne(Long projectId) {
