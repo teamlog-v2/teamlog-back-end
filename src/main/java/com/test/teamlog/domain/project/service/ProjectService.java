@@ -169,36 +169,18 @@ public class ProjectService {
     }
 
     // 프로젝트 검색
-    public List<ProjectDTO.ProjectListResponse> searchProject(String name, User currentUser) {
+    public List<ProjectSearchResult> search(String name, User currentUser) {
         List<Project> projectList = projectRepository.searchProjectByName(name);
+        List<ProjectSearchResult> responseList = new ArrayList<>();
 
-        List<ProjectDTO.ProjectListResponse> projects = new ArrayList<>();
         for (Project project : projectList) {
+            // 본인이 속하지 않은 프로젝트 결과는 출력되지 않도록 한다.
             if (!isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE)
                 continue;
 
-            long postCount = project.getPosts().size();
-
-            String path = null;
-            if (project.getThumbnail() == null) {
-                path = defaultProjectImages[project.getId().intValue() % 4];
-            } else {
-                path = project.getThumbnail();
-            }
-            String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/resources/")
-                    .path(path)
-                    .toUriString();
-            ProjectDTO.ProjectListResponse item = ProjectDTO.ProjectListResponse.builder()
-                    .id(project.getId())
-                    .name(project.getName())
-                    .postCount(postCount)
-                    .updateTime(project.getUpdateTime())
-                    .thumbnail(imgUri)
-                    .build();
-            projects.add(item);
+            responseList.add(ProjectSearchResult.from(project));
         }
-        return projects;
+        return responseList;
     }
 
     // 프로젝트와의 관계

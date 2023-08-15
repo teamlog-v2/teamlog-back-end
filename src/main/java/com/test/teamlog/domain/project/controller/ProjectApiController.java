@@ -114,10 +114,12 @@ public class ProjectApiController {
 
     @Operation(summary = "프로젝트 검색")
     @GetMapping("/projects")
-    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> searchProject(@RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<ProjectDTO.ProjectListResponse> response = projectService.searchProject(name, currentUser.getUser());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<List<ProjectSearchResponse>> search(@RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        final List<ProjectSearchResult> resultList = projectService.search(name, currentUser.getUser());
+        final List<ProjectSearchResponse> responseList = resultList.stream().map(ProjectSearchResponse::from).collect(Collectors.toList());
+
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 
     @Operation(summary = "유저 프로젝트 리스트 조회")
