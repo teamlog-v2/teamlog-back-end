@@ -1,5 +1,7 @@
-package com.test.teamlog.controller;
+package com.test.teamlog.domain.projectjoin.controller;
 
+import com.test.teamlog.domain.projectjoin.dto.ProjectJoinApplyRequest;
+import com.test.teamlog.domain.projectjoin.dto.ProjectJoinInviteRequest;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectJoinDTO;
@@ -20,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
-public class ProjectJoinController {
+public class ProjectJoinApiController {
     private final ProjectJoinService projectJoinService;
 
     @Operation(summary = "프로젝트 멤버 초대(신청) 추가")
@@ -33,8 +35,25 @@ public class ProjectJoinController {
         if (userId != null) {
             apiResponse = projectJoinService.inviteUserForProject(projectId, userId);
         } else {
-            apiResponse = projectJoinService.applyForProject(projectId, currentUser.getUser());
+            apiResponse = projectJoinService.applyForProjectV1(projectId, currentUser.getUser());
         }
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "프로젝트 멤버 초대")
+    @PostMapping("/project-joins/invite")
+    public ResponseEntity<ApiResponse> invite(@RequestBody ProjectJoinInviteRequest request,
+                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = projectJoinService.inviteUserList(request.toInput(), currentUser.getUser());
+        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "프로젝트 멤버 신청")
+    @PostMapping("/project-joins/apply")
+    public ResponseEntity<ApiResponse> apply(@RequestBody ProjectJoinApplyRequest request,
+                                             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        ApiResponse apiResponse = projectJoinService.apply(request.toInput(), currentUser.getUser());
+
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectJoinRepository extends JpaRepository<ProjectJoin, Long> {
+    List<ProjectJoin> findAllByProject(Project project);
     Optional<ProjectJoin> findByProjectAndUser(Project project, User user);
     List<ProjectJoin> findAllByProjectAndIsAcceptedFalseAndIsInvitedTrue(Project project);
     List<ProjectJoin> findAllByProjectAndIsAcceptedTrueAndIsInvitedFalse(Project project);

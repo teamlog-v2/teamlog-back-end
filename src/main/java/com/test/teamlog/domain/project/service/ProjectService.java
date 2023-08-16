@@ -314,11 +314,6 @@ public class ProjectService {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 마스터 아님 )");
     }
 
-    // 이미 ProjectJoin 있을 경우
-    public Boolean isJoinAlreadyExist(Project project, User currentUser) {
-        return projectJoinRepository.findByProjectAndUser(project, currentUser).isPresent();
-    }
-
     // 프로젝트 마스터 여부
     private boolean isProjectMaster(Project project, User currentUser) {
         if (currentUser == null) return false;
