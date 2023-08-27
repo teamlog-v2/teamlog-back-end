@@ -42,9 +42,12 @@ public class ProjectMember {
     }
 
     public static ProjectMember create(Project project, User user) {
-        return ProjectMember.builder()
+        final ProjectMember projectMember = ProjectMember.builder()
                 .project(project)
                 .user(user)
                 .build();
+
+        project.getProjectMembers().add(projectMember);
+        return projectMember;
     }
 }
