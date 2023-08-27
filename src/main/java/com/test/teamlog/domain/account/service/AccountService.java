@@ -6,14 +6,12 @@ import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.domain.token.service.TokenService;
 import com.test.teamlog.entity.ProjectMember;
-import com.test.teamlog.entity.TeamMember;
 import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.global.utility.PasswordUtil;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.repository.ProjectMemberRepository;
-import com.test.teamlog.repository.TeamMemberRepository;
 import com.test.teamlog.service.FileStorageService;
 import com.test.teamlog.service.UserFollowService;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +31,6 @@ public class AccountService {
     private final FileStorageService fileStorageService;
     private final UserFollowService userFollowService;
     private final ProjectMemberRepository projectMemberRepository;
-    private final TeamMemberRepository teamMemberRepository;
 
     public List<UserRequest.UserSimpleInfo> searchUser(String id, String name) {
         List<User> userList = accountRepository.searchUserByIdentificationAndName(id, name);
@@ -141,10 +138,6 @@ public class AccountService {
     //회원 탈퇴
     @Transactional
     public ApiResponse deleteUser(User currentUser) {
-        List<TeamMember> teamMemberList = teamMemberRepository.findByUser(currentUser);
-        if (teamMemberList.size() != 0) {
-            throw new BadRequestException("가입된 팀이 있습니다.\n모든 팀 탈퇴 후 진행해주세요.");
-        }
         List<ProjectMember> projectMemberList = projectMemberRepository.findByUser(currentUser);
         if (projectMemberList.size() != 0) {
             throw new BadRequestException("가입된 프로젝트가 있습니다.\n모든 프로젝트 탈퇴 후 진행해주세요.");

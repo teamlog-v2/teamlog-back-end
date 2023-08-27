@@ -1,6 +1,5 @@
 package com.test.teamlog.domain.project.dto;
 
-import com.test.teamlog.payload.TeamDTO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -14,7 +13,6 @@ public class ProjectReadByUserResponse {
     private LocalDateTime updateTime; // 마지막 활동 시간
     private String updateTimeStr;
     private String thumbnail; // 대표 이미지
-    private TeamDTO.TeamSimpleInfo team;
 
     public static ProjectReadByUserResponse from(ProjectReadByUserResult result) {
         ProjectReadByUserResponse response = new ProjectReadByUserResponse();
@@ -23,7 +21,6 @@ public class ProjectReadByUserResponse {
         response.setPostCount(result.getPostCount());
         response.setUpdateTime(result.getUpdateTime());
         response.setThumbnail(result.getThumbnail());
-        response.setTeam(result.getTeam());
 
         return response;
     }

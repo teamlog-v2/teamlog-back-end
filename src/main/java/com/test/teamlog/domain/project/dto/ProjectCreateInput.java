@@ -3,7 +3,6 @@ package com.test.teamlog.domain.project.dto;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Project;
-import com.test.teamlog.entity.Team;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -18,13 +17,12 @@ public class ProjectCreateInput {
     private String masterId;
     private Long teamId;
 
-    public Project toProject(User currentUser, Team team) {
+    public Project toProject(User currentUser) {
         return Project.builder()
                 .name(this.name)
                 .introduction(this.introduction)
                 .accessModifier(this.accessModifier)
                 .master(currentUser)
-                .team(team)
                 .build();
     }
 }

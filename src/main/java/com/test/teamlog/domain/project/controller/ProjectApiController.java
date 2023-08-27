@@ -101,17 +101,6 @@ public class ProjectApiController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "연관 프로젝트 추천")
-    @GetMapping("/recommended")
-    public ResponseEntity<List<ProjectDTO.ProjectSimpleInfo>> getRecommendedProjects(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<ProjectDTO.ProjectSimpleInfo> response = null;
-        if (currentUser != null) {
-            response = projectService.getRecommendedProjects(currentUser.getUser());
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
     @Operation(summary = "프로젝트 검색")
     @GetMapping("/projects")
     public ResponseEntity<List<ProjectSearchResponse>> search(@RequestParam(value = "name", required = false, defaultValue = "") String name,

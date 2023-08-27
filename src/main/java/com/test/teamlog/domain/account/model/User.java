@@ -51,11 +51,6 @@ public class User {
     @Builder.Default
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<TeamFollower> teamFollowers = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 10)
     private List<PostLike> postLikes = new ArrayList<>();
 
     @Builder.Default

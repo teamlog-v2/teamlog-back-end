@@ -1,7 +1,5 @@
 package com.test.teamlog.domain.project.dto;
 
-import com.test.teamlog.entity.Team;
-import com.test.teamlog.payload.TeamDTO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -15,11 +13,6 @@ public class ProjectSearchResponse {
     private LocalDateTime updateTime; // 마지막 활동 시간
     private String updateTimeStr;
     private String thumbnail; // 대표 이미지
-    private TeamDTO.TeamSimpleInfo team;
-
-    public void setTeam(Team team) {
-        this.team = TeamDTO.TeamSimpleInfo.of(team);
-    }
 
     public static ProjectSearchResponse from(ProjectSearchResult result) {
         ProjectSearchResponse response = new ProjectSearchResponse();
