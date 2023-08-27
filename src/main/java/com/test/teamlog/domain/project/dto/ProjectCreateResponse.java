@@ -2,7 +2,6 @@ package com.test.teamlog.domain.project.dto;
 
 import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.payload.Relation;
-import com.test.teamlog.payload.TeamDTO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -11,7 +10,6 @@ import java.time.LocalDateTime;
 public class ProjectCreateResponse {
     private Relation relation;
     private Long id;
-    private TeamDTO.TeamSimpleInfo team;
     private String name;
     private String introduction;
     private String thumbnail;
@@ -25,7 +23,6 @@ public class ProjectCreateResponse {
         ProjectCreateResponse response = new ProjectCreateResponse();
         response.setRelation(result.getRelation());
         response.setId(result.getId());
-        response.setTeam(result.getTeam());
         response.setName(result.getName());
         response.setIntroduction(result.getIntroduction());
         response.setThumbnail(result.getThumbnail());

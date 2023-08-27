@@ -2,7 +2,6 @@ package com.test.teamlog.payload;
 
 import com.test.teamlog.entity.AccessModifier;
 import com.test.teamlog.entity.Project;
-import com.test.teamlog.entity.Team;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -27,7 +26,6 @@ public class ProjectDTO {
     public static class ProjectResponse {
         private Relation relation;
         private Long id;
-        private TeamDTO.TeamSimpleInfo team;
         private String name;
         private String introduction;
         private String thumbnail;
@@ -39,7 +37,6 @@ public class ProjectDTO {
 
         public ProjectResponse(Project project) {
             this.id = project.getId();
-            this.team = TeamDTO.TeamSimpleInfo.of(project.getTeam());
             this.name = project.getName();
             this.introduction = project.getIntroduction();
             this.accessModifier = project.getAccessModifier();
@@ -60,11 +57,6 @@ public class ProjectDTO {
         private LocalDateTime updateTime; // 마지막 활동 시간
         private String updateTimeStr;
         private String thumbnail; // 대표 이미지
-        private TeamDTO.TeamSimpleInfo team;
-
-        public void setTeam(Team team) {
-            this.team = TeamDTO.TeamSimpleInfo.of(team);
-        }
     }
 
     @Data

@@ -18,10 +18,6 @@ public interface AccountRepository extends JpaRepository<User, String> {
             "and u.identification not in (select j.user.identification from ProjectJoin j where j.project.id = :projectId)")
     List<User> getUsersNotInProjectMember(@Param("projectId") Long projectId);
 
-    @Query("SELECT u FROM User u WHERE u.identification not in (select m.user.identification from TeamMember m where m.team.id = :teamId)" +
-            "and u.identification not in (select j.user.identification from TeamJoin j where j.team.id = :teamId)")
-    List<User> getUsersNotInTeamMember(@Param("teamId") Long teamId);
-
     Optional<User> findByIdentification(String identification);
 
     List<User> findAllByIdentificationIn(List<String> identificationList);

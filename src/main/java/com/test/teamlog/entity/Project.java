@@ -33,10 +33,6 @@ public class Project extends BaseTimeEntity {
     @JoinColumn(name = "master_user_id", nullable = false)
     private User master;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id")
-    private Team team;
-
     private String thumbnail;
 
     @Builder.Default
@@ -63,18 +59,6 @@ public class Project extends BaseTimeEntity {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<Task> tasks = new ArrayList<Task>();
-
-    public void setTeam(Team team) {
-        if (team == null) {
-            this.team = null;
-            return;
-        }
-        if (this.team != null) {
-            this.team.getProjects().remove(this);
-        }
-        this.team = team;
-        team.getProjects().add(this);
-    }
 
     public void delegateMaster(User master) {
         this.master = master;
