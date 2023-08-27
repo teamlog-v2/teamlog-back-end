@@ -48,4 +48,15 @@ public class ProjectFollower {
         user.getProjectFollowers().add(this);
     }
 
+    public static ProjectFollower create(Project project, User user) {
+        ProjectFollower projectFollower = ProjectFollower.builder()
+                .project(project)
+                .user(user)
+                .build();
+
+        project.getProjectFollowers().add(projectFollower);
+        user.getProjectFollowers().add(projectFollower);
+
+        return projectFollower;
+    }
 }

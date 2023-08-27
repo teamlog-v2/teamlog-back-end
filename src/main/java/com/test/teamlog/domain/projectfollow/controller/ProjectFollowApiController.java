@@ -1,10 +1,12 @@
-package com.test.teamlog.controller;
+package com.test.teamlog.domain.projectfollow.controller;
 
-import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.domain.projectfollow.dto.ProjectFollowerReadResponse;
+import com.test.teamlog.domain.projectfollow.dto.ProjectFollowerReadResult;
+import com.test.teamlog.domain.projectfollow.dto.ProjectFollowerReadUserFollowedResponse;
+import com.test.teamlog.domain.projectfollow.dto.ProjectFollowerReadUserFollowedResult;
+import com.test.teamlog.domain.projectfollow.service.ProjectFollowService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.ProjectDTO;
-import com.test.teamlog.service.ProjectFollowService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,12 +17,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Tag(name = "프로젝트 팔로우 관리")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
-public class ProjectFollowController {
+public class ProjectFollowApiController {
     private final ProjectFollowService projectFollowService;
 
     @Operation(summary = "프로젝트 팔로우")
@@ -41,15 +44,19 @@ public class ProjectFollowController {
 
     @Operation(summary = "프로젝트 팔로워 조회")
     @GetMapping("/projects/{projectId}/followers")
-    public ResponseEntity<List<UserRequest.UserSimpleInfo>> getProjectFollowerList(@PathVariable("projectId") Long projectId) {
-        List<UserRequest.UserSimpleInfo> response = projectFollowService.getProjectFollowerList(projectId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<List<ProjectFollowerReadResponse>> readAll(@PathVariable("projectId") Long projectId) {
+        final List<ProjectFollowerReadResult> resultList = projectFollowService.readAll(projectId);
+        final List<ProjectFollowerReadResponse> responseList = resultList.stream().map(ProjectFollowerReadResponse::of).collect(Collectors.toList());
+
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 
     @Operation(summary = "유저가 팔로우하는 프로젝트 조회")
     @GetMapping("/accounts/{userId}/project-follow")
-    public ResponseEntity<List<ProjectDTO.ProjectListResponse>> getFollowingProjectListByUser(@PathVariable("userId") String userId) {
-        List<ProjectDTO.ProjectListResponse> response = projectFollowService.getProjectListByProjectFollower(userId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<List<ProjectFollowerReadUserFollowedResponse>> readAllUserFollowed(@PathVariable("userId") String userId) {
+        final List<ProjectFollowerReadUserFollowedResult> resultList = projectFollowService.readAllByUserIdentification(userId);
+        final List<ProjectFollowerReadUserFollowedResponse> responseList = resultList.stream().map(ProjectFollowerReadUserFollowedResponse::of).collect(Collectors.toList());
+
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 }

@@ -10,7 +10,7 @@ import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.payload.Relation;
-import com.test.teamlog.repository.ProjectFollowerRepository;
+import com.test.teamlog.domain.projectfollow.repository.ProjectFollowerRepository;
 import com.test.teamlog.repository.ProjectJoinRepository;
 import com.test.teamlog.repository.ProjectMemberRepository;
 import com.test.teamlog.repository.ProjectRepository;
