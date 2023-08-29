@@ -13,7 +13,7 @@ import com.test.teamlog.global.utility.PasswordUtil;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.repository.ProjectMemberRepository;
 import com.test.teamlog.service.FileStorageService;
-import com.test.teamlog.service.UserFollowService;
+import com.test.teamlog.domain.userfollow.service.UserFollowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

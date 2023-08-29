@@ -32,4 +32,14 @@ public class UserFollow {
     @JoinColumn(name = "to_user_id", nullable = false)
     private User toUser;
 
+    public static UserFollow create(User fromUser, User toUser) {
+        UserFollow userFollow = new UserFollow();
+        userFollow.setFromUser(fromUser);
+        userFollow.setToUser(toUser);
+
+        toUser.getFollowers().add(userFollow);
+        fromUser.getFollowings().add(userFollow);
+
+        return userFollow;
+    }
 }

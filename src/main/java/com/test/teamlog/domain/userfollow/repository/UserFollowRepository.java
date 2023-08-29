@@ -1,4 +1,4 @@
-package com.test.teamlog.repository;
+package com.test.teamlog.domain.userfollow.repository;
 
 import com.test.teamlog.domain.account.model.User;
 
@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserFollowRepository extends JpaRepository<UserFollow, Long> {
-    public Optional<UserFollow> findByFromUserAndToUser(User user, User targetUser);
-    public List<UserFollow> findByFromUser(User user);
+    Optional<UserFollow> findByFromUserAndToUser(User user, User targetUser);
+    List<UserFollow> findAllByFromUser(User user);
+    List<UserFollow> findAllByToUser(User user);
 }
