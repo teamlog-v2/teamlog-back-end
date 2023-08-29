@@ -36,12 +36,12 @@ public class User {
     @Builder.Default
     @OneToMany(mappedBy="toUser", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<UserFollow> followers = new ArrayList<>();
+    private List<UserFollow> followers = new ArrayList<>(); // 나를 팔로우 하는 사람들
 
     @Builder.Default
     @OneToMany(mappedBy="fromUser", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<UserFollow> following = new ArrayList<>();
+    private List<UserFollow> followings = new ArrayList<>(); // 내가 팔로우 하는 사람들
 
     @Builder.Default
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)

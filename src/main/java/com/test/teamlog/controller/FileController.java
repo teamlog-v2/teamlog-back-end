@@ -1,7 +1,5 @@
 package com.test.teamlog.controller;
 
-import com.test.teamlog.domain.account.model.User;
-
 import com.test.teamlog.payload.FileDTO;
 import com.test.teamlog.service.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -41,7 +40,7 @@ public class FileController {
         }
         String originalFileName = resource.getFileName();
         originalFileName =
-                new String(originalFileName.getBytes("ISO-8859-1"), "euc-kr");
+                new String(originalFileName.getBytes(StandardCharsets.ISO_8859_1), "euc-kr");
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .cacheControl(CacheControl.maxAge(10800, TimeUnit.SECONDS))

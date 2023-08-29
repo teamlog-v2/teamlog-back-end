@@ -21,7 +21,7 @@ import com.test.teamlog.repository.PostTagRepository;
 import com.test.teamlog.repository.PostUpdateHistoryRepository;
 import com.test.teamlog.service.FileStorageService;
 import com.test.teamlog.domain.project.service.ProjectService;
-import com.test.teamlog.service.UserFollowService;
+import com.test.teamlog.domain.userfollow.service.UserFollowService;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -65,7 +65,7 @@ public class PostService {
     }
 
     public List<PostResult> readAllByFollowingUser(User currentUser) {
-        List<UserFollow> userFollowingList = userFollowService.readUserFollowList(currentUser);
+        List<UserFollow> userFollowingList = userFollowService.readAllByUser(currentUser);
         if (CollectionUtils.isEmpty(userFollowingList)) return Collections.emptyList();
 
         List<User> userFollowings = userFollowingList.stream().map(UserFollow::getToUser).collect(Collectors.toList());
