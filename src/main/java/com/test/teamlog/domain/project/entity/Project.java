@@ -1,6 +1,13 @@
-package com.test.teamlog.entity;
+package com.test.teamlog.domain.project.entity;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.post.entity.Post;
+import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
+import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
+import com.test.teamlog.domain.projectmember.entity.ProjectMember;
+import com.test.teamlog.entity.*;
+import com.test.teamlog.global.entity.AccessModifier;
+import com.test.teamlog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;

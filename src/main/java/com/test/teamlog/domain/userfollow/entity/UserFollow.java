@@ -1,4 +1,4 @@
-package com.test.teamlog.entity;
+package com.test.teamlog.domain.userfollow.entity;
 
 import com.test.teamlog.domain.account.model.User;
 import jakarta.persistence.*;

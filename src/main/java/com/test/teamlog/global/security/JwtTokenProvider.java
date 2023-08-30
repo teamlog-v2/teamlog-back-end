@@ -1,7 +1,7 @@
 package com.test.teamlog.global.security;
 
-import com.test.teamlog.entity.Token;
-import com.test.teamlog.repository.TokenRepository;
+import com.test.teamlog.domain.token.entity.Token;
+import com.test.teamlog.domain.token.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

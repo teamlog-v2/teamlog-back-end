@@ -5,7 +5,7 @@ import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.userfollow.dto.UserFollowerReadResult;
 import com.test.teamlog.domain.userfollow.dto.UserFollowingReadResult;
 import com.test.teamlog.domain.userfollow.repository.UserFollowRepository;
-import com.test.teamlog.entity.UserFollow;
+import com.test.teamlog.domain.userfollow.entity.UserFollow;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import lombok.RequiredArgsConstructor;

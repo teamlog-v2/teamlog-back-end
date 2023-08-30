@@ -1,4 +1,4 @@
-package com.test.teamlog.entity;
+package com.test.teamlog.global.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

@@ -1,5 +1,7 @@
 package com.test.teamlog.entity;
 
+import com.test.teamlog.domain.project.entity.Project;
+import com.test.teamlog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
@@ -13,7 +15,7 @@ import java.util.List;
 @Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Task extends BaseTimeEntity{
+public class Task extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

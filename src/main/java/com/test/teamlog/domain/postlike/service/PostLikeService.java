@@ -2,11 +2,11 @@ package com.test.teamlog.domain.postlike.service;
 
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.postlike.dto.PostLikerResult;
-import com.test.teamlog.entity.Post;
-import com.test.teamlog.entity.PostLike;
+import com.test.teamlog.domain.post.entity.Post;
+import com.test.teamlog.domain.postlike.entity.PostLike;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.repository.PostLikeRepository;
+import com.test.teamlog.domain.postlike.repository.PostLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;

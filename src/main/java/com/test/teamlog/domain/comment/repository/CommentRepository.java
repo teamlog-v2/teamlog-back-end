@@ -2,8 +2,8 @@ package com.test.teamlog.domain.comment.repository;
 
 import com.test.teamlog.domain.account.model.User;
 
-import com.test.teamlog.entity.Comment;
-import com.test.teamlog.entity.Post;
+import com.test.teamlog.domain.comment.entity.Comment;
+import com.test.teamlog.domain.post.entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

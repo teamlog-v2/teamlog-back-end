@@ -1,8 +1,8 @@
 package com.test.teamlog.domain.comment.dto;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.entity.Comment;
-import com.test.teamlog.entity.Post;
+import com.test.teamlog.domain.comment.entity.Comment;
+import com.test.teamlog.domain.post.entity.Post;
 import lombok.Data;
 
 import java.util.List;

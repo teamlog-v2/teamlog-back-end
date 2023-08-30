@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.project.dto;
 
-import com.test.teamlog.entity.Project;
+import com.test.teamlog.domain.project.entity.Project;
 import lombok.Data;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 

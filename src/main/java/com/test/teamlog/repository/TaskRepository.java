@@ -1,6 +1,6 @@
 package com.test.teamlog.repository;
 
-import com.test.teamlog.entity.Project;
+import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.entity.Task;
 import com.test.teamlog.entity.TaskStatus;
 import jakarta.persistence.LockModeType;

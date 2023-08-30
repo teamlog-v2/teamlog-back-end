@@ -1,7 +1,7 @@
 package com.test.teamlog.domain.posttag.service;
 
-import com.test.teamlog.entity.PostTag;
-import com.test.teamlog.repository.PostTagRepository;
+import com.test.teamlog.domain.posttag.entity.PostTag;
+import com.test.teamlog.domain.posttag.repository.PostTagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

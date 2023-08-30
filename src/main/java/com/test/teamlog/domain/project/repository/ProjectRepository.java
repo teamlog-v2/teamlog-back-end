@@ -1,8 +1,8 @@
-package com.test.teamlog.repository;
+package com.test.teamlog.domain.project.repository;
 
 import com.test.teamlog.domain.account.model.User;
 
-import com.test.teamlog.entity.Project;
+import com.test.teamlog.domain.project.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

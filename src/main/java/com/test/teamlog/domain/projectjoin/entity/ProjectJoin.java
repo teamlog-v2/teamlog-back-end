@@ -1,6 +1,8 @@
-package com.test.teamlog.entity;
+package com.test.teamlog.domain.projectjoin.entity;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.project.entity.Project;
+import com.test.teamlog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

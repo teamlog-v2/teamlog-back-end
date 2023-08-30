@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.post.dto;
 
-import com.test.teamlog.entity.AccessModifier;
+import com.test.teamlog.global.entity.AccessModifier;
 import lombok.Data;
 
 import java.util.List;

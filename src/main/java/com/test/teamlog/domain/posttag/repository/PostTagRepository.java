@@ -1,8 +1,8 @@
-package com.test.teamlog.repository;
+package com.test.teamlog.domain.posttag.repository;
 
-import com.test.teamlog.entity.Post;
-import com.test.teamlog.entity.PostTag;
-import com.test.teamlog.entity.Project;
+import com.test.teamlog.domain.post.entity.Post;
+import com.test.teamlog.domain.posttag.entity.PostTag;
+import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.payload.PostTagInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
