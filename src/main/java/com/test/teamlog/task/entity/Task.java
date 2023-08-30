@@ -1,6 +1,8 @@
-package com.test.teamlog.entity;
+package com.test.teamlog.task.entity;
 
 import com.test.teamlog.domain.project.entity.Project;
+import com.test.teamlog.entity.TaskPerformer;
+import com.test.teamlog.entity.TaskStatus;
 import com.test.teamlog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;

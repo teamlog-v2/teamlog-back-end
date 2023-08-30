@@ -1,6 +1,7 @@
 package com.test.teamlog.entity;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.task.entity.Task;
 import jakarta.persistence.*;
 import lombok.*;
 

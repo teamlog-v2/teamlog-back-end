@@ -1,9 +1,9 @@
-package com.test.teamlog.controller;
+package com.test.teamlog.task.controller;
 
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TaskDTO;
-import com.test.teamlog.service.TaskService;
+import com.test.teamlog.task.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

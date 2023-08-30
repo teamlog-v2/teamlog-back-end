@@ -1,7 +1,7 @@
-package com.test.teamlog.repository;
+package com.test.teamlog.task.repository;
 
 import com.test.teamlog.domain.project.entity.Project;
-import com.test.teamlog.entity.Task;
+import com.test.teamlog.task.entity.Task;
 import com.test.teamlog.entity.TaskStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Sort;

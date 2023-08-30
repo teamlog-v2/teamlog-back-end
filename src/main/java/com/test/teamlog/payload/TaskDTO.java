@@ -1,7 +1,7 @@
 package com.test.teamlog.payload;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
-import com.test.teamlog.entity.Task;
+import com.test.teamlog.task.entity.Task;
 import com.test.teamlog.entity.TaskPerformer;
 import com.test.teamlog.entity.TaskStatus;
 import jakarta.validation.constraints.NotBlank;

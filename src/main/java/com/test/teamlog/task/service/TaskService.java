@@ -1,17 +1,17 @@
-package com.test.teamlog.service;
+package com.test.teamlog.task.service;
 
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.domain.project.entity.Project;
-import com.test.teamlog.entity.Task;
+import com.test.teamlog.task.entity.Task;
 import com.test.teamlog.entity.TaskPerformer;
 import com.test.teamlog.entity.TaskStatus;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.TaskDTO;
 import com.test.teamlog.domain.project.repository.ProjectRepository;
-import com.test.teamlog.repository.TaskRepository;
+import com.test.teamlog.task.repository.TaskRepository;
 import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
