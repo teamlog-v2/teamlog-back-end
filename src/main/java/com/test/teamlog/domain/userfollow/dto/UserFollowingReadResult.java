@@ -1,7 +1,7 @@
 package com.test.teamlog.domain.userfollow.dto;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.entity.UserFollow;
+import com.test.teamlog.domain.userfollow.entity.UserFollow;
 import lombok.Data;
 
 @Data

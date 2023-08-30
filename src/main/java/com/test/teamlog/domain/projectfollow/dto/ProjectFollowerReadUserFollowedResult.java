@@ -1,7 +1,7 @@
 package com.test.teamlog.domain.projectfollow.dto;
 
-import com.test.teamlog.entity.Project;
-import com.test.teamlog.entity.ProjectFollower;
+import com.test.teamlog.domain.project.entity.Project;
+import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
 import lombok.Data;
 
 import java.time.LocalDateTime;

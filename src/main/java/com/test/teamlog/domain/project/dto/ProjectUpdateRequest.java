@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.project.dto;
 
-import com.test.teamlog.entity.AccessModifier;
+import com.test.teamlog.global.entity.AccessModifier;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;

@@ -2,7 +2,7 @@ package com.test.teamlog.domain.post.dto;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
-import com.test.teamlog.entity.AccessModifier;
+import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.payload.ProjectDTO;
 import lombok.AccessLevel;
 import lombok.Data;

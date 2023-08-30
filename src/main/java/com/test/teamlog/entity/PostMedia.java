@@ -1,5 +1,6 @@
 package com.test.teamlog.entity;
 
+import com.test.teamlog.domain.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
 

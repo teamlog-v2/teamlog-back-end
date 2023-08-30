@@ -1,6 +1,7 @@
-package com.test.teamlog.entity;
+package com.test.teamlog.domain.postupdatehistory.entity;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;

@@ -1,7 +1,7 @@
 package com.test.teamlog.domain.postlike.dto;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.entity.PostLike;
+import com.test.teamlog.domain.postlike.entity.PostLike;
 import lombok.Data;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 

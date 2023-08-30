@@ -1,9 +1,9 @@
 package com.test.teamlog.domain.post.dto;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.entity.AccessModifier;
-import com.test.teamlog.entity.Post;
-import com.test.teamlog.entity.Project;
+import com.test.teamlog.global.entity.AccessModifier;
+import com.test.teamlog.domain.post.entity.Post;
+import com.test.teamlog.domain.project.entity.Project;
 import lombok.Data;
 import org.locationtech.jts.geom.Point;
 

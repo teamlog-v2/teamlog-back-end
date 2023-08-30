@@ -1,4 +1,4 @@
-package com.test.teamlog.entity;
+package com.test.teamlog.domain.token.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,7 +1,7 @@
 package com.test.teamlog.domain.projectmember.dto;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.entity.ProjectMember;
+import com.test.teamlog.domain.projectmember.entity.ProjectMember;
 import lombok.Data;
 
 @Data

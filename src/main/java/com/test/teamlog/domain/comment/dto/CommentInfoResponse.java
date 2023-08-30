@@ -1,7 +1,7 @@
 package com.test.teamlog.domain.comment.dto;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
-import com.test.teamlog.entity.Comment;
+import com.test.teamlog.domain.comment.entity.Comment;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;

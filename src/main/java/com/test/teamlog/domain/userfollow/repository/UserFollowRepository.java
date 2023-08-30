@@ -2,7 +2,7 @@ package com.test.teamlog.domain.userfollow.repository;
 
 import com.test.teamlog.domain.account.model.User;
 
-import com.test.teamlog.entity.UserFollow;
+import com.test.teamlog.domain.userfollow.entity.UserFollow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

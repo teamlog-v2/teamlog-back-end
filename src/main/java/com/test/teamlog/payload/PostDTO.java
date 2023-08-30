@@ -1,7 +1,7 @@
 package com.test.teamlog.payload;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
-import com.test.teamlog.entity.PostUpdateHistory;
+import com.test.teamlog.domain.postupdatehistory.entity.PostUpdateHistory;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
