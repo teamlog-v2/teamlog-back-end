@@ -1,6 +1,4 @@
-package com.test.teamlog.entity;
-
-import com.test.teamlog.domain.account.model.User;
+package com.test.teamlog.domain.task.entity;
 
 public enum TaskStatus {
     NOT_STARTED(0), IN_PROGRESS(1), COMPLETE(2), FAILED(3);

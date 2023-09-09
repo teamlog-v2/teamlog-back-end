@@ -2,8 +2,8 @@ package com.test.teamlog.domain.account.model;
 
 import com.test.teamlog.domain.postlike.entity.PostLike;
 import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
+import com.test.teamlog.domain.task.entity.TaskPerformer;
 import com.test.teamlog.domain.userfollow.entity.UserFollow;
-import com.test.teamlog.entity.*;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
