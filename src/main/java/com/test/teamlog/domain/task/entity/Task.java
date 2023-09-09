@@ -1,12 +1,11 @@
-package com.test.teamlog.task.entity;
+package com.test.teamlog.domain.task.entity;
 
 import com.test.teamlog.domain.project.entity.Project;
-import com.test.teamlog.entity.TaskPerformer;
-import com.test.teamlog.entity.TaskStatus;
 import com.test.teamlog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -51,14 +50,20 @@ public class Task extends BaseTimeEntity {
         project.getTasks().add(this);
     }
 
-    public void addTaskPerformers(List<TaskPerformer> performers)
+    public void addTaskPerformerList(List<TaskPerformer> performerList)
     {
-        this.taskPerformers.addAll(performers);
+        this.taskPerformers.addAll(performerList);
     }
 
-    public void removeTaskPerformers(List<TaskPerformer> performers)
-    {
-        this.taskPerformers.removeAll(performers);
+    public void removeTaskPerformerList(List<TaskPerformer> performerList) {
+        if (CollectionUtils.isEmpty(performerList)) return;
+
+        this.taskPerformers.removeAll(performerList);
+    }
+
+    public void update(String taskName, LocalDateTime deadline) {
+        this.taskName = taskName;
+        this.deadline = deadline;
     }
 
 }

@@ -7,7 +7,7 @@ import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
 import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.global.entity.BaseTimeEntity;
-import com.test.teamlog.task.entity.Task;
+import com.test.teamlog.domain.task.entity.Task;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;

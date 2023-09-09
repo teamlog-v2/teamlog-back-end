@@ -1,8 +1,8 @@
-package com.test.teamlog.task.repository;
+package com.test.teamlog.domain.task.repository;
 
 import com.test.teamlog.domain.project.entity.Project;
-import com.test.teamlog.task.entity.Task;
-import com.test.teamlog.entity.TaskStatus;
+import com.test.teamlog.domain.task.entity.Task;
+import com.test.teamlog.domain.task.entity.TaskStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,7 +37,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Modifying
     @Transactional
     @Query("update Task t set t.priority = t.priority-1 where t.project = :project and t.status = :status and t.priority > :priority")
-    void reorderInPreviousStatus(@Param("project") Project project, @Param("status") TaskStatus status, @Param("priority") int priorit);
+    void reorderInPreviousStatus(@Param("project") Project project, @Param("status") TaskStatus status, @Param("priority") int priority);
 
     @Modifying
     @Transactional
