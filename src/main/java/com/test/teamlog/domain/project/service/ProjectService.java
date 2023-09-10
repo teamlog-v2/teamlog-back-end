@@ -2,24 +2,22 @@ package com.test.teamlog.domain.project.service;
 
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.AccountService;
-import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.posttag.entity.PostTag;
-import com.test.teamlog.domain.posttag.service.PostTagService;
 import com.test.teamlog.domain.project.dto.*;
 import com.test.teamlog.domain.project.entity.Project;
+import com.test.teamlog.domain.project.repository.ProjectRepository;
 import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
+import com.test.teamlog.domain.projectfollow.repository.ProjectFollowerRepository;
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
+import com.test.teamlog.domain.projectjoin.repository.ProjectJoinRepository;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
+import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
 import com.test.teamlog.payload.Relation;
-import com.test.teamlog.domain.projectfollow.repository.ProjectFollowerRepository;
-import com.test.teamlog.domain.projectjoin.repository.ProjectJoinRepository;
-import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
-import com.test.teamlog.domain.project.repository.ProjectRepository;
 import com.test.teamlog.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,9 +32,9 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectService {
-    private final AccountService accountService;
-    private final PostTagService postTagService;
     private final ProjectRepository projectRepository;
+
+    private final AccountService accountService;
     private final ProjectMemberRepository projectMemberRepository;
     private final ProjectFollowerRepository projectFollowerRepository;
     private final ProjectJoinRepository projectJoinRepository;
@@ -277,10 +275,7 @@ public class ProjectService {
 
     // 프로젝트의 해시태그들 조회
     public List<String> readHashTagsInProjectPosts(Long projectId) {
-        Project project = findOne(projectId);
-        final List<Post> postList = project.getPosts();
-
-        final List<PostTag> hashTagList = postTagService.findAllByPostIdIn(postList.stream().map(Post::getId).collect(Collectors.toList()));
+        final List<PostTag> hashTagList = projectRepository.findAllPostTagByProjectId(projectId);
         return hashTagList.stream().map(PostTag::getName).collect(Collectors.toList());
     }
 
