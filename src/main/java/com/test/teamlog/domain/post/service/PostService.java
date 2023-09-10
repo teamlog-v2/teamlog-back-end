@@ -9,7 +9,6 @@ import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
 import com.test.teamlog.domain.posttag.entity.PostTag;
-import com.test.teamlog.domain.posttag.repository.PostTagRepository;
 import com.test.teamlog.domain.postupdatehistory.entity.PostUpdateHistory;
 import com.test.teamlog.domain.postupdatehistory.service.PostUpdateHistoryService;
 import com.test.teamlog.domain.project.entity.Project;
@@ -52,7 +51,6 @@ public class PostService {
     private final FileStorageService fileStorageService;
     private final ProjectService projectService;
     private final PostRepository postRepository;
-    private final PostTagRepository postTagRepository;
     private final PostMediaRepository postMediaRepository;
 
     private final PostUpdateHistoryRepository postUpdateHistoryRepository;
@@ -432,7 +430,7 @@ public class PostService {
         final PostResult result = PostResult.of(post);
 
         // 해시태그 설정
-        List<PostTag> hashtagList = postTagRepository.findAllByPost(post);
+        List<PostTag> hashtagList = post.getHashtags();
         List<String> hashtagNameList
                 = !CollectionUtils.isEmpty(hashtagList) ?
                 hashtagList.stream().map(PostTag::getName).collect(Collectors.toList()) :
