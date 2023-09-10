@@ -1,12 +1,12 @@
 package com.test.teamlog.domain.post.repository;
 
 
-import com.test.teamlog.domain.postupdatehistory.entity.PostUpdateHistory;
+import com.test.teamlog.entity.PostMedia;
 
 import java.util.List;
 
 public interface PostRepositoryCustom {
     boolean existsPostLikeByPostAndUser(Long postId, Long userId);
 
-    List<PostUpdateHistory> findAllPostUpdateHistoryByPostId(Long postId);
+    List<PostMedia> findAllPostMediaByPostId(Long postId);
 }
