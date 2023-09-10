@@ -7,27 +7,24 @@ import com.test.teamlog.domain.post.dto.PostResult;
 import com.test.teamlog.domain.post.dto.PostUpdateInput;
 import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.post.repository.PostRepository;
-import com.test.teamlog.domain.postlike.dto.PostLikerResult;
-import com.test.teamlog.domain.postlike.service.PostLikeService;
 import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
 import com.test.teamlog.domain.posttag.entity.PostTag;
+import com.test.teamlog.domain.posttag.repository.PostTagRepository;
 import com.test.teamlog.domain.postupdatehistory.entity.PostUpdateHistory;
 import com.test.teamlog.domain.postupdatehistory.service.PostUpdateHistoryService;
 import com.test.teamlog.domain.project.entity.Project;
+import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.domain.userfollow.entity.UserFollow;
-import com.test.teamlog.entity.*;
+import com.test.teamlog.domain.userfollow.service.UserFollowService;
+import com.test.teamlog.entity.PostMedia;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.PagedResponse;
 import com.test.teamlog.payload.PostDTO;
-import com.test.teamlog.payload.PostTagInfo;
 import com.test.teamlog.repository.PostMediaRepository;
-import com.test.teamlog.domain.posttag.repository.PostTagRepository;
 import com.test.teamlog.repository.PostUpdateHistoryRepository;
 import com.test.teamlog.service.FileStorageService;
-import com.test.teamlog.domain.project.service.ProjectService;
-import com.test.teamlog.domain.userfollow.service.UserFollowService;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -43,6 +40,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,7 +55,6 @@ public class PostService {
     private final PostTagRepository postTagRepository;
     private final PostMediaRepository postMediaRepository;
 
-    private final PostLikeService postLikeService;
     private final PostUpdateHistoryRepository postUpdateHistoryRepository;
 
     public List<PostResult> getPostsByUser(User currentUser) {
@@ -279,18 +276,6 @@ public class PostService {
                 0, posts.isLast());
     }
 
-    // 해시태그 추천
-    public List<String> getRecommendedHashTags(Long id) {
-        Project project = projectService.findOne(id);
-
-        List<PostTagInfo> hashtags = postTagRepository.getRecommendedHashTags(id);
-        List<String> response = new ArrayList<>();
-        for (PostTagInfo tag : hashtags) {
-            response.add(tag.getName());
-        }
-        return response;
-    }
-
     // 위치정보가 있는 Public 포스트들 조회
     public List<PostResult> readAllWithLocation(User currentUser) {
         List<Post> posts = postRepository.findAllByLocationIsNotNullAndAccessModifier(AccessModifier.PUBLIC);
@@ -455,7 +440,9 @@ public class PostService {
         result.setHashtags(hashtagNameList);
 
         // 좋아요 여부 설정
-        Boolean isILikeIt = currentUser != null ? postLikeService.existsByPostAndUser(post, currentUser) : Boolean.FALSE;
+        Boolean isILikeIt = currentUser != null ?
+                postRepository.existsPostLikeByPostAndUser(post.getId(), currentUser.getIdx()) :
+                Boolean.FALSE;
         result.setIsILikeIt(isILikeIt);
 
         // 미디어 정보 설정
@@ -493,56 +480,14 @@ public class PostService {
         return historyList.stream().map(PostDTO.PostHistoryInfo::new).collect(Collectors.toList());
     }
 
-
-    /**
-     * 좋아요
-     *
-     * @param postId
-     * @param currentUser
-     * @return
-     */
-    @Transactional
-    public ApiResponse likePost(Long postId, User currentUser) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-
-        postLikeService.create(post, currentUser);
-        return new ApiResponse(Boolean.TRUE, "포스트 좋아요 성공");
-    }
-
-    /**
-     * 좋아요 취소
-     *
-     * @param postId
-     * @param currentUser
-     * @return
-     */
-    @Transactional
-    public ApiResponse unlikePost(Long postId, User currentUser) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-
-        postLikeService.delete(post, currentUser);
-        return new ApiResponse(Boolean.TRUE, "포스트 좋아요 취소 성공");
-    }
-
-    /**
-     * 게시물 좋아요 목록 조회
-     * @param postId
-     * @return
-     */
-    @Transactional(readOnly = true)
-    public List<PostLikerResult> readPostLikerList(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-
-        return postLikeService.readAllByPost(post);
-    }
-
     private String makeFileDownloadUri(PostMedia postMedia, String path) {
         return ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path(path)
                 .path(postMedia.getStoredFileName())
                 .toUriString();
+    }
+
+    public Optional<Post> readById(Long id) {
+        return postRepository.findById(id);
     }
 }
