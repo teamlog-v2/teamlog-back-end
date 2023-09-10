@@ -10,7 +10,6 @@ import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
 import com.test.teamlog.domain.posttag.entity.PostTag;
 import com.test.teamlog.domain.postupdatehistory.entity.PostUpdateHistory;
-import com.test.teamlog.domain.postupdatehistory.service.PostUpdateHistoryService;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.domain.userfollow.entity.UserFollow;
@@ -20,9 +19,7 @@ import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.PagedResponse;
-import com.test.teamlog.payload.PostDTO;
 import com.test.teamlog.repository.PostMediaRepository;
-import com.test.teamlog.repository.PostUpdateHistoryRepository;
 import com.test.teamlog.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
@@ -46,14 +43,11 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PostService {
-    private final PostUpdateHistoryService postUpdateHistoryService;
     private final UserFollowService userFollowService;
     private final FileStorageService fileStorageService;
     private final ProjectService projectService;
     private final PostRepository postRepository;
     private final PostMediaRepository postMediaRepository;
-
-    private final PostUpdateHistoryRepository postUpdateHistoryRepository;
 
     public List<PostResult> getPostsByUser(User currentUser) {
         List<PostResult> resultList = new ArrayList<>();
@@ -317,16 +311,15 @@ public class PostService {
             final List<PostTag> postTagList
                     = input.getHashtags()
                     .stream().map(hashTag -> PostTag.builder().name(hashTag).build())
-                    .collect(Collectors.toList());
+                    .toList();
             postTagList.forEach(tag -> tag.setPost(post));
         }
 
+        post.addPostUpdateHistory(new PostUpdateHistory(post, currentUser));
         Post newPost = postRepository.save(post);
 
         storeMediaFiles(media, post);
         storeFiles(files, post);
-
-        postUpdateHistoryService.createPostUpdateHistory(currentUser, post);
 
         project.setUpdateTime(LocalDateTime.now());
         return newPost.getId();
@@ -366,8 +359,6 @@ public class PostService {
         storeFiles(files, post);
 
         updatePostTagList(input.getHashtags(), post);
-
-        postUpdateHistoryService.createPostUpdateHistory(currentUser, post);
 
         return post.getId();
     }
@@ -464,18 +455,6 @@ public class PostService {
         result.setFiles(fileList);
 
         return result;
-    }
-
-    @Transactional
-    public List<PostDTO.PostHistoryInfo> readPostUpdateHistory(Long postId, User currentUser) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-        projectService.validateProjectMember(post.getProject(), currentUser);
-
-        Sort sort = Sort.by(Sort.Direction.ASC, "id");
-        List<PostUpdateHistory> historyList = postUpdateHistoryRepository.findAllByPost(post, sort);
-
-        return historyList.stream().map(PostDTO.PostHistoryInfo::new).collect(Collectors.toList());
     }
 
     private String makeFileDownloadUri(PostMedia postMedia, String path) {

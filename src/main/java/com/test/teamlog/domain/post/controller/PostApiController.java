@@ -71,15 +71,7 @@ public class PostApiController {
         return new ResponseEntity<>(PostResponse.from(result), HttpStatus.OK);
     }
 
-    // TODO: API 위치 고민해보기
-    @Operation(summary = "게시물 수정 내역 조회")
-    @GetMapping("/{id}/historys")
-    public ResponseEntity<List<PostDTO.PostHistoryInfo>> readPostUpdateHistory(@PathVariable("id") long id,
-                                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostDTO.PostHistoryInfo> response = postService.readPostUpdateHistory(id, currentUser.getUser());
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 
     // TODO: API 사용 여부 확인
     @Operation(summary = "모든 게시물 조회")

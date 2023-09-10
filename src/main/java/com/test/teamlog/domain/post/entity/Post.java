@@ -89,6 +89,12 @@ public class Post extends BaseTimeEntity {
         this.hashtags.removeAll(tags);
     }
 
+    public void addPostUpdateHistory(PostUpdateHistory postUpdateHistory) {
+        if (postUpdateHistory == null) return;
+
+        this.postUpdateHistories.add(postUpdateHistory);
+    }
+
     public void update(String contents,
                        AccessModifier accessModifier,
                        AccessModifier commentModifier,
