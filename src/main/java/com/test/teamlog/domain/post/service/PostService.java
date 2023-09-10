@@ -43,10 +43,11 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PostService {
+    private final PostRepository postRepository;
+
     private final UserFollowService userFollowService;
     private final FileStorageService fileStorageService;
     private final ProjectService projectService;
-    private final PostRepository postRepository;
     private final PostMediaRepository postMediaRepository;
 
     public List<PostResult> getPostsByUser(User currentUser) {
