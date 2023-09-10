@@ -60,11 +60,11 @@ public class AccountApiController {
 
     @Operation(summary = "로그인 검증")
     @GetMapping("/validate")
-    public ResponseEntity<UserRequest.UserSimpleInfo> validateUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+    public ResponseEntity<UserValidateResponse> validateUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         if (currentUser == null) {
-            return new ResponseEntity<>(new UserRequest.UserSimpleInfo(), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new UserValidateResponse(), HttpStatus.UNAUTHORIZED);
         } else {
-            return new ResponseEntity<>(new UserRequest.UserSimpleInfo(currentUser.getUser()), HttpStatus.OK);
+            return new ResponseEntity<>(UserValidateResponse.of(currentUser.getUser()), HttpStatus.OK);
         }
     }
 
@@ -77,17 +77,17 @@ public class AccountApiController {
 
     @Operation(summary = "회원 정보 조회")
     @GetMapping("/{identification}")
-    public ResponseEntity<UserRequest.UserResponse> getUserById(@PathVariable("identification") String identification,
-                                                                @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        UserRequest.UserResponse userResponse = accountService.getUser(identification, currentUser.getUser());
-        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    public ResponseEntity<UserReadDetailResponse> readDetail(@PathVariable("identification") String identification,
+                                                             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        UserReadDetailResult result = accountService.readDetail(identification, currentUser.getUser());
+        return new ResponseEntity<>(UserReadDetailResponse.from(result), HttpStatus.OK);
     }
 
     @Operation(summary = "회원 정보 수정")
     @PutMapping
-    public ResponseEntity<ApiResponse> updateUser(@Valid @RequestPart(value = "key", required = true) UserRequest.UserUpdateRequest userRequest,
-                                                  @RequestPart(value = "profileImg", required = false) MultipartFile image,
-                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+    public ResponseEntity<ApiResponse> update(@Valid @RequestPart(value = "key") UserRequest.UserUpdateRequest userRequest,
+                                              @RequestPart(value = "profileImg", required = false) MultipartFile image,
+                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         ApiResponse apiResponse = accountService.updateUser(userRequest, image, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -143,10 +143,10 @@ public class AccountApiController {
 
     @Operation(summary = "회원 검색")
     @GetMapping
-    public ResponseEntity<List<UserRequest.UserSimpleInfo>> searchUser(@RequestParam(value = "id", required = false, defaultValue = "") String identification,
-                                                                       @RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<UserRequest.UserSimpleInfo> response = accountService.searchUser(identification, name);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<List<UserSearchResponse>> search(@RequestParam(value = "id", required = false, defaultValue = "") String identification,
+                                                                   @RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                                   @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        final List<UserSearchResult> resultList = accountService.search(identification, name);
+        return new ResponseEntity<>(resultList.stream().map(UserSearchResponse::from).collect(Collectors.toList()), HttpStatus.OK);
     }
 }

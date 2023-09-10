@@ -3,23 +3,21 @@ package com.test.teamlog.domain.account.service;
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.projectmember.entity.ProjectMember;
+import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
 import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.domain.token.service.TokenService;
-import com.test.teamlog.domain.projectmember.entity.ProjectMember;
 import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.global.utility.PasswordUtil;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
 import com.test.teamlog.service.FileStorageService;
-import com.test.teamlog.domain.userfollow.service.UserFollowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,35 +25,37 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AccountService {
     private final TokenService tokenService;
-    private final AccountRepository accountRepository;
     private final FileStorageService fileStorageService;
-    private final UserFollowService userFollowService;
     private final ProjectMemberRepository projectMemberRepository;
 
-    public List<UserRequest.UserSimpleInfo> searchUser(String id, String name) {
+    private final AccountRepository accountRepository;
+
+    public List<UserSearchResult> search(String id, String name) {
         List<User> userList = accountRepository.searchUserByIdentificationAndName(id, name);
-        List<UserRequest.UserSimpleInfo> response = new ArrayList<>();
-        for (User user : userList) {
-            response.add(new UserRequest.UserSimpleInfo(user));
-        }
-        return response;
+
+        return userList.stream().map(UserSearchResult::from).toList();
     }
 
-    public UserRequest.UserResponse getUser(String identification, User currentUser) {
-        UserRequest.UserResponse response = null;
+    @Transactional(readOnly = true)
+    public UserReadDetailResult readDetail(String identification, User currentUser) {
+        UserReadDetailResult result;
+
         if (currentUser == null || !identification.equals(currentUser.getIdentification())) {
             User user = accountRepository.findByIdentification(identification)
                     .orElseThrow(() -> new ResourceNotFoundException("USER", "id", identification));
-            response = new UserRequest.UserResponse(user);
-            response.setIsMe(Boolean.FALSE);
-            if (currentUser == null) response.setIsMe(null);
-            response.setIsFollow(userFollowService.isFollow(currentUser, user));
+            result = UserReadDetailResult.from(user);
+            result.setIsMe(currentUser != null ? Boolean.FALSE : null);
+            result.setIsFollow(currentUser != null ?
+                    accountRepository.isFollow(currentUser.getIdentification(), user.getIdentification()) :
+                    null
+            );
         } else {
-            response = new UserRequest.UserResponse(currentUser);
-            response.setIsMe(Boolean.TRUE);
-            response.setIsFollow(Boolean.FALSE);
+            result = UserReadDetailResult.from(currentUser);
+            result.setIsMe(Boolean.TRUE);
+            result.setIsFollow(Boolean.FALSE);
         }
-        return response;
+
+        return result;
     }
 
     @Transactional
