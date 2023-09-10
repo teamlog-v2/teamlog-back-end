@@ -2,8 +2,6 @@ package com.test.teamlog.domain.post.controller;
 
 import com.test.teamlog.domain.post.dto.*;
 import com.test.teamlog.domain.post.service.PostService;
-import com.test.teamlog.domain.postlike.dto.PostLikerResponse;
-import com.test.teamlog.domain.postlike.dto.PostLikerResult;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.PagedResponse;
@@ -125,31 +123,6 @@ public class PostApiController {
     public ResponseEntity<List<PostResponse>> readAllByFollowingUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<PostResult> result = postService.readAllByFollowingUser(currentUser.getUser());
         List<PostResponse> response = result.stream().map(PostResponse::from).collect(Collectors.toList());
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @Operation(summary = "게시물 좋아요")
-    @PostMapping("/{postId}/like")
-    public ResponseEntity<ApiResponse> like(@PathVariable("postId") long postId,
-                                            @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = postService.likePost(postId, currentUser.getUser());
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
-    }
-
-    @Operation(summary = "게시물 좋아요 취소")
-    @DeleteMapping("/{postId}/like")
-    public ResponseEntity<ApiResponse> unlike(@PathVariable("postId") long postId,
-                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = postService.unlikePost(postId, currentUser.getUser());
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @Operation(summary = "게시물을 좋아하는 사람 조회")
-    @GetMapping("/{postId}/likers")
-    public ResponseEntity<List<PostLikerResponse>> readPostLikerList(@PathVariable("postId") long postId) {
-        List<PostLikerResult> resultList = postService.readPostLikerList(postId);
-        final List<PostLikerResponse> response = resultList.stream().map(PostLikerResponse::from).collect(Collectors.toList());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

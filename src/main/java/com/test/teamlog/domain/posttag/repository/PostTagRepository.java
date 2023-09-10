@@ -16,9 +16,4 @@ public interface PostTagRepository extends JpaRepository<PostTag, Long> {
     public List<PostTag> findAllByPost(Post post);
 
     List<PostTag> findAllByPostIdIn(List<Long> postIdList);
-
-    @Query(value = "SELECT h.name as name, count(h.name) as cnt FROM post_tag h where h.post_id in (select p.id from post p where p.project_id=:project ) group by h.name " +
-            "order by cnt desc limit 5"
-            , nativeQuery = true)
-    public List<PostTagInfo> getRecommendedHashTags(@Param("project") Long project_id);
 }

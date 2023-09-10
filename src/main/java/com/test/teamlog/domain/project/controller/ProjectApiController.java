@@ -129,14 +129,6 @@ public class ProjectApiController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Deprecated
-    @Operation(summary = "해시태그 추천")
-    @GetMapping("/projects/{projectId}/recommended-hashtags")
-    public ResponseEntity<List<String>> getRecommendedHashTags(@PathVariable("projectId") long projectId) {
-        List<String> response = postService.getRecommendedHashTags(projectId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
     // TODO: post쪽 api랑 통합
     @Operation(summary = "위치정보가 있는 프로젝트 게시물 조회")
     @GetMapping("/projects/{projectId}/posts/with-location")
