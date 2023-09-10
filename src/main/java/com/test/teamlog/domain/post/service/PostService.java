@@ -19,7 +19,6 @@ import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.PagedResponse;
-import com.test.teamlog.repository.PostMediaRepository;
 import com.test.teamlog.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
@@ -48,7 +47,6 @@ public class PostService {
     private final UserFollowService userFollowService;
     private final FileStorageService fileStorageService;
     private final ProjectService projectService;
-    private final PostMediaRepository postMediaRepository;
 
     public List<PostResult> getPostsByUser(User currentUser) {
         List<PostResult> resultList = new ArrayList<>();
@@ -439,7 +437,7 @@ public class PostService {
         List<PostMediaResult> mediaList = new ArrayList<>();
         List<PostMediaResult> fileList = new ArrayList<>();
 
-        List<PostMedia> postMediaList = postMediaRepository.findAllByPost(post);
+        List<PostMedia> postMediaList = postRepository.findAllPostMediaByPostId(post.getId());
         for (PostMedia postMedia : postMediaList) {
             final PostMediaResult postMediaResult = PostMediaResult.from(postMedia);
 
