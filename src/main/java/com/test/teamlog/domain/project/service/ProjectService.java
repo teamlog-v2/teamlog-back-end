@@ -9,7 +9,7 @@ import com.test.teamlog.domain.project.repository.ProjectRepository;
 import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
 import com.test.teamlog.domain.projectfollow.repository.ProjectFollowerRepository;
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
-import com.test.teamlog.domain.projectjoin.repository.ProjectJoinRepository;
+import com.test.teamlog.domain.projectjoin.service.query.ProjectJoinQueryService;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.exception.ResourceForbiddenException;
@@ -37,7 +37,7 @@ public class ProjectService {
     private final ProjectMemberQueryService projectMemberQueryService;
     private final AccountService accountService;
     private final ProjectFollowerRepository projectFollowerRepository;
-    private final ProjectJoinRepository projectJoinRepository;
+    private final ProjectJoinQueryService projectJoinQueryService;
     private final FileStorageService fileStorageService;
 
     @Transactional
@@ -114,7 +114,7 @@ public class ProjectService {
         if (isProjectMaster(project, currentUser)) return Relation.MASTER;
         if (projectMemberQueryService.isProjectMember(project, currentUser)) return Relation.MEMBER;
 
-        ProjectJoin projectJoin = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
+        ProjectJoin projectJoin = projectJoinQueryService.findByProjectAndUser(project, currentUser).orElse(null);
 
         if (projectJoin != null) {
             if (projectJoin.getIsAccepted() && !projectJoin.getIsInvited()) return Relation.APPLIED;
