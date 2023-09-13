@@ -6,7 +6,7 @@ import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
-import com.test.teamlog.domain.projectjoin.repository.ProjectJoinRepository;
+import com.test.teamlog.domain.projectjoin.service.query.ProjectJoinQueryService;
 import com.test.teamlog.domain.projectmember.dto.ProjectMemberReadResult;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
 import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
@@ -28,7 +28,7 @@ public class ProjectMemberService {
     private final ProjectMemberRepository projectMemberRepository;
 
     private final AccountRepository accountRepository;
-    private final ProjectJoinRepository projectJoinRepository;
+    private final ProjectJoinQueryService projectJoinQueryService;
     private final ProjectService projectService;
 
 
@@ -36,7 +36,7 @@ public class ProjectMemberService {
     @Transactional
     public ApiResponse create(Long projectId, User currentUser) {
         final Project project = projectService.findOne(projectId);
-        ProjectJoin projectJoin = projectJoinRepository.findByProjectAndUser(project, currentUser)
+        ProjectJoin projectJoin = projectJoinQueryService.findByProjectAndUser(project, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation", "ID", currentUser.getIdentification()));
 
         // TODO: project_join과 함께 다시 생각해보기
