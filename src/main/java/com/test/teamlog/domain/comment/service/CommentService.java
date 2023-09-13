@@ -6,12 +6,12 @@ import com.test.teamlog.domain.account.service.AccountService;
 import com.test.teamlog.domain.comment.dto.CommentCreateInput;
 import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
 import com.test.teamlog.domain.comment.dto.CommentUpdateInput;
+import com.test.teamlog.domain.comment.entity.Comment;
 import com.test.teamlog.domain.comment.repository.CommentRepository;
 import com.test.teamlog.domain.commentmention.service.CommentMentionService;
-import com.test.teamlog.domain.post.repository.PostRepository;
-import com.test.teamlog.domain.comment.entity.Comment;
-import com.test.teamlog.entity.CommentMention;
 import com.test.teamlog.domain.post.entity.Post;
+import com.test.teamlog.domain.post.service.query.PostQueryService;
+import com.test.teamlog.entity.CommentMention;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
@@ -37,17 +37,17 @@ public class CommentService {
     private final CommentMentionService commentMentionService;
 
     private final AccountService userService;
-    private final PostRepository postRepository;
+    private final PostQueryService postQueryService;
 
     // 유저가 작성한 댓글 조회
     public List<CommentInfoResponse> getCommentByUser(User currentUser) {
         List<Comment> commentList = commentRepository.findAllByWriter(currentUser);
-        return  makeCommentInfoResponseList(currentUser, commentList);
+        return makeCommentInfoResponseList(currentUser, commentList);
     }
 
     // 게시물의 부모 댓글 조회
     public PagedResponse<CommentInfoResponse> getParentComments(Long postId, int page, int size, User currentUser) {
-        Post post = postRepository.findById(postId)
+        Post post = postQueryService.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
@@ -84,6 +84,7 @@ public class CommentService {
 
         return makeCommentInfoResponseList(currentUser, commentList.get(0), commentList);
     }
+
     private List<CommentInfoResponse> makeCommentInfoResponseList(User currentUser, Comment comment, List<Comment> commentList) {
         if (CollectionUtils.isEmpty(commentList)) return Collections.emptyList();
 
@@ -107,7 +108,7 @@ public class CommentService {
     // 댓글 생성
     @Transactional
     public ApiResponse create(CommentCreateInput input, User currentUser) {
-        Post post = postRepository.findById(input.getPostId())
+        Post post = postQueryService.findById(input.getPostId())
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", input.getPostId()));
 
         Comment parentComment = input.getParentCommentId() != null ?
