@@ -3,20 +3,17 @@ package com.test.teamlog.domain.projectmember.service;
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.AccountRepository;
-import com.test.teamlog.domain.post.repository.PostRepository;
-import com.test.teamlog.domain.project.service.ProjectService;
-import com.test.teamlog.domain.projectmember.dto.ProjectMemberReadResult;
 import com.test.teamlog.domain.project.entity.Project;
+import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
+import com.test.teamlog.domain.projectjoin.repository.ProjectJoinRepository;
+import com.test.teamlog.domain.projectmember.dto.ProjectMemberReadResult;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
+import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
 import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.domain.projectjoin.repository.ProjectJoinRepository;
-import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
-import com.test.teamlog.domain.project.repository.ProjectRepository;
-import com.test.teamlog.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,13 +25,12 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectMemberService {
-    private final AccountRepository accountRepository;
-    private final ProjectRepository projectRepository;
-    private final PostRepository postRepository;
     private final ProjectMemberRepository projectMemberRepository;
+
+    private final AccountRepository accountRepository;
     private final ProjectJoinRepository projectJoinRepository;
     private final ProjectService projectService;
-    private final FileStorageService fileStorageService;
+
 
     // 프로젝트 멤버 추가
     @Transactional
@@ -46,6 +42,7 @@ public class ProjectMemberService {
         // TODO: project_join과 함께 다시 생각해보기
         if (!projectJoin.getIsInvited() || projectJoin.getIsAccepted()) throw new BadRequestException("잘못된 요청입니다.");
 
+
         projectMemberRepository.save(ProjectMember.create(projectJoin.getProject(), projectJoin.getUser()));
         return new ApiResponse(Boolean.TRUE, "프로젝트 멤버 가입 됨");
     }
@@ -55,7 +52,7 @@ public class ProjectMemberService {
     public ApiResponse leaveProject(Long projectId, User currentUser) {
         final Project project = projectService.findOne(projectId);
 
-        if(project.getMaster().getIdentification().equals(currentUser.getIdentification())) {
+        if (project.getMaster().getIdentification().equals(currentUser.getIdentification())) {
             throw new ResourceForbiddenException("마스터는 탈퇴할 수 없습니다.\n위임하고 다시 시도하세요.");
         }
 

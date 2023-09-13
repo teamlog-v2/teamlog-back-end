@@ -9,6 +9,7 @@ import com.test.teamlog.domain.projectjoin.dto.ProjectJoinApplyInput;
 import com.test.teamlog.domain.projectjoin.dto.ProjectJoinInviteInput;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
+import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
@@ -34,6 +35,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProjectJoinService {
     private final AccountService accountService;
+    private final ProjectMemberQueryService projectMemberQueryService;
+    
     private final AccountRepository accountRepository;
     private final ProjectRepository projectRepository;
     private final ProjectJoinRepository projectJoinRepository;
@@ -52,7 +55,7 @@ public class ProjectJoinService {
         User user = accountRepository.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        if (projectService.isProjectMember(project, user))
+        if (projectMemberQueryService.isProjectMember(project, user))
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
 
         if (isJoinAlreadyExist(project, user))
@@ -73,7 +76,7 @@ public class ProjectJoinService {
     public ApiResponse inviteUserList(ProjectJoinInviteInput input, User user) {
         final Project project = projectService.findOne(input.getProjectId());
 
-        if (!projectService.isProjectMember(project, user))
+        if (!projectMemberQueryService.isProjectMember(project, user))
             throw new ResourceAlreadyExistsException("프로젝트 멤버 초대 권한이 없습니다.");
 
         final List<ProjectJoin> projectJoinList = projectJoinRepository.findAllByProject(project);
@@ -115,7 +118,7 @@ public class ProjectJoinService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        if (projectService.isProjectMember(project, currentUser))
+        if (projectMemberQueryService.isProjectMember(project, currentUser))
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
 
         if (isJoinAlreadyExist(project, currentUser))
@@ -135,7 +138,7 @@ public class ProjectJoinService {
     public ApiResponse apply(ProjectJoinApplyInput input, User currentUser) {
         final Project project = projectService.findOne(input.getProjectId());
 
-        if (projectService.isProjectMember(project, currentUser)) {
+        if (projectMemberQueryService.isProjectMember(project, currentUser)) {
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
         }
 

@@ -12,6 +12,7 @@ import com.test.teamlog.domain.posttag.entity.PostTag;
 import com.test.teamlog.domain.postupdatehistory.entity.PostUpdateHistory;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.ProjectService;
+import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.domain.userfollow.entity.UserFollow;
 import com.test.teamlog.domain.userfollow.service.UserFollowService;
 import com.test.teamlog.entity.PostMedia;
@@ -46,6 +47,7 @@ public class PostService {
 
     private final UserFollowService userFollowService;
     private final FileStorageService fileStorageService;
+    private final ProjectMemberQueryService projectMemberQueryService;
     private final ProjectService projectService;
 
     public List<PostResult> getPostsByUser(User currentUser) {
@@ -75,7 +77,7 @@ public class PostService {
 
         // 비공개일 경우 프로젝트 멤버 권한 체크
         if (post.getAccessModifier() == AccessModifier.PRIVATE) {
-            projectService.validateProjectMember(post.getProject(), currentUser);
+            projectMemberQueryService.isProjectMember(post.getProject(), currentUser);
         }
 
         return convertToPostResult(post, currentUser);
@@ -97,7 +99,7 @@ public class PostService {
                                                            Long cursor, int size, User currentUser) {
         Project project = projectService.findOne(projectId);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
-        Boolean isUserMemberOfProject = projectService.isProjectMember(project, currentUser);
+        Boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
 
         Slice<Post> posts = null;
         if (cursor == null) {
@@ -138,7 +140,7 @@ public class PostService {
                                                                     User currentUser) {
         Project project = projectService.findOne(projectId);
 
-        Boolean isUserMemberOfProject = projectService.isProjectMember(project, currentUser);
+        Boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
 
         Slice<Post> posts;
@@ -201,7 +203,7 @@ public class PostService {
                                                                               int size,
                                                                               User currentUser) {
         Project project = projectService.findOne(projectId);
-        Boolean isUserMemberOfProject = projectService.isProjectMember(project, currentUser);
+        Boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
 
         Slice<Post> posts = null;
@@ -238,7 +240,7 @@ public class PostService {
                                                                     String cop, Long cursor, int size, User currentUser) {
         Project project = projectService.findOne(projectId);
         Pageable pageable = PageRequest.of(0, size, sort, "id");
-        Boolean isUserMemberOfProject = projectService.isProjectMember(project, currentUser);
+        Boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
 
         Slice<Post> posts = null;
         if (cursor == null) {
@@ -277,7 +279,7 @@ public class PostService {
     // 위치정보가 있는 프로젝트의 포스트들 조회
     public List<PostResult> readAllWithLocation(Long projectId, User currentUser) {
         Project project = projectService.findOne(projectId);
-        Boolean isUserMemberOfProject = projectService.isProjectMember(project, currentUser);
+        Boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
 
         List<Post> posts = null;
         if (isUserMemberOfProject)
@@ -301,7 +303,7 @@ public class PostService {
                        MultipartFile[] files,
                        User currentUser) {
         Project project = projectService.findOne(input.getProjectId());
-        projectService.validateProjectMember(project, currentUser);
+        projectMemberQueryService.isProjectMember(project, currentUser);
 
         input.setLocation(makeLocation(input.getLatitude(), input.getLongitude()));
         Post post = input.toPost(project, currentUser);
@@ -348,7 +350,7 @@ public class PostService {
                        MultipartFile[] files, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-        projectService.validateProjectMember(post.getProject(), currentUser);
+        projectMemberQueryService.isProjectMember(post.getProject(), currentUser);
 
         post.update(input.getContents(), input.getAccessModifier(), input.getCommentModifier(), makeLocation(input.getLatitude(), input.getLongitude()), input.getAddress());
 
@@ -408,7 +410,7 @@ public class PostService {
     public ApiResponse delete(Long id, User currentUser) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-        projectService.validateProjectMember(post.getProject(), currentUser);
+        projectMemberQueryService.isProjectMember(post.getProject(), currentUser);
 
         fileStorageService.deleteFilesByPost(post);
         postRepository.delete(post);

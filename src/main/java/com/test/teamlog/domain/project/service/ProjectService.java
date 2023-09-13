@@ -11,7 +11,7 @@ import com.test.teamlog.domain.projectfollow.repository.ProjectFollowerRepositor
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
 import com.test.teamlog.domain.projectjoin.repository.ProjectJoinRepository;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
-import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
+import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.exception.ResourceForbiddenException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.global.entity.AccessModifier;
@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
 public class ProjectService {
     private final ProjectRepository projectRepository;
 
+    private final ProjectMemberQueryService projectMemberQueryService;
     private final AccountService accountService;
-    private final ProjectMemberRepository projectMemberRepository;
     private final ProjectFollowerRepository projectFollowerRepository;
     private final ProjectJoinRepository projectJoinRepository;
     private final FileStorageService fileStorageService;
@@ -112,7 +112,7 @@ public class ProjectService {
     private Relation detectRelation(Project project, User currentUser) {
         if (currentUser == null) return Relation.NONE;
         if (isProjectMaster(project, currentUser)) return Relation.MASTER;
-        if (isProjectMember(project, currentUser)) return Relation.MEMBER;
+        if (projectMemberQueryService.isProjectMember(project, currentUser)) return Relation.MEMBER;
 
         ProjectJoin projectJoin = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
 
@@ -131,7 +131,7 @@ public class ProjectService {
 
         // Private 시 검증
         if (project.getAccessModifier() == AccessModifier.PRIVATE) {
-            validateProjectMember(project, currentUser);
+            projectMemberQueryService.validateProjectMember(project, currentUser);
         }
 
         final ProjectReadResult result = ProjectReadResult.from(project);
@@ -171,7 +171,7 @@ public class ProjectService {
 
     // 본인이 속하지 않은 비공개 프로젝트인지 확인
     private boolean isNotMemberAndPrivateProject(User currentUser, Project project) {
-        return !isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE;
+        return !projectMemberQueryService.isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE;
     }
 
     /**
@@ -259,19 +259,8 @@ public class ProjectService {
         return project.getMaster().getIdentification().equals(currentUser.getIdentification());
     }
 
-    // 프로젝트 멤버 여부
-    public boolean isProjectMember(Project project, User currentUser) {
-        if (currentUser == null) return false;
-
-        return projectMemberRepository.findByProjectAndUser(project, currentUser).isPresent();
-    }
-
     // 프로젝트 멤버 검증
-    public void validateProjectMember(Project project, User currentUser) {
-        if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다.\n로그인 해주세요.");
-        projectMemberRepository.findByProjectAndUser(project, currentUser)
-                .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다.\n(프로젝트 멤버 아님)"));
-    }
+
 
     // 프로젝트의 해시태그들 조회
     public List<String> readHashTagsInProjectPosts(Long projectId) {
