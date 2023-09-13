@@ -2,8 +2,8 @@ package com.test.teamlog.domain.projectjoin.service;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.account.service.AccountService;
+import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.repository.ProjectRepository;
 import com.test.teamlog.domain.project.service.ProjectService;
@@ -37,7 +37,7 @@ public class ProjectJoinService {
     private final AccountService accountService;
     private final ProjectMemberQueryService projectMemberQueryService;
     
-    private final AccountRepository accountRepository;
+    private final AccountQueryService accountQueryService;
     private final ProjectRepository projectRepository;
     private final ProjectJoinRepository projectJoinRepository;
     private final ProjectService projectService;
@@ -52,7 +52,7 @@ public class ProjectJoinService {
     public ApiResponse inviteUserForProject(Long projectId, String userId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
-        User user = accountRepository.findByIdentification(userId)
+        User user = accountQueryService.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         if (projectMemberQueryService.isProjectMember(project, user))

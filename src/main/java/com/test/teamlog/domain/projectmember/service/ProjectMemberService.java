@@ -2,7 +2,7 @@ package com.test.teamlog.domain.projectmember.service;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
@@ -27,7 +27,7 @@ import java.util.List;
 public class ProjectMemberService {
     private final ProjectMemberRepository projectMemberRepository;
 
-    private final AccountRepository accountRepository;
+    private final AccountQueryService accountQueryService;
     private final ProjectJoinQueryService projectJoinQueryService;
     private final ProjectService projectService;
 
@@ -67,7 +67,7 @@ public class ProjectMemberService {
     @Transactional
     public ApiResponse expelMember(Long projectId, String userId, User currentUser) {
         final Project project = projectService.findOne(projectId);
-        User user = accountRepository.findByIdentification(userId)
+        User user = accountQueryService.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         projectService.validateMasterUser(project, currentUser);
 
@@ -91,7 +91,8 @@ public class ProjectMemberService {
     // 프로젝트 멤버 아닌 유저 리스트
     @Deprecated
     public List<UserRequest.UserSimpleInfo> readAllNotInProjectMember(Long projectId) {
-        List<User> userList = accountRepository.getUsersNotInProjectMember(projectId);
+
+        List<User> userList = accountQueryService.findUsersNotInProjectMember(projectId);
         List<UserRequest.UserSimpleInfo> response = new ArrayList<>();
         for (User user : userList) {
             response.add(new UserRequest.UserSimpleInfo(user));
