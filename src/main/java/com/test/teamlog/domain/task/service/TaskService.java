@@ -1,10 +1,9 @@
 package com.test.teamlog.domain.task.service;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.repository.ProjectRepository;
-import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.domain.task.dto.*;
 import com.test.teamlog.domain.task.entity.Task;
@@ -38,10 +37,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
-    private final AccountRepository accountRepository;
+    private final AccountQueryService accountQueryService;
     private final ProjectRepository projectRepository;
     private final ProjectMemberQueryService projectMemberQueryService;
-    private final ProjectService projectService;
 
     // 태스크 상세 조회
     public TaskReadDetailResult readDetail(Long id) {
@@ -97,7 +95,7 @@ public class TaskService {
 
         List<TaskPerformer> performerList = new ArrayList<>();
         if (input.getPerformerIdList() != null) {
-            final List<User> userList = accountRepository.findAllByIdentificationIn(input.getPerformerIdList());
+            final List<User> userList = accountQueryService.findAllByIdentificationIn(input.getPerformerIdList());
             final Map<String, User> identificationToUserMap
                     = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
 
@@ -158,7 +156,7 @@ public class TaskService {
 
         List<TaskPerformer> taskPerformerList = new ArrayList<>();
 
-        final List<User> userList = accountRepository.findAllByIdentificationIn(newTaskPerformerIdList);
+        final List<User> userList = accountQueryService.findAllByIdentificationIn(newTaskPerformerIdList);
         final Map<String, User> identificationToUserMap
                 = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
         List<String> invalidIdentificationList = new ArrayList<>();

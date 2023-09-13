@@ -1,16 +1,16 @@
 package com.test.teamlog.domain.projectfollow.service;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.account.service.query.AccountQueryService;
+import com.test.teamlog.domain.project.entity.Project;
+import com.test.teamlog.domain.project.repository.ProjectRepository;
 import com.test.teamlog.domain.projectfollow.dto.ProjectFollowerReadResult;
 import com.test.teamlog.domain.projectfollow.dto.ProjectFollowerReadUserFollowedResult;
-import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
+import com.test.teamlog.domain.projectfollow.repository.ProjectFollowerRepository;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.domain.projectfollow.repository.ProjectFollowerRepository;
-import com.test.teamlog.domain.project.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectFollowService {
-    private final AccountRepository accountRepository;
+    private final AccountQueryService accountQueryService;
     private final ProjectRepository projectRepository;
     private final ProjectFollowerRepository projectFollowerRepository;
 
     // 유저가 팔로우하는 프로젝트 목록 조회
     public List<ProjectFollowerReadUserFollowedResult> readAllByUserIdentification(String userIdentification) {
-        User user = accountRepository.findByIdentification(userIdentification)
+        User user = accountQueryService.findByIdentification(userIdentification)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userIdentification));
         List<ProjectFollower> projectFollowerList = projectFollowerRepository.findAllByUser(user);
 
