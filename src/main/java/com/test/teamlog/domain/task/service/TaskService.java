@@ -5,11 +5,12 @@ import com.test.teamlog.domain.account.repository.AccountRepository;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.repository.ProjectRepository;
 import com.test.teamlog.domain.project.service.ProjectService;
+import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.domain.task.dto.*;
 import com.test.teamlog.domain.task.entity.Task;
-import com.test.teamlog.domain.task.repository.TaskRepository;
 import com.test.teamlog.domain.task.entity.TaskPerformer;
 import com.test.teamlog.domain.task.entity.TaskStatus;
+import com.test.teamlog.domain.task.repository.TaskRepository;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ApiResponse;
 import jakarta.persistence.LockModeType;
@@ -39,6 +40,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final AccountRepository accountRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectMemberQueryService projectMemberQueryService;
     private final ProjectService projectService;
 
     // 태스크 상세 조회
@@ -87,7 +89,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
 
         // 멤버만 가능
-        projectService.validateProjectMember(project, currentUser);
+        projectMemberQueryService.validateProjectMember(project, currentUser);
 
         Task task = input.toTask();
         task.setPriority(taskRepository.getCountByPostAndStatus(project, input.getStatus()));
@@ -138,7 +140,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", taskId));
 
         // 멤버만 가능
-        projectService.validateProjectMember(task.getProject(), currentUser);
+        projectMemberQueryService.validateProjectMember(task.getProject(), currentUser);
 
         LocalDateTime deadline
                 = input.getDeadline() != null ?
@@ -194,7 +196,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
 
         // 멤버만 가능
-        projectService.validateProjectMember(task.getProject(), currentUser);
+        projectMemberQueryService.validateProjectMember(task.getProject(), currentUser);
 
         if (request.getStatus().equals(task.getStatus())) {
             if (request.getPriority() == task.getPriority()) return;
@@ -221,7 +223,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
 
         // 멤버만 가능
-        projectService.validateProjectMember(task.getProject(), currentUser);
+        projectMemberQueryService.validateProjectMember(task.getProject(), currentUser);
 
         taskRepository.reorderInPreviousStatus(task.getProject(), task.getStatus(), task.getPriority()); // 기존 status 정리
         taskRepository.delete(task);

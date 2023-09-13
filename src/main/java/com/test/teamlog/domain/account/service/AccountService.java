@@ -3,11 +3,8 @@ package com.test.teamlog.domain.account.service;
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.AccountRepository;
-import com.test.teamlog.domain.projectmember.entity.ProjectMember;
-import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
 import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.domain.token.service.TokenService;
-import com.test.teamlog.exception.BadRequestException;
 import com.test.teamlog.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.global.utility.PasswordUtil;
@@ -26,7 +23,6 @@ import java.util.List;
 public class AccountService {
     private final TokenService tokenService;
     private final FileStorageService fileStorageService;
-    private final ProjectMemberRepository projectMemberRepository;
 
     private final AccountRepository accountRepository;
 
@@ -138,11 +134,6 @@ public class AccountService {
     //회원 탈퇴
     @Transactional
     public ApiResponse deleteUser(User currentUser) {
-        List<ProjectMember> projectMemberList = projectMemberRepository.findByUser(currentUser);
-        if (projectMemberList.size() != 0) {
-            throw new BadRequestException("가입된 프로젝트가 있습니다.\n모든 프로젝트 탈퇴 후 진행해주세요.");
-        }
-
         accountRepository.delete(currentUser);
         return new ApiResponse(Boolean.TRUE, "회원 탈퇴 성공");
     }
