@@ -7,7 +7,7 @@ import com.test.teamlog.domain.project.dto.*;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.repository.ProjectRepository;
 import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
-import com.test.teamlog.domain.projectfollow.repository.ProjectFollowerRepository;
+import com.test.teamlog.domain.projectfollow.service.query.ProjectFollowQueryService;
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
 import com.test.teamlog.domain.projectjoin.service.query.ProjectJoinQueryService;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
@@ -36,7 +36,7 @@ public class ProjectService {
 
     private final ProjectMemberQueryService projectMemberQueryService;
     private final AccountService accountService;
-    private final ProjectFollowerRepository projectFollowerRepository;
+    private final ProjectFollowQueryService projectFollowQueryService;
     private final ProjectJoinQueryService projectJoinQueryService;
     private final FileStorageService fileStorageService;
 
@@ -80,7 +80,7 @@ public class ProjectService {
             user = isMyProjectList ? currentUser : accountService.readByIdentification(identification);
         }
 
-        List<ProjectFollower> userFollowingProjectList = projectFollowerRepository.findAllByUser(user);
+        List<ProjectFollower> userFollowingProjectList = projectFollowQueryService.findAllByUser(user);
         List<ProjectReadUserFollowingResult> resultList = new ArrayList<>();
 
         for (ProjectFollower userFollowingProject : userFollowingProjectList) {
