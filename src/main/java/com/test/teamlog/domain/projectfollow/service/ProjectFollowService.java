@@ -3,7 +3,7 @@ package com.test.teamlog.domain.projectfollow.service;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
-import com.test.teamlog.domain.project.repository.ProjectRepository;
+import com.test.teamlog.domain.project.service.query.ProjectCommandService;
 import com.test.teamlog.domain.projectfollow.dto.ProjectFollowerReadResult;
 import com.test.teamlog.domain.projectfollow.dto.ProjectFollowerReadUserFollowedResult;
 import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProjectFollowService {
     private final AccountQueryService accountQueryService;
-    private final ProjectRepository projectRepository;
+    private final ProjectCommandService projectCommandService;
     private final ProjectFollowerRepository projectFollowerRepository;
 
     // 유저가 팔로우하는 프로젝트 목록 조회
@@ -37,7 +37,7 @@ public class ProjectFollowService {
 
     // 해당 프로젝트를 팔로우하는 사용자 목록 조회
     public List<ProjectFollowerReadResult> readAll(Long projectId) {
-        Project project = projectRepository.findById(projectId)
+        final Project project = projectCommandService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
 
         List<ProjectFollower> projectFollowerList = projectFollowerRepository.findAllByProject(project);
@@ -48,7 +48,7 @@ public class ProjectFollowService {
     // 프로젝트 팔로우
     @Transactional
     public ApiResponse followProject(Long projectId, User currentUser) {
-        Project project = projectRepository.findById(projectId)
+        final Project project = projectCommandService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
 
         projectFollowerRepository.findByProjectAndUser(project, currentUser)
@@ -64,8 +64,9 @@ public class ProjectFollowService {
     // 프로젝트 언팔로우
     @Transactional
     public ApiResponse unfollowProject(Long projectId, User currentUser) {
-        Project project = projectRepository.findById(projectId)
+        final Project project = projectCommandService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+
         ProjectFollower projectFollower = projectFollowerRepository.findByProjectAndUser(project, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("ProjectFollwer", "UserId", currentUser.getIdentification()));
 
