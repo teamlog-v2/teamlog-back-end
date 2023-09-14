@@ -5,8 +5,8 @@ import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.AccountService;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
-import com.test.teamlog.domain.project.repository.ProjectRepository;
 import com.test.teamlog.domain.project.service.ProjectService;
+import com.test.teamlog.domain.project.service.query.ProjectCommandService;
 import com.test.teamlog.domain.projectjoin.dto.ProjectJoinApplyInput;
 import com.test.teamlog.domain.projectjoin.dto.ProjectJoinInviteInput;
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
@@ -38,9 +38,11 @@ public class ProjectJoinService {
     private final ProjectMemberQueryService projectMemberQueryService;
     
     private final AccountQueryService accountQueryService;
-    private final ProjectRepository projectRepository;
+    private final ProjectCommandService projectCommandService;
     private final ProjectJoinRepository projectJoinRepository;
     private final ProjectService projectService;
+
+
     private String[] defaultProjectImages = new String[]{"20210504(81931d0a-14c3-43bd-912d-c4bd687c31ea)",
             "20210504(97a31008-24f4-4dc0-98bd-c83cf8d57b95)",
             "20210504(171eb9ac-f7ce-4e30-b4c6-a19a28e45c75)",
@@ -50,7 +52,7 @@ public class ProjectJoinService {
     @Deprecated
     @Transactional
     public ApiResponse inviteUserForProject(Long projectId, String userId) {
-        Project project = projectRepository.findById(projectId)
+        Project project = projectCommandService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
         User user = accountQueryService.findByIdentification(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
@@ -115,7 +117,7 @@ public class ProjectJoinService {
     @Deprecated
     @Transactional
     public ApiResponse applyForProjectV1(Long projectId, User currentUser) {
-        Project project = projectRepository.findById(projectId)
+        Project project = projectCommandService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
         if (projectMemberQueryService.isProjectMember(project, currentUser))
@@ -169,7 +171,7 @@ public class ProjectJoinService {
 
     // 프로젝트 가입 신청자 목록 조회
     public List<ProjectJoinDTO.ProjectJoinForProject> getProjectApplyListForProject(Long projectId) {
-        Project project = projectRepository.findById(projectId)
+        Project project = projectCommandService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
         List<ProjectJoin> projectJoins = projectJoinRepository.findAllByProjectAndIsAcceptedTrueAndIsInvitedFalse(project);
@@ -189,7 +191,7 @@ public class ProjectJoinService {
 
     // 프로젝트 멤버로 초대한 사용자 목록 조회
     public List<ProjectJoinDTO.ProjectJoinForProject> getProjectInvitationListForProject(Long projectId) {
-        Project project = projectRepository.findById(projectId)
+        Project project = projectCommandService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
         List<ProjectJoin> projectJoins = projectJoinRepository.findAllByProjectAndIsAcceptedFalseAndIsInvitedTrue(project);
