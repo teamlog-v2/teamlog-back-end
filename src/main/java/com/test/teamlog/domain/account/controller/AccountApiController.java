@@ -2,9 +2,6 @@ package com.test.teamlog.domain.account.controller;
 
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.service.AccountService;
-import com.test.teamlog.domain.post.dto.PostResponse;
-import com.test.teamlog.domain.post.dto.PostResult;
-import com.test.teamlog.domain.post.service.PostService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +32,6 @@ public class AccountApiController {
     @Value("${cookie.domain}")
     private String cookieDomain;
     private final AccountService accountService;
-    private final PostService postService;
 
     @Operation(summary = "로그인")
     @PostMapping("/sign-in")
@@ -109,20 +105,6 @@ public class AccountApiController {
     public ResponseEntity<ApiResponse> deleteUserProfileImage(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         ApiResponse apiResponse = accountService.deleteUserProfileImage(currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @Operation(summary = "개인 작성 이력 조회 (게시물)")
-    @GetMapping("/posts")
-    public ResponseEntity<List<PostResponse>> getPostsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostResponse> response = null;
-        if (currentUser == null) {
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            final List<PostResult> resultList = postService.getPostsByUser(currentUser.getUser());
-            response = resultList.stream().map(PostResponse::from).collect(Collectors.toList());
-
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
     }
 
     @Operation(summary = "회원 검색")
