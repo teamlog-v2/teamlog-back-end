@@ -4,7 +4,7 @@ import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
 import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
-import com.test.teamlog.exception.ResourceForbiddenException;
+import com.test.teamlog.global.exception.ResourceForbiddenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

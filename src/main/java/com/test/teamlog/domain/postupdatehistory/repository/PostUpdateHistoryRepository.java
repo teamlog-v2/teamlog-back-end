@@ -1,4 +1,4 @@
-package com.test.teamlog.repository;
+package com.test.teamlog.domain.postupdatehistory.repository;
 
 import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.postupdatehistory.entity.PostUpdateHistory;

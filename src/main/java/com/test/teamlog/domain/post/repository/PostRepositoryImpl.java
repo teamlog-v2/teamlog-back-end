@@ -7,7 +7,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.test.teamlog.domain.post.dto.PostReadByProjectInput;
 import com.test.teamlog.domain.post.entity.Post;
-import com.test.teamlog.entity.PostMedia;
+import com.test.teamlog.domain.postmedia.entity.PostMedia;
 import com.test.teamlog.global.entity.AccessModifier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

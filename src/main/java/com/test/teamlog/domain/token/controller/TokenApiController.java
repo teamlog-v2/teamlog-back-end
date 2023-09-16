@@ -3,7 +3,7 @@ package com.test.teamlog.domain.token.controller;
 import com.test.teamlog.domain.token.dto.ReIssueResponse;
 import com.test.teamlog.domain.token.dto.ReIssueResult;
 import com.test.teamlog.domain.token.service.TokenService;
-import com.test.teamlog.exception.BadRequestException;
+import com.test.teamlog.global.exception.BadRequestException;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

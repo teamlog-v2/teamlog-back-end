@@ -1,7 +1,6 @@
-package com.test.teamlog.entity;
+package com.test.teamlog.domain.comment.entity;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.comment.entity.Comment;
 import jakarta.persistence.*;
 import lombok.*;
 

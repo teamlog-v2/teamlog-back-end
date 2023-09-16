@@ -2,6 +2,7 @@ package com.test.teamlog.payload;
 
 import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.domain.project.entity.Project;
+import com.test.teamlog.domain.project.dto.Relation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;

@@ -4,7 +4,7 @@ import com.test.teamlog.domain.postlike.dto.PostLikerResponse;
 import com.test.teamlog.domain.postlike.dto.PostLikerResult;
 import com.test.teamlog.domain.postlike.service.PostLikeService;
 import com.test.teamlog.global.security.UserAdapter;
-import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.global.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

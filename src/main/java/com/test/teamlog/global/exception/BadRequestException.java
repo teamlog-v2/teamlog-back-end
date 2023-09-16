@@ -1,14 +1,14 @@
-package com.test.teamlog.exception;
+package com.test.teamlog.global.exception;
 
-import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.global.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(value = HttpStatus.FORBIDDEN)
-public class ResourceForbiddenException extends RuntimeException {
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public class BadRequestException extends RuntimeException {
     private ApiResponse apiResponse;
 
-    public ResourceForbiddenException(String message) {
+    public BadRequestException(String message) {
         super();
         setApiResponse(message);
     }

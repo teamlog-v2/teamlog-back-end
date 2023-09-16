@@ -1,4 +1,4 @@
-package com.test.teamlog.exception;
+package com.test.teamlog.global.exception;
 
 public class MyFileNotFoundException extends RuntimeException {
     public MyFileNotFoundException(String message) {

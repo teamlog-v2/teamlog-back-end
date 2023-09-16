@@ -1,4 +1,4 @@
-package com.test.teamlog.service;
+package com.test.teamlog.global.security;
 
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
