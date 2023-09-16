@@ -14,7 +14,7 @@ import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.query.ProjectQueryService;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.domain.userfollow.entity.UserFollow;
-import com.test.teamlog.domain.userfollow.service.UserFollowService;
+import com.test.teamlog.domain.userfollow.service.query.UserFollowQueryService;
 import com.test.teamlog.entity.PostMedia;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.global.entity.AccessModifier;
@@ -47,9 +47,9 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
 
-    private final UserFollowService userFollowService;
     private final FileStorageService fileStorageService;
     private final ProjectQueryService projectQueryService;
+    private final UserFollowQueryService userFollowQueryService;
     private final ProjectMemberQueryService projectMemberQueryService;
 
     public List<PostResult> getPostsByUser(User currentUser) {
@@ -63,7 +63,7 @@ public class PostService {
     }
 
     public List<PostResult> readAllByFollowingUser(User currentUser) {
-        List<UserFollow> userFollowingList = userFollowService.readAllByUser(currentUser);
+        List<UserFollow> userFollowingList = userFollowQueryService.readAllByFromUser(currentUser);
         if (CollectionUtils.isEmpty(userFollowingList)) return Collections.emptyList();
 
         List<User> userFollowings = userFollowingList.stream().map(UserFollow::getToUser).collect(Collectors.toList());

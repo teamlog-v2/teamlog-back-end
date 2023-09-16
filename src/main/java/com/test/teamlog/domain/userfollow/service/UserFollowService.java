@@ -113,10 +113,6 @@ public class UserFollowService {
         return userFollowRepository.findByFromUserAndToUser(fromUser, targetUser).isPresent();
     }
 
-    public List<UserFollow> readAllByUser(User currentUser) {
-        return userFollowRepository.findAllByFromUser(currentUser);
-    }
-
     private User readByIdentification(String identification) {
         return accountQueryService.findByIdentification(identification)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "identification", identification));
