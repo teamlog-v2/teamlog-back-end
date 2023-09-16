@@ -88,4 +88,10 @@ public class Project extends BaseTimeEntity {
             projectMember.setProject(this);
         }
     }
+
+    public boolean isProjectMaster(User user) {
+        if (user == null) return false;
+
+        return this.master.getIdentification().equals(user.getIdentification());
+    }
 }

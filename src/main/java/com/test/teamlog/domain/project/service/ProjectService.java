@@ -111,7 +111,7 @@ public class ProjectService {
     // 프로젝트와의 관계
     private Relation detectRelation(Project project, User currentUser) {
         if (currentUser == null) return Relation.NONE;
-        if (isProjectMaster(project, currentUser)) return Relation.MASTER;
+        if (project.isProjectMaster(currentUser)) return Relation.MASTER;
         if (projectMemberQueryService.isProjectMember(project, currentUser)) return Relation.MEMBER;
 
         ProjectJoin projectJoin = projectJoinQueryService.findByProjectAndUser(project, currentUser).orElse(null);
@@ -247,20 +247,11 @@ public class ProjectService {
     }
 
     // 마스터 검증
-    public void validateMasterUser(Project project, User currentUser) {
-        if (!project.getMaster().getIdentification().equals(currentUser.getIdentification()))
+    private void validateMasterUser(Project project, User currentUser) {
+        if (!project.isProjectMaster(currentUser)) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 마스터 아님 )");
+        }
     }
-
-    // 프로젝트 마스터 여부
-    private boolean isProjectMaster(Project project, User currentUser) {
-        if (currentUser == null) return false;
-
-        return project.getMaster().getIdentification().equals(currentUser.getIdentification());
-    }
-
-    // 프로젝트 멤버 검증
-
 
     // 프로젝트의 해시태그들 조회
     public List<String> readHashTagsInProjectPosts(Long projectId) {
