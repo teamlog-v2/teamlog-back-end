@@ -2,7 +2,7 @@ package com.test.teamlog.domain.token.service;
 
 import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.domain.token.dto.ReIssueResult;
-import com.test.teamlog.exception.ResourceNotFoundException;
+import com.test.teamlog.global.exception.ResourceNotFoundException;
 import com.test.teamlog.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

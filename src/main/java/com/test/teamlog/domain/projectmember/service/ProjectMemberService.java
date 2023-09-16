@@ -10,10 +10,10 @@ import com.test.teamlog.domain.projectjoin.service.query.ProjectJoinQueryService
 import com.test.teamlog.domain.projectmember.dto.ProjectMemberReadResult;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
 import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
-import com.test.teamlog.exception.BadRequestException;
-import com.test.teamlog.exception.ResourceForbiddenException;
-import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.global.exception.BadRequestException;
+import com.test.teamlog.global.exception.ResourceForbiddenException;
+import com.test.teamlog.global.exception.ResourceNotFoundException;
+import com.test.teamlog.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

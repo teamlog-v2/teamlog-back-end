@@ -1,12 +1,12 @@
-package com.test.teamlog.service;
+package com.test.teamlog.domain.postmedia.service;
 
 import com.test.teamlog.global.config.FileConfig;
 import com.test.teamlog.domain.post.entity.Post;
-import com.test.teamlog.entity.PostMedia;
-import com.test.teamlog.exception.FileStorageException;
-import com.test.teamlog.exception.MyFileNotFoundException;
-import com.test.teamlog.payload.FileDTO;
-import com.test.teamlog.repository.PostMediaRepository;
+import com.test.teamlog.domain.postmedia.entity.PostMedia;
+import com.test.teamlog.global.exception.FileStorageException;
+import com.test.teamlog.global.exception.MyFileNotFoundException;
+import com.test.teamlog.domain.postmedia.dto.FileDTO;
+import com.test.teamlog.domain.postmedia.repository.PostMediaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

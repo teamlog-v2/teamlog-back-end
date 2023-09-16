@@ -1,4 +1,4 @@
-package com.test.teamlog.payload;
+package com.test.teamlog.global.dto;
 
 import com.test.teamlog.domain.account.model.User;
 

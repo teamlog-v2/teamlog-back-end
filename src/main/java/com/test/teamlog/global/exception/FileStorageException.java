@@ -1,4 +1,4 @@
-package com.test.teamlog.exception;
+package com.test.teamlog.global.exception;
 
 public class FileStorageException extends RuntimeException {
     public FileStorageException(String message) {

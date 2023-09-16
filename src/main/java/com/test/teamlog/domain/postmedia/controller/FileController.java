@@ -1,7 +1,7 @@
-package com.test.teamlog.controller;
+package com.test.teamlog.domain.postmedia.controller;
 
-import com.test.teamlog.payload.FileDTO;
-import com.test.teamlog.service.FileStorageService;
+import com.test.teamlog.domain.postmedia.dto.FileDTO;
+import com.test.teamlog.domain.postmedia.service.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
+// TODO: 우선 File쪽 service와 같은 패키지에 둔 상태로 위치 고민 필요
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")

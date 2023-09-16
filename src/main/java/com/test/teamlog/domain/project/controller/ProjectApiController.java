@@ -3,7 +3,7 @@ package com.test.teamlog.domain.project.controller;
 import com.test.teamlog.domain.project.dto.*;
 import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.global.security.UserAdapter;
-import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
