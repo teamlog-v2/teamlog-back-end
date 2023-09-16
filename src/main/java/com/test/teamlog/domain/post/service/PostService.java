@@ -45,10 +45,10 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
 
+    private final ProjectService projectService;
     private final UserFollowService userFollowService;
     private final FileStorageService fileStorageService;
     private final ProjectMemberQueryService projectMemberQueryService;
-    private final ProjectService projectService;
 
     public List<PostResult> getPostsByUser(User currentUser) {
         List<PostResult> resultList = new ArrayList<>();
@@ -65,7 +65,7 @@ public class PostService {
         if (CollectionUtils.isEmpty(userFollowingList)) return Collections.emptyList();
 
         List<User> userFollowings = userFollowingList.stream().map(UserFollow::getToUser).collect(Collectors.toList());
-        List<Post> posts = postRepository.findAllByWriters(userFollowings);
+        List<Post> posts = postRepository.findAllByWriterIn(userFollowings);
 
         return posts.stream().map(post -> convertToPostResult(post, currentUser)).collect(Collectors.toList());
     }
@@ -94,179 +94,25 @@ public class PostService {
                 posts.getTotalPages(), posts.isLast());
     }
 
-    // 프로젝트 내 포스트 조회
-    private PagedResponse<PostResult> searchPostsByProject(Long projectId, Sort.Direction sort, String cop,
-                                                           Long cursor, int size, User currentUser) {
-        Project project = projectService.findOne(projectId);
-        Pageable pageable = PageRequest.of(0, size, sort, "id");
-        Boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
-
-        Slice<Post> posts = null;
-        if (cursor == null) {
-            if (isUserMemberOfProject)
-                posts = postRepository.findAllByProject(project, pageable);
-            else
-                posts = postRepository.findAllByProject(project, AccessModifier.PUBLIC, pageable);
-        } else {
-            if (isUserMemberOfProject)
-                posts = postRepository.findAllByProjectAndCursor(project, cursor, cop, pageable);
-            else
-                posts = postRepository.findAllByProjectAndCursor(project, cursor, cop, AccessModifier.PUBLIC, pageable);
-        }
-
-        List<PostResult> resultList = new ArrayList<>();
-        for (Post post : posts) {
-            resultList.add(convertToPostResult(post, currentUser));
-        }
-
-        long totalElements = 0;
-
-        if (isUserMemberOfProject)
-            totalElements = postRepository.getPostsCount(project);
-        else
-            totalElements = postRepository.getPostsCount(project, AccessModifier.PUBLIC);
-
-        return new PagedResponse<>(resultList, 0, posts.getSize(), totalElements,
-                0, posts.isLast());
-    }
-
-    // 키워드로 게시물 조회
-    private PagedResponse<PostResult> searchPostsInProjectByKeyword(Long projectId,
-                                                                    String keyword,
-                                                                    Sort.Direction sort,
-                                                                    String cop,
-                                                                    Long cursor,
-                                                                    int size,
-                                                                    User currentUser) {
-        Project project = projectService.findOne(projectId);
-
-        Boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
-        Pageable pageable = PageRequest.of(0, size, sort, "id");
-
-        Slice<Post> posts;
-        if (cursor == null) {
-            if (isUserMemberOfProject)
-                posts = postRepository.searchPostsInProject(project, keyword, pageable);
-            else
-                posts = postRepository.searchPostsInProject(project, keyword, AccessModifier.PUBLIC, pageable);
-        } else {
-            if (isUserMemberOfProject)
-                posts = postRepository.searchPostsInProjectByCursor(project, cursor, keyword, cop, pageable);
-            else
-                posts = postRepository.searchPostsInProjectByCursor(project, cursor, keyword, cop, AccessModifier.PUBLIC, pageable);
-        }
-
-        List<PostResult> resultList = new ArrayList<>();
-        for (Post post : posts) {
-            resultList.add(convertToPostResult(post, currentUser));
-        }
-
-        long totalElements;
-        if (isUserMemberOfProject)
-            totalElements = postRepository.getPostsCountByKeyword(project, keyword);
-        else
-            totalElements = postRepository.getPostsCountByKeyword(project, keyword, AccessModifier.PUBLIC);
-
-        return new PagedResponse<>(resultList, 0, posts.getSize(), totalElements,
-                0, posts.isLast());
-    }
-
-    // FIXME: QueryDsl 도입 후 중복 로직을 제거해보자
-    public PagedResponse<PostResult> search(Long projectId, PostReadByProjectInput input, User currentUser) {
+    // 해시태그 선별 조회 + 키워드 검색
+    public PagedResponse<PostResult> search(Long projectId,
+                                            PostReadByProjectInput input,
+                                            User currentUser) {
         input.convertPagingInfo();
 
-        final String keyword = input.getKeyword();
-        final List<String> hashtagList = input.getHashtagList();
-        final Sort.Direction sort = input.getSort();
-        final String comparisonOperator = input.getComparisonOperator();
-        final Long cursor = input.getCursor();
-        final int size = input.getSize();
-
-        if (keyword != null && hashtagList != null) {
-            return searchPostsInProjectByHashtagAndKeyword(projectId, keyword, hashtagList, sort, comparisonOperator, cursor, size, currentUser);
-        } else if (keyword != null) {
-            return searchPostsInProjectByKeyword(projectId, keyword, sort, comparisonOperator, cursor, size, currentUser);
-        } else if (hashtagList != null) {
-            return searchPostsInProjectByHashtag(projectId, hashtagList, sort, comparisonOperator, cursor, size, currentUser);
-        } else {
-            return searchPostsByProject(projectId, sort, comparisonOperator, cursor, size, currentUser);
-        }
-    }
-
-    // 해시태그 선별 조회 + 키워드 검색
-    private PagedResponse<PostResult> searchPostsInProjectByHashtagAndKeyword(Long projectId,
-                                                                              String keyword,
-                                                                              List<String> names,
-                                                                              Sort.Direction sort,
-                                                                              String cop,
-                                                                              Long cursor,
-                                                                              int size,
-                                                                              User currentUser) {
         Project project = projectService.findOne(projectId);
-        Boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
-        Pageable pageable = PageRequest.of(0, size, sort, "id");
+        input.setProjectId(projectId);
 
-        Slice<Post> posts = null;
-        if (cursor == null) {
-            if (isUserMemberOfProject)
-                posts = postRepository.searchPostsInProjectByHashtagAndKeyword(project, names, keyword, pageable);
-            else
-                posts = postRepository.searchPublicPostsInProjectByHashtagAndKeyword(project, names, keyword, AccessModifier.PUBLIC, pageable);
-        } else {
-            if (isUserMemberOfProject)
-                posts = postRepository.searchPostsInProjectByHashtagAndKeywordAndCursor(project, cursor, names,
-                        keyword, cop, pageable);
-            else
-                posts = postRepository.searchPublicPostsInProjectByHashtagAndKeywordAndCursor(project, cursor, names,
-                        keyword, cop, AccessModifier.PUBLIC, pageable);
-        }
-        List<PostResult> resultList = new ArrayList<>();
-        for (Post post : posts) {
-            resultList.add(convertToPostResult(post, currentUser));
-        }
-        long totalElements = 0;
-        if (isUserMemberOfProject) {
-            postRepository.getPostsCountByHashtagAndKeyword(project, names, keyword, pageable).getTotalElements();
-        } else {
-            postRepository.getPostsCountByHashtagAndKeyword(project, names, keyword, AccessModifier.PUBLIC, pageable).getTotalElements();
-        }
+        boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
+        Pageable pageable = PageRequest.of(0, input.getSize(), input.getSort(), "id");
 
-        return new PagedResponse<>(resultList, 0, posts.getSize(), totalElements,
-                0, posts.isLast());
-    }
+        input.setAccessModifier(!isUserMemberOfProject ? AccessModifier.PUBLIC : null);
+        final Page<Post> page = postRepository.search(input, pageable);
+        final List<Post> postList = page.getContent();
 
-    // 해시태그 선별 조회
-    private PagedResponse<PostResult> searchPostsInProjectByHashtag(Long projectId, List<String> names, Sort.Direction sort,
-                                                                    String cop, Long cursor, int size, User currentUser) {
-        Project project = projectService.findOne(projectId);
-        Pageable pageable = PageRequest.of(0, size, sort, "id");
-        Boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
+        List<PostResult> resultList = postList.stream().map(p -> convertToPostResult(p, currentUser)).collect(Collectors.toList());
 
-        Slice<Post> posts = null;
-        if (cursor == null) {
-            if (isUserMemberOfProject)
-                posts = postRepository.getPostsInProjectByHashTag(project, names, pageable);
-            else
-                posts = postRepository.getPostsInProjectByHashTag(project, names, AccessModifier.PUBLIC, pageable);
-        } else {
-            if (isUserMemberOfProject)
-                posts = postRepository.getPostsInProjectByHashTagAndCursor(project, cursor, names, cop, pageable);
-            else
-                posts = postRepository.getPostsInProjectByHashTagAndCursor(project, cursor, names, cop, AccessModifier.PUBLIC, pageable);
-        }
-        List<PostResult> resultList = new ArrayList<>();
-        for (Post post : posts) {
-            resultList.add(convertToPostResult(post, currentUser));
-        }
-        long totalElements = 0;
-        if (isUserMemberOfProject)
-            totalElements = postRepository.getPostsCountByHashTag(project, names, pageable).getTotalElements();
-        else
-            totalElements = postRepository.getPostsCountByHashTag(project, names, AccessModifier.PUBLIC, pageable).getTotalElements();
-
-
-        return new PagedResponse<>(resultList, 0, posts.getSize(), totalElements,
-                0, posts.isLast());
+        return new PagedResponse<>(resultList, 0, page.getSize(), page.getTotalElements(), 0, page.isLast());
     }
 
     // 위치정보가 있는 Public 포스트들 조회
@@ -283,9 +129,9 @@ public class PostService {
 
         List<Post> posts = null;
         if (isUserMemberOfProject)
-            posts = postRepository.findAllPostsWithLocationByProject(project);
+            posts = postRepository.findAllByProjectAndLocationIsNotNull(project);
         else
-            posts = postRepository.findAllPostsWithLocationByProject(project, AccessModifier.PUBLIC);
+            posts = postRepository.findAllByProjectAndAccessModifierAndLocationIsNotNull(project, AccessModifier.PUBLIC);
 
         List<PostResult> resultList = new ArrayList<>();
         for (Post post : posts) {
@@ -294,7 +140,6 @@ public class PostService {
 
         return resultList;
     }
-
 
     // 포스트 생성
     @Transactional

@@ -4,7 +4,6 @@ import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.domain.token.dto.ReIssueResult;
 import com.test.teamlog.exception.ResourceNotFoundException;
 import com.test.teamlog.global.security.JwtTokenProvider;
-import com.test.teamlog.domain.token.repository.TokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import java.security.InvalidParameterException;
 @RequiredArgsConstructor
 public class TokenService {
     private final JwtTokenProvider jwtTokenProvider;
-    private final TokenRepository tokenRepository;
 
     public CreateTokenResult createToken(String identification) {
         final String accessToken = createAccessToken(identification);

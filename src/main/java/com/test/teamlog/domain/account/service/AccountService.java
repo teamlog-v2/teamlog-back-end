@@ -21,10 +21,10 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AccountService {
+    private final AccountRepository accountRepository;
+
     private final TokenService tokenService;
     private final FileStorageService fileStorageService;
-
-    private final AccountRepository accountRepository;
 
     public List<UserSearchResult> search(String id, String name) {
         List<User> userList = accountRepository.searchUserByIdentificationAndName(id, name);

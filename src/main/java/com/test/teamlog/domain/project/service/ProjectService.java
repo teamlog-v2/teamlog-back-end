@@ -34,11 +34,11 @@ import java.util.stream.Collectors;
 public class ProjectService {
     private final ProjectRepository projectRepository;
 
-    private final ProjectMemberQueryService projectMemberQueryService;
     private final AccountService accountService;
-    private final ProjectFollowQueryService projectFollowQueryService;
-    private final ProjectJoinQueryService projectJoinQueryService;
     private final FileStorageService fileStorageService;
+    private final ProjectJoinQueryService projectJoinQueryService;
+    private final ProjectMemberQueryService projectMemberQueryService;
+    private final ProjectFollowQueryService projectFollowQueryService;
 
     @Transactional
     public ApiResponse updateThumbnail(Long projectId, MultipartFile image, User currentUser) {

@@ -27,10 +27,9 @@ import java.util.List;
 public class ProjectMemberService {
     private final ProjectMemberRepository projectMemberRepository;
 
+    private final ProjectService projectService;
     private final AccountQueryService accountQueryService;
     private final ProjectJoinQueryService projectJoinQueryService;
-    private final ProjectService projectService;
-
 
     // 프로젝트 멤버 추가
     @Transactional

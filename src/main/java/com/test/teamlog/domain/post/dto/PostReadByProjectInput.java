@@ -1,5 +1,6 @@
 package com.test.teamlog.domain.post.dto;
 
+import com.test.teamlog.global.entity.AccessModifier;
 import lombok.Data;
 import org.springframework.data.domain.Sort;
 
@@ -7,6 +8,9 @@ import java.util.List;
 
 @Data
 public class PostReadByProjectInput {
+    private Long projectId;
+    private AccessModifier accessModifier;
+
     private List<String> hashtagList;
     private String keyword;
     private Integer order;

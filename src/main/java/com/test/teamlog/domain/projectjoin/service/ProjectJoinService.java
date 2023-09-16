@@ -34,14 +34,13 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectJoinService {
+    private final ProjectJoinRepository projectJoinRepository;
+
     private final AccountService accountService;
-    private final ProjectMemberQueryService projectMemberQueryService;
-    
+    private final ProjectService projectService;
     private final AccountQueryService accountQueryService;
     private final ProjectCommandService projectCommandService;
-    private final ProjectJoinRepository projectJoinRepository;
-    private final ProjectService projectService;
-
+    private final ProjectMemberQueryService projectMemberQueryService;
 
     private String[] defaultProjectImages = new String[]{"20210504(81931d0a-14c3-43bd-912d-c4bd687c31ea)",
             "20210504(97a31008-24f4-4dc0-98bd-c83cf8d57b95)",
