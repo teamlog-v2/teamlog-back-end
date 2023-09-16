@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AccountRepository extends JpaRepository<User, String>, AccountRepositoryCustom {
+public interface AccountRepository extends JpaRepository<User, Long>, AccountRepositoryCustom {
     @Query("SELECT u FROM User u WHERE u.identification LIKE concat('%',:id,'%') AND u.name LIKE concat('%',:name,'%')")
     List<User> searchUserByIdentificationAndName(@Param("id") String id, @Param("name") String name);
 
