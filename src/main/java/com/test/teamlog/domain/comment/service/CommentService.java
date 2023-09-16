@@ -34,10 +34,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
-    private final CommentMentionService commentMentionService;
 
     private final AccountService userService;
     private final PostQueryService postQueryService;
+    private final CommentMentionService commentMentionService;
 
     // 유저가 작성한 댓글 조회
     public List<CommentInfoResponse> getCommentByUser(User currentUser) {

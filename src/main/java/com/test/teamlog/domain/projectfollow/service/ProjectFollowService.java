@@ -22,9 +22,10 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectFollowService {
+    private final ProjectFollowerRepository projectFollowerRepository;
+
     private final AccountQueryService accountQueryService;
     private final ProjectCommandService projectCommandService;
-    private final ProjectFollowerRepository projectFollowerRepository;
 
     // 유저가 팔로우하는 프로젝트 목록 조회
     public List<ProjectFollowerReadUserFollowedResult> readAllByUserIdentification(String userIdentification) {

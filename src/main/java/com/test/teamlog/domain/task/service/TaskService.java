@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
+
     private final AccountQueryService accountQueryService;
     private final ProjectCommandService projectCommandService;
     private final ProjectMemberQueryService projectMemberQueryService;

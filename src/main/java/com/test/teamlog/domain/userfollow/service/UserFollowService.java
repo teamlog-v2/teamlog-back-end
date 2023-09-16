@@ -19,8 +19,9 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserFollowService {
-    private final AccountService accountService;
     private final UserFollowRepository userFollowRepository;
+
+    private final AccountService accountService;
 
     // 팔로워 리스트 조회
     public List<UserFollowerReadResult> readAllFollower(String userId, User currentUser) {

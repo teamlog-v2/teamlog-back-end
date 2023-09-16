@@ -6,7 +6,7 @@ import java.util.List;
 
 @Data
 public class PostReadByProjectRequest {
-    private List<String> hashtagList;
+    private List<String> hashtag;
     private String keyword;
     private Integer order;
     private Long cursor;
@@ -14,7 +14,7 @@ public class PostReadByProjectRequest {
 
     public PostReadByProjectInput toInput() {
         PostReadByProjectInput input = new PostReadByProjectInput();
-        input.setHashtagList(hashtagList);
+        input.setHashtagList(hashtag);
         input.setKeyword(keyword);
         input.setOrder(order);
         input.setCursor(cursor);
