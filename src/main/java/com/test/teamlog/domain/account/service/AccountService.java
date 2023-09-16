@@ -79,13 +79,6 @@ public class AccountService {
         return SignUpResult.from(user);
     }
 
-    // identification 중복 체크
-    private void checkIdDuplication(String identification) {
-        if (accountRepository.findByIdentification(identification).isPresent()) {
-            throw new ResourceAlreadyExistsException("이미 존재하는 회원입니다.");
-        }
-    }
-
     @Transactional
     public ApiResponse updateUser(UserRequest.UserUpdateRequest userRequest, MultipartFile image, User currentUser) {
         if (userRequest.getDefaultImage()) {
@@ -145,5 +138,12 @@ public class AccountService {
 
     public List<User> readAllByIdentificationIn(List<String> identificationList) {
         return accountRepository.findAllByIdentificationIn(identificationList);
+    }
+
+    // identification 중복 체크
+    private void checkIdDuplication(String identification) {
+        if (accountRepository.findByIdentification(identification).isPresent()) {
+            throw new ResourceAlreadyExistsException("이미 존재하는 회원입니다.");
+        }
     }
 }

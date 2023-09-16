@@ -1,7 +1,7 @@
 package com.test.teamlog.domain.project.service;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.service.AccountService;
+import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.posttag.entity.PostTag;
 import com.test.teamlog.domain.project.dto.*;
 import com.test.teamlog.domain.project.entity.Project;
@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
 public class ProjectService {
     private final ProjectRepository projectRepository;
 
-    private final AccountService accountService;
     private final FileStorageService fileStorageService;
+    private final AccountQueryService accountQueryService;
     private final ProjectJoinQueryService projectJoinQueryService;
     private final ProjectMemberQueryService projectMemberQueryService;
     private final ProjectFollowQueryService projectFollowQueryService;
@@ -74,10 +74,10 @@ public class ProjectService {
 
         boolean isMyProjectList = false;
         if (currentUser == null) {
-            user = accountService.readByIdentification(identification);
+            user = readByIdentification(identification);
         } else {
             isMyProjectList = currentUser.getIdentification().equals(identification);
-            user = isMyProjectList ? currentUser : accountService.readByIdentification(identification);
+            user = isMyProjectList ? currentUser : readByIdentification(identification);
         }
 
         List<ProjectFollower> userFollowingProjectList = projectFollowQueryService.findAllByUser(user);
@@ -149,10 +149,10 @@ public class ProjectService {
 
         boolean isMyProjectList = false;
         if (currentUser == null) {
-            user = accountService.readByIdentification(identification);
+            user = readByIdentification(identification);
         } else {
             isMyProjectList = currentUser.getIdentification().equals(identification);
-            user = isMyProjectList ? currentUser : accountService.readByIdentification(identification);
+            user = isMyProjectList ? currentUser : readByIdentification(identification);
         }
 
         List<Project> projectList = projectRepository.findProjectByUser(user);
@@ -229,7 +229,7 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
         validateMasterUser(project, currentUser);
 
-        final User newMaster = accountService.readByIdentification(newMasterIdentification); // 존재하는지 검증
+        final User newMaster = readByIdentification(newMasterIdentification); // 존재하는지 검증
         project.delegateMaster(newMaster);
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 마스터 위임 성공");
@@ -271,5 +271,10 @@ public class ProjectService {
     public Project findOne(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+    }
+
+    private User readByIdentification(String identification) {
+        return accountQueryService.findByIdentification(identification)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "identification", identification));
     }
 }

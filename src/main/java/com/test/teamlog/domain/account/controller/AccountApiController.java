@@ -2,8 +2,6 @@ package com.test.teamlog.domain.account.controller;
 
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.service.AccountService;
-import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
-import com.test.teamlog.domain.comment.service.CommentService;
 import com.test.teamlog.domain.post.dto.PostResponse;
 import com.test.teamlog.domain.post.dto.PostResult;
 import com.test.teamlog.domain.post.service.PostService;
@@ -38,7 +36,6 @@ public class AccountApiController {
     private String cookieDomain;
     private final AccountService accountService;
     private final PostService postService;
-    private final CommentService commentService;
 
     @Operation(summary = "로그인")
     @PostMapping("/sign-in")
@@ -124,19 +121,6 @@ public class AccountApiController {
             final List<PostResult> resultList = postService.getPostsByUser(currentUser.getUser());
             response = resultList.stream().map(PostResponse::from).collect(Collectors.toList());
 
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        }
-    }
-
-    @Operation(summary = "개인 작성 이력 조회 (댓글)")
-    @GetMapping("/comments")
-    public ResponseEntity<List<CommentInfoResponse>> getCommentsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<CommentInfoResponse> response = null;
-
-        if (currentUser == null) {
-            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
-        } else {
-            response = commentService.getCommentByUser(currentUser.getUser());
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
     }
