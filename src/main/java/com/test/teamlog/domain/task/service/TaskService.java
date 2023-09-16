@@ -3,7 +3,7 @@ package com.test.teamlog.domain.task.service;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
-import com.test.teamlog.domain.project.service.query.ProjectCommandService;
+import com.test.teamlog.domain.project.service.query.ProjectQueryService;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.domain.task.dto.*;
 import com.test.teamlog.domain.task.entity.Task;
@@ -39,7 +39,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
 
     private final AccountQueryService accountQueryService;
-    private final ProjectCommandService projectCommandService;
+    private final ProjectQueryService projectQueryService;
     private final ProjectMemberQueryService projectMemberQueryService;
 
     // 태스크 상세 조회
@@ -52,7 +52,7 @@ public class TaskService {
     // 프로젝트의 태스크들 조회
     @Transactional
     public List<TaskReadByProjectResult> readAllByProject(Long projectId) {
-        final Project project = projectCommandService.findById(projectId)
+        final Project project = projectQueryService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
 
         Sort sort = Sort.by(Sort.Direction.ASC, "priority");
@@ -84,7 +84,7 @@ public class TaskService {
     // 태스크 생성
     @Transactional
     public TaskCreateResult create(Long projectId, TaskCreateInput input, User currentUser) {
-        Project project = projectCommandService.findById(projectId)
+        Project project = projectQueryService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
         // 멤버만 가능
         projectMemberQueryService.validateProjectMember(project, currentUser);

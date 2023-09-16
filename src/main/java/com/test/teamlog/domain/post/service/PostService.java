@@ -11,7 +11,7 @@ import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
 import com.test.teamlog.domain.posttag.entity.PostTag;
 import com.test.teamlog.domain.postupdatehistory.entity.PostUpdateHistory;
 import com.test.teamlog.domain.project.entity.Project;
-import com.test.teamlog.domain.project.service.ProjectService;
+import com.test.teamlog.domain.project.service.query.ProjectQueryService;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.domain.userfollow.entity.UserFollow;
 import com.test.teamlog.domain.userfollow.service.UserFollowService;
@@ -25,7 +25,10 @@ import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -36,7 +39,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,9 +47,9 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
 
-    private final ProjectService projectService;
     private final UserFollowService userFollowService;
     private final FileStorageService fileStorageService;
+    private final ProjectQueryService projectQueryService;
     private final ProjectMemberQueryService projectMemberQueryService;
 
     public List<PostResult> getPostsByUser(User currentUser) {
@@ -100,7 +102,7 @@ public class PostService {
                                             User currentUser) {
         input.convertPagingInfo();
 
-        Project project = projectService.findOne(projectId);
+        Project project = findProjectById(projectId);
         input.setProjectId(projectId);
 
         boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
@@ -124,7 +126,7 @@ public class PostService {
 
     // 위치정보가 있는 프로젝트의 포스트들 조회
     public List<PostResult> readAllWithLocation(Long projectId, User currentUser) {
-        Project project = projectService.findOne(projectId);
+        Project project = findProjectById(projectId);
         Boolean isUserMemberOfProject = projectMemberQueryService.isProjectMember(project, currentUser);
 
         List<Post> posts = null;
@@ -147,7 +149,7 @@ public class PostService {
                        MultipartFile[] media,
                        MultipartFile[] files,
                        User currentUser) {
-        Project project = projectService.findOne(input.getProjectId());
+        Project project = findProjectById(input.getProjectId());
         projectMemberQueryService.isProjectMember(project, currentUser);
 
         input.setLocation(makeLocation(input.getLatitude(), input.getLongitude()));
@@ -310,7 +312,7 @@ public class PostService {
                 .toUriString();
     }
 
-    public Optional<Post> readById(Long id) {
-        return postRepository.findById(id);
+    private Project findProjectById(Long projectId) {
+        return projectQueryService.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
     }
 }

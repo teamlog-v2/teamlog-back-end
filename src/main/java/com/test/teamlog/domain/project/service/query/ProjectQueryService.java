@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class ProjectCommandService {
+public class ProjectQueryService {
     private final ProjectRepository projectRepository;
 
     public Optional<Project> findById(Long id) {
