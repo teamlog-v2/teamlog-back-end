@@ -5,7 +5,6 @@ import com.test.teamlog.domain.post.service.PostService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.PagedResponse;
-import com.test.teamlog.payload.PostDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -115,6 +114,30 @@ public class PostApiController {
     public ResponseEntity<List<PostResponse>> readAllByFollowingUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<PostResult> result = postService.readAllByFollowingUser(currentUser.getUser());
         List<PostResponse> response = result.stream().map(PostResponse::from).collect(Collectors.toList());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(summary = "개인 작성 이력 조회 (게시물)")
+    @GetMapping("/accounts/posts")
+    public ResponseEntity<List<PostResponse>> getPostsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<PostResponse> response = null;
+        if (currentUser == null) {
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        } else {
+            final List<PostResult> resultList = postService.getPostsByUser(currentUser.getUser());
+            response = resultList.stream().map(PostResponse::from).collect(Collectors.toList());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @Operation(summary = "위치정보가 있는 프로젝트 게시물 조회")
+    @GetMapping("/projects/{projectId}/posts/with-location")
+    public ResponseEntity<List<PostResponse>> getLocationPosts(@PathVariable("projectId") long projectId,
+                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<PostResult> resultList = postService.readAllWithLocation(projectId, currentUser.getUser());
+        final List<PostResponse> response = resultList.stream().map(PostResponse::from).collect(Collectors.toList());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

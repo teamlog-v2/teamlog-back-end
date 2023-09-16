@@ -2,7 +2,7 @@ package com.test.teamlog.domain.postlike.service;
 
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.post.entity.Post;
-import com.test.teamlog.domain.post.service.PostService;
+import com.test.teamlog.domain.post.service.query.PostQueryService;
 import com.test.teamlog.domain.postlike.dto.PostLikerResult;
 import com.test.teamlog.domain.postlike.entity.PostLike;
 import com.test.teamlog.domain.postlike.repository.PostLikeRepository;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class PostLikeService {
     private final PostLikeRepository postLikeRepository;
 
-    private final PostService postService;
+    private final PostQueryService postQueryService;
 
     /**
      * 좋아요
@@ -35,8 +35,7 @@ public class PostLikeService {
      */
     @Transactional
     public ApiResponse create(Long postId, User currentUser) {
-        Post post = postService.readById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+        Post post = readPostById(postId);
 
         if (postLikeRepository.findByPostAndUser(post, currentUser).isPresent()) {
             throw new ResourceAlreadyExistsException("이미 좋아요를 누른 게시물입니다.");
@@ -60,8 +59,7 @@ public class PostLikeService {
      */
     @Transactional
     public ApiResponse delete(Long postId, User currentUser) {
-        final Post post = postService.readById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+        final Post post = readPostById(postId);
 
         PostLike postLike = postLikeRepository.findByPostAndUser(post, currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("PostLiker", "UserId", currentUser.getIdentification()));
@@ -77,10 +75,14 @@ public class PostLikeService {
      */
     @Transactional(readOnly = true)
     public List<PostLikerResult> readPostLikerList(Long postId) {
-        Post post = postService.readById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+        Post post = readPostById(postId);
 
         final List<PostLike> postLikeList = postLikeRepository.findAllByPost(post);
         return postLikeList.stream().map(PostLikerResult::from).collect(Collectors.toList());
+    }
+
+    private Post readPostById(Long postId) {
+        return postQueryService.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
     }
 }

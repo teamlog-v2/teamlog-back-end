@@ -1,16 +1,10 @@
 package com.test.teamlog.domain.project.controller;
 
-import com.test.teamlog.domain.post.dto.PostResponse;
-import com.test.teamlog.domain.post.dto.PostResult;
-import com.test.teamlog.domain.post.service.PostService;
 import com.test.teamlog.domain.project.dto.*;
-import com.test.teamlog.domain.project.dto.ProjectCreateRequest;
-import com.test.teamlog.domain.project.dto.ProjectCreateResponse;
-import com.test.teamlog.domain.project.dto.ProjectCreateResult;
+import com.test.teamlog.domain.project.service.ProjectService;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.payload.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
-import com.test.teamlog.domain.project.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,7 +25,6 @@ import java.util.stream.Collectors;
 @Tag(name = "프로젝트 관리")
 public class ProjectApiController {
     private final ProjectService projectService;
-    private final PostService postService;
 
     @Operation(summary = "프로젝트 생성")
     @PostMapping("/projects")
@@ -126,17 +119,6 @@ public class ProjectApiController {
                                                                                      @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         final List<ProjectReadUserFollowingResult> resultList = projectService.readAllUserFollowing(identification, currentUser.getUser());
         List<ProjectReadUserFollowingResponse> response = resultList.stream().map(ProjectReadUserFollowingResponse::from).collect(Collectors.toList());
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    // TODO: post쪽 api랑 통합
-    @Operation(summary = "위치정보가 있는 프로젝트 게시물 조회")
-    @GetMapping("/projects/{projectId}/posts/with-location")
-    public ResponseEntity<List<PostResponse>> getLocationPosts(@PathVariable("projectId") long projectId,
-                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostResult> resultList = postService.readAllWithLocation(projectId, currentUser.getUser());
-        final List<PostResponse> response = resultList.stream().map(PostResponse::from).collect(Collectors.toList());
-
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
