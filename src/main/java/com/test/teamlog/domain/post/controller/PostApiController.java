@@ -2,12 +2,9 @@ package com.test.teamlog.domain.post.controller;
 
 import com.test.teamlog.domain.post.dto.*;
 import com.test.teamlog.domain.post.service.PostService;
-import com.test.teamlog.domain.postlike.dto.PostLikerResponse;
-import com.test.teamlog.domain.postlike.dto.PostLikerResult;
 import com.test.teamlog.global.security.UserAdapter;
-import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.PagedResponse;
-import com.test.teamlog.payload.PostDTO;
+import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.global.dto.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -73,15 +70,7 @@ public class PostApiController {
         return new ResponseEntity<>(PostResponse.from(result), HttpStatus.OK);
     }
 
-    // TODO: API 위치 고민해보기
-    @Operation(summary = "게시물 수정 내역 조회")
-    @GetMapping("/{id}/historys")
-    public ResponseEntity<List<PostDTO.PostHistoryInfo>> readPostUpdateHistory(@PathVariable("id") long id,
-                                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostDTO.PostHistoryInfo> response = postService.readPostUpdateHistory(id, currentUser.getUser());
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 
     // TODO: API 사용 여부 확인
     @Operation(summary = "모든 게시물 조회")
@@ -129,27 +118,26 @@ public class PostApiController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "게시물 좋아요")
-    @PostMapping("/{postId}/like")
-    public ResponseEntity<ApiResponse> like(@PathVariable("postId") long postId,
-                                            @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = postService.likePost(postId, currentUser.getUser());
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    @Operation(summary = "개인 작성 이력 조회 (게시물)")
+    @GetMapping("/accounts/posts")
+    public ResponseEntity<List<PostResponse>> getPostsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<PostResponse> response = null;
+        if (currentUser == null) {
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        } else {
+            final List<PostResult> resultList = postService.getPostsByUser(currentUser.getUser());
+            response = resultList.stream().map(PostResponse::from).collect(Collectors.toList());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
     }
 
-    @Operation(summary = "게시물 좋아요 취소")
-    @DeleteMapping("/{postId}/like")
-    public ResponseEntity<ApiResponse> unlike(@PathVariable("postId") long postId,
-                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = postService.unlikePost(postId, currentUser.getUser());
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @Operation(summary = "게시물을 좋아하는 사람 조회")
-    @GetMapping("/{postId}/likers")
-    public ResponseEntity<List<PostLikerResponse>> readPostLikerList(@PathVariable("postId") long postId) {
-        List<PostLikerResult> resultList = postService.readPostLikerList(postId);
-        final List<PostLikerResponse> response = resultList.stream().map(PostLikerResponse::from).collect(Collectors.toList());
+    @Operation(summary = "위치정보가 있는 프로젝트 게시물 조회")
+    @GetMapping("/projects/{projectId}/posts/with-location")
+    public ResponseEntity<List<PostResponse>> getLocationPosts(@PathVariable("projectId") long projectId,
+                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<PostResult> resultList = postService.readAllWithLocation(projectId, currentUser.getUser());
+        final List<PostResponse> response = resultList.stream().map(PostResponse::from).collect(Collectors.toList());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

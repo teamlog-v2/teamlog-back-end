@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.postmedia.dto;
 
-import com.test.teamlog.entity.PostMedia;
+import com.test.teamlog.domain.postmedia.entity.PostMedia;
 import lombok.Data;
 
 @Data

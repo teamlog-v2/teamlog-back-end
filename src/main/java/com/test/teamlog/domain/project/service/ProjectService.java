@@ -1,26 +1,24 @@
 package com.test.teamlog.domain.project.service;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.service.AccountService;
-import com.test.teamlog.domain.post.entity.Post;
+import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.posttag.entity.PostTag;
-import com.test.teamlog.domain.posttag.service.PostTagService;
 import com.test.teamlog.domain.project.dto.*;
 import com.test.teamlog.domain.project.entity.Project;
-import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
-import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
-import com.test.teamlog.domain.projectmember.entity.ProjectMember;
-import com.test.teamlog.exception.ResourceForbiddenException;
-import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.global.entity.AccessModifier;
-import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.ProjectDTO;
-import com.test.teamlog.payload.Relation;
-import com.test.teamlog.domain.projectfollow.repository.ProjectFollowerRepository;
-import com.test.teamlog.domain.projectjoin.repository.ProjectJoinRepository;
-import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
 import com.test.teamlog.domain.project.repository.ProjectRepository;
-import com.test.teamlog.service.FileStorageService;
+import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
+import com.test.teamlog.domain.projectfollow.service.query.ProjectFollowQueryService;
+import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
+import com.test.teamlog.domain.projectjoin.service.query.ProjectJoinQueryService;
+import com.test.teamlog.domain.projectmember.entity.ProjectMember;
+import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
+import com.test.teamlog.global.exception.ResourceForbiddenException;
+import com.test.teamlog.global.exception.ResourceNotFoundException;
+import com.test.teamlog.global.entity.AccessModifier;
+import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.payload.ProjectDTO;
+import com.test.teamlog.domain.project.dto.Relation;
+import com.test.teamlog.domain.postmedia.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,13 +32,13 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectService {
-    private final AccountService accountService;
-    private final PostTagService postTagService;
     private final ProjectRepository projectRepository;
-    private final ProjectMemberRepository projectMemberRepository;
-    private final ProjectFollowerRepository projectFollowerRepository;
-    private final ProjectJoinRepository projectJoinRepository;
+
     private final FileStorageService fileStorageService;
+    private final AccountQueryService accountQueryService;
+    private final ProjectJoinQueryService projectJoinQueryService;
+    private final ProjectMemberQueryService projectMemberQueryService;
+    private final ProjectFollowQueryService projectFollowQueryService;
 
     @Transactional
     public ApiResponse updateThumbnail(Long projectId, MultipartFile image, User currentUser) {
@@ -76,13 +74,13 @@ public class ProjectService {
 
         boolean isMyProjectList = false;
         if (currentUser == null) {
-            user = accountService.readByIdentification(identification);
+            user = readByIdentification(identification);
         } else {
             isMyProjectList = currentUser.getIdentification().equals(identification);
-            user = isMyProjectList ? currentUser : accountService.readByIdentification(identification);
+            user = isMyProjectList ? currentUser : readByIdentification(identification);
         }
 
-        List<ProjectFollower> userFollowingProjectList = projectFollowerRepository.findAllByUser(user);
+        List<ProjectFollower> userFollowingProjectList = projectFollowQueryService.findAllByUser(user);
         List<ProjectReadUserFollowingResult> resultList = new ArrayList<>();
 
         for (ProjectFollower userFollowingProject : userFollowingProjectList) {
@@ -113,10 +111,10 @@ public class ProjectService {
     // 프로젝트와의 관계
     private Relation detectRelation(Project project, User currentUser) {
         if (currentUser == null) return Relation.NONE;
-        if (isProjectMaster(project, currentUser)) return Relation.MASTER;
-        if (isProjectMember(project, currentUser)) return Relation.MEMBER;
+        if (project.isProjectMaster(currentUser)) return Relation.MASTER;
+        if (projectMemberQueryService.isProjectMember(project, currentUser)) return Relation.MEMBER;
 
-        ProjectJoin projectJoin = projectJoinRepository.findByProjectAndUser(project, currentUser).orElse(null);
+        ProjectJoin projectJoin = projectJoinQueryService.findByProjectAndUser(project, currentUser).orElse(null);
 
         if (projectJoin != null) {
             if (projectJoin.getIsAccepted() && !projectJoin.getIsInvited()) return Relation.APPLIED;
@@ -133,7 +131,7 @@ public class ProjectService {
 
         // Private 시 검증
         if (project.getAccessModifier() == AccessModifier.PRIVATE) {
-            validateProjectMember(project, currentUser);
+            projectMemberQueryService.validateProjectMember(project, currentUser);
         }
 
         final ProjectReadResult result = ProjectReadResult.from(project);
@@ -151,10 +149,10 @@ public class ProjectService {
 
         boolean isMyProjectList = false;
         if (currentUser == null) {
-            user = accountService.readByIdentification(identification);
+            user = readByIdentification(identification);
         } else {
             isMyProjectList = currentUser.getIdentification().equals(identification);
-            user = isMyProjectList ? currentUser : accountService.readByIdentification(identification);
+            user = isMyProjectList ? currentUser : readByIdentification(identification);
         }
 
         List<Project> projectList = projectRepository.findProjectByUser(user);
@@ -173,7 +171,7 @@ public class ProjectService {
 
     // 본인이 속하지 않은 비공개 프로젝트인지 확인
     private boolean isNotMemberAndPrivateProject(User currentUser, Project project) {
-        return !isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE;
+        return !projectMemberQueryService.isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE;
     }
 
     /**
@@ -231,7 +229,7 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
         validateMasterUser(project, currentUser);
 
-        final User newMaster = accountService.readByIdentification(newMasterIdentification); // 존재하는지 검증
+        final User newMaster = readByIdentification(newMasterIdentification); // 존재하는지 검증
         project.delegateMaster(newMaster);
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 마스터 위임 성공");
@@ -249,43 +247,25 @@ public class ProjectService {
     }
 
     // 마스터 검증
-    public void validateMasterUser(Project project, User currentUser) {
-        if (!project.getMaster().getIdentification().equals(currentUser.getIdentification()))
+    private void validateMasterUser(Project project, User currentUser) {
+        if (!project.isProjectMaster(currentUser)) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 마스터 아님 )");
-    }
-
-    // 프로젝트 마스터 여부
-    private boolean isProjectMaster(Project project, User currentUser) {
-        if (currentUser == null) return false;
-
-        return project.getMaster().getIdentification().equals(currentUser.getIdentification());
-    }
-
-    // 프로젝트 멤버 여부
-    public boolean isProjectMember(Project project, User currentUser) {
-        if (currentUser == null) return false;
-
-        return projectMemberRepository.findByProjectAndUser(project, currentUser).isPresent();
-    }
-
-    // 프로젝트 멤버 검증
-    public void validateProjectMember(Project project, User currentUser) {
-        if (currentUser == null) throw new ResourceForbiddenException("권한이 없습니다.\n로그인 해주세요.");
-        projectMemberRepository.findByProjectAndUser(project, currentUser)
-                .orElseThrow(() -> new ResourceForbiddenException("권한이 없습니다.\n(프로젝트 멤버 아님)"));
+        }
     }
 
     // 프로젝트의 해시태그들 조회
     public List<String> readHashTagsInProjectPosts(Long projectId) {
-        Project project = findOne(projectId);
-        final List<Post> postList = project.getPosts();
-
-        final List<PostTag> hashTagList = postTagService.findAllByPostIdIn(postList.stream().map(Post::getId).collect(Collectors.toList()));
+        final List<PostTag> hashTagList = projectRepository.findAllPostTagByProjectId(projectId);
         return hashTagList.stream().map(PostTag::getName).collect(Collectors.toList());
     }
 
     public Project findOne(Long projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+    }
+
+    private User readByIdentification(String identification) {
+        return accountQueryService.findByIdentification(identification)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "identification", identification));
     }
 }

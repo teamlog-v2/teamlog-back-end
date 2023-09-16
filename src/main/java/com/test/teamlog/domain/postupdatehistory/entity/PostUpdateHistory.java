@@ -11,11 +11,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Builder
-@Setter @Getter
-@NoArgsConstructor
+@Setter
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-@Table(name="post_update_history")
+@Table(name = "post_update_history")
 public class PostUpdateHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,11 +34,8 @@ public class PostUpdateHistory {
     @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;
 
-    public void setPost(Post post) {
-        if(this.post != null) {
-            this.post.getPostUpdateHistories().remove(this);
-        }
+    public PostUpdateHistory(Post post, User user) {
         this.post = post;
-        post.getPostUpdateHistories().add(this);
+        this.user = user;
     }
 }

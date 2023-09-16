@@ -5,8 +5,8 @@ import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
 import com.test.teamlog.domain.comment.dto.CommentUpdateRequest;
 import com.test.teamlog.domain.comment.service.CommentService;
 import com.test.teamlog.global.security.UserAdapter;
-import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.PagedResponse;
+import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.global.dto.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -66,5 +68,18 @@ public class CommentApiController {
                                                                                @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         PagedResponse<CommentInfoResponse> response = commentService.getChildComments(commentId, page, size, currentUser.getUser());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(summary = "개인 작성 이력 조회 (댓글)")
+    @GetMapping("/accounts/comments")
+    public ResponseEntity<List<CommentInfoResponse>> getCommentsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        List<CommentInfoResponse> response = null;
+
+        if (currentUser == null) {
+            return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        } else {
+            response = commentService.getCommentByUser(currentUser.getUser());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
     }
 }

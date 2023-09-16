@@ -2,20 +2,19 @@ package com.test.teamlog.domain.comment.service;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.service.AccountService;
+import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.comment.dto.CommentCreateInput;
 import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
 import com.test.teamlog.domain.comment.dto.CommentUpdateInput;
-import com.test.teamlog.domain.comment.repository.CommentRepository;
-import com.test.teamlog.domain.commentmention.service.CommentMentionService;
-import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.domain.comment.entity.Comment;
-import com.test.teamlog.entity.CommentMention;
+import com.test.teamlog.domain.comment.repository.CommentRepository;
 import com.test.teamlog.domain.post.entity.Post;
-import com.test.teamlog.exception.ResourceForbiddenException;
-import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.ApiResponse;
-import com.test.teamlog.payload.PagedResponse;
+import com.test.teamlog.domain.post.service.query.PostQueryService;
+import com.test.teamlog.domain.comment.entity.CommentMention;
+import com.test.teamlog.global.exception.ResourceForbiddenException;
+import com.test.teamlog.global.exception.ResourceNotFoundException;
+import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.global.dto.PagedResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,20 +33,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository commentRepository;
-    private final CommentMentionService commentMentionService;
 
-    private final AccountService userService;
-    private final PostRepository postRepository;
+    private final PostQueryService postQueryService;
+    private final AccountQueryService accountQueryService;
 
     // 유저가 작성한 댓글 조회
     public List<CommentInfoResponse> getCommentByUser(User currentUser) {
         List<Comment> commentList = commentRepository.findAllByWriter(currentUser);
-        return  makeCommentInfoResponseList(currentUser, commentList);
+        return makeCommentInfoResponseList(currentUser, commentList);
     }
 
     // 게시물의 부모 댓글 조회
     public PagedResponse<CommentInfoResponse> getParentComments(Long postId, int page, int size, User currentUser) {
-        Post post = postRepository.findById(postId)
+        Post post = postQueryService.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
@@ -84,6 +82,7 @@ public class CommentService {
 
         return makeCommentInfoResponseList(currentUser, commentList.get(0), commentList);
     }
+
     private List<CommentInfoResponse> makeCommentInfoResponseList(User currentUser, Comment comment, List<Comment> commentList) {
         if (CollectionUtils.isEmpty(commentList)) return Collections.emptyList();
 
@@ -107,7 +106,7 @@ public class CommentService {
     // 댓글 생성
     @Transactional
     public ApiResponse create(CommentCreateInput input, User currentUser) {
-        Post post = postRepository.findById(input.getPostId())
+        Post post = postQueryService.findById(input.getPostId())
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", input.getPostId()));
 
         Comment parentComment = input.getParentCommentId() != null ?
@@ -116,16 +115,16 @@ public class CommentService {
                 null;
 
         Comment comment = input.toComment(currentUser, post, parentComment);
-        commentRepository.save(comment);
+        comment.addCommentMentions(makeCommentMentionList(input.getCommentMentions(), comment));
 
-        commentMentionService.createAll(makeCommentMentionList(input.getCommentMentions(), comment));
+        commentRepository.save(comment);
         return new ApiResponse(Boolean.TRUE, "댓글 생성 성공");
     }
 
     private List<CommentMention> makeCommentMentionList(List<String> commentMentionIdentificationList, Comment comment) {
         if (CollectionUtils.isEmpty(commentMentionIdentificationList)) return Collections.emptyList();
 
-        final List<User> userList = userService.readAllByIdentificationIn(commentMentionIdentificationList);
+        final List<User> userList = accountQueryService.findAllByIdentificationIn(commentMentionIdentificationList);
         final Map<String, User> userMap
                 = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
 

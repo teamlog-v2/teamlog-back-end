@@ -1,17 +1,17 @@
 package com.test.teamlog.domain.task.service;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
-import com.test.teamlog.domain.project.repository.ProjectRepository;
-import com.test.teamlog.domain.project.service.ProjectService;
+import com.test.teamlog.domain.project.service.query.ProjectQueryService;
+import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.domain.task.dto.*;
 import com.test.teamlog.domain.task.entity.Task;
-import com.test.teamlog.domain.task.repository.TaskRepository;
 import com.test.teamlog.domain.task.entity.TaskPerformer;
 import com.test.teamlog.domain.task.entity.TaskStatus;
-import com.test.teamlog.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.ApiResponse;
+import com.test.teamlog.domain.task.repository.TaskRepository;
+import com.test.teamlog.global.exception.ResourceNotFoundException;
+import com.test.teamlog.global.dto.ApiResponse;
 import jakarta.persistence.LockModeType;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,9 +37,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
-    private final AccountRepository accountRepository;
-    private final ProjectRepository projectRepository;
-    private final ProjectService projectService;
+
+    private final AccountQueryService accountQueryService;
+    private final ProjectQueryService projectQueryService;
+    private final ProjectMemberQueryService projectMemberQueryService;
 
     // 태스크 상세 조회
     public TaskReadDetailResult readDetail(Long id) {
@@ -51,7 +52,7 @@ public class TaskService {
     // 프로젝트의 태스크들 조회
     @Transactional
     public List<TaskReadByProjectResult> readAllByProject(Long projectId) {
-        Project project = projectRepository.findById(projectId)
+        final Project project = projectQueryService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
 
         Sort sort = Sort.by(Sort.Direction.ASC, "priority");
@@ -83,11 +84,10 @@ public class TaskService {
     // 태스크 생성
     @Transactional
     public TaskCreateResult create(Long projectId, TaskCreateInput input, User currentUser) {
-        Project project = projectRepository.findById(projectId)
+        Project project = projectQueryService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
-
         // 멤버만 가능
-        projectService.validateProjectMember(project, currentUser);
+        projectMemberQueryService.validateProjectMember(project, currentUser);
 
         Task task = input.toTask();
         task.setPriority(taskRepository.getCountByPostAndStatus(project, input.getStatus()));
@@ -95,7 +95,7 @@ public class TaskService {
 
         List<TaskPerformer> performerList = new ArrayList<>();
         if (input.getPerformerIdList() != null) {
-            final List<User> userList = accountRepository.findAllByIdentificationIn(input.getPerformerIdList());
+            final List<User> userList = accountQueryService.findAllByIdentificationIn(input.getPerformerIdList());
             final Map<String, User> identificationToUserMap
                     = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
 
@@ -138,7 +138,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", taskId));
 
         // 멤버만 가능
-        projectService.validateProjectMember(task.getProject(), currentUser);
+        projectMemberQueryService.validateProjectMember(task.getProject(), currentUser);
 
         LocalDateTime deadline
                 = input.getDeadline() != null ?
@@ -156,7 +156,7 @@ public class TaskService {
 
         List<TaskPerformer> taskPerformerList = new ArrayList<>();
 
-        final List<User> userList = accountRepository.findAllByIdentificationIn(newTaskPerformerIdList);
+        final List<User> userList = accountQueryService.findAllByIdentificationIn(newTaskPerformerIdList);
         final Map<String, User> identificationToUserMap
                 = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
         List<String> invalidIdentificationList = new ArrayList<>();
@@ -194,7 +194,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
 
         // 멤버만 가능
-        projectService.validateProjectMember(task.getProject(), currentUser);
+        projectMemberQueryService.validateProjectMember(task.getProject(), currentUser);
 
         if (request.getStatus().equals(task.getStatus())) {
             if (request.getPriority() == task.getPriority()) return;
@@ -221,7 +221,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
 
         // 멤버만 가능
-        projectService.validateProjectMember(task.getProject(), currentUser);
+        projectMemberQueryService.validateProjectMember(task.getProject(), currentUser);
 
         taskRepository.reorderInPreviousStatus(task.getProject(), task.getStatus(), task.getPriority()); // 기존 status 정리
         taskRepository.delete(task);
