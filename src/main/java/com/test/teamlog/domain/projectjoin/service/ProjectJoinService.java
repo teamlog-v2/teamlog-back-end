@@ -2,7 +2,6 @@ package com.test.teamlog.domain.projectjoin.service;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.service.AccountService;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.ProjectService;
@@ -36,7 +35,6 @@ import java.util.stream.Collectors;
 public class ProjectJoinService {
     private final ProjectJoinRepository projectJoinRepository;
 
-    private final AccountService accountService;
     private final ProjectService projectService;
     private final AccountQueryService accountQueryService;
     private final ProjectCommandService projectCommandService;
@@ -83,7 +81,7 @@ public class ProjectJoinService {
         final List<ProjectJoin> projectJoinList = projectJoinRepository.findAllByProject(project);
         final Map<String, ProjectJoin> identificationToProjectJoinMap = projectJoinList.stream().collect(Collectors.toMap(pj -> pj.getUser().getIdentification(), Function.identity()));
 
-        final List<User> userList = accountService.readAllByIdentificationIn(input.getUserIdentificationList());
+        final List<User> userList = accountQueryService.findAllByIdentificationIn(input.getUserIdentificationList());
         final Map<String, User> identificationToUserMap
                 = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
 

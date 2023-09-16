@@ -2,13 +2,12 @@ package com.test.teamlog.domain.comment.service;
 
 import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.service.AccountService;
+import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.comment.dto.CommentCreateInput;
 import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
 import com.test.teamlog.domain.comment.dto.CommentUpdateInput;
 import com.test.teamlog.domain.comment.entity.Comment;
 import com.test.teamlog.domain.comment.repository.CommentRepository;
-import com.test.teamlog.domain.commentmention.service.CommentMentionService;
 import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.post.service.query.PostQueryService;
 import com.test.teamlog.entity.CommentMention;
@@ -35,9 +34,8 @@ import java.util.stream.Collectors;
 public class CommentService {
     private final CommentRepository commentRepository;
 
-    private final AccountService userService;
     private final PostQueryService postQueryService;
-    private final CommentMentionService commentMentionService;
+    private final AccountQueryService accountQueryService;
 
     // 유저가 작성한 댓글 조회
     public List<CommentInfoResponse> getCommentByUser(User currentUser) {
@@ -117,16 +115,16 @@ public class CommentService {
                 null;
 
         Comment comment = input.toComment(currentUser, post, parentComment);
-        commentRepository.save(comment);
+        comment.addCommentMentions(makeCommentMentionList(input.getCommentMentions(), comment));
 
-        commentMentionService.createAll(makeCommentMentionList(input.getCommentMentions(), comment));
+        commentRepository.save(comment);
         return new ApiResponse(Boolean.TRUE, "댓글 생성 성공");
     }
 
     private List<CommentMention> makeCommentMentionList(List<String> commentMentionIdentificationList, Comment comment) {
         if (CollectionUtils.isEmpty(commentMentionIdentificationList)) return Collections.emptyList();
 
-        final List<User> userList = userService.readAllByIdentificationIn(commentMentionIdentificationList);
+        final List<User> userList = accountQueryService.findAllByIdentificationIn(commentMentionIdentificationList);
         final Map<String, User> userMap
                 = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
 

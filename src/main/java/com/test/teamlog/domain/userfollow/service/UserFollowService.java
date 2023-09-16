@@ -1,7 +1,7 @@
 package com.test.teamlog.domain.userfollow.service;
 
 import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.account.service.AccountService;
+import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.userfollow.dto.UserFollowerReadResult;
 import com.test.teamlog.domain.userfollow.dto.UserFollowingReadResult;
 import com.test.teamlog.domain.userfollow.entity.UserFollow;
@@ -21,11 +21,11 @@ import java.util.List;
 public class UserFollowService {
     private final UserFollowRepository userFollowRepository;
 
-    private final AccountService accountService;
+    private final AccountQueryService accountQueryService;
 
     // 팔로워 리스트 조회
     public List<UserFollowerReadResult> readAllFollower(String userId, User currentUser) {
-        final User user = accountService.readByIdentification(userId);
+        final User user = readByIdentification(userId);
 
         List<UserFollow> followingList = userFollowRepository.findAllByFromUser(currentUser); // 유저가 팔로우하는 사람들 (내가 from)
         List<UserFollow> followerList = userFollowRepository.findAllByToUser(user); // 유저를 팔로우하는 사람들 (내가 to)
@@ -57,7 +57,7 @@ public class UserFollowService {
 
     // 팔로잉 리스트 조회
     public List<UserFollowingReadResult> readAllFollowing(String userId, User currentUser) {
-        User user = accountService.readByIdentification(userId);
+        User user = readByIdentification(userId);
 
         List<UserFollow> currentUserFollowingList = userFollowRepository.findAllByFromUser(currentUser); // 로그인한 사람의 팔로잉 목록
         List<UserFollow> followingList = user.getFollowings(); // 특정 유저의 팔로잉 목록
@@ -92,7 +92,7 @@ public class UserFollowService {
     // 팔로우
     @Transactional
     public ApiResponse follow(User currentUser, String targetUserId) {
-        User targetUser = accountService.readByIdentification(targetUserId);
+        User targetUser = readByIdentification(targetUserId);
 
         userFollowRepository.save(UserFollow.create(currentUser, targetUser));
         return new ApiResponse(Boolean.TRUE, "팔로우 성공");
@@ -101,7 +101,7 @@ public class UserFollowService {
     // 언팔로우
     @Transactional
     public ApiResponse unfollow(String targetUserId, User currentUser) {
-        User targetUser = accountService.readByIdentification(targetUserId);
+        User targetUser = readByIdentification(targetUserId);
         UserFollow userFollow = userFollowRepository.findByFromUserAndToUser(currentUser, targetUser)
                 .orElseThrow(() -> new ResourceNotFoundException("UserFollow", "FromUserId", currentUser.getIdentification()));
 
@@ -115,5 +115,10 @@ public class UserFollowService {
 
     public List<UserFollow> readAllByUser(User currentUser) {
         return userFollowRepository.findAllByFromUser(currentUser);
+    }
+
+    private User readByIdentification(String identification) {
+        return accountQueryService.findByIdentification(identification)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "identification", identification));
     }
 }
