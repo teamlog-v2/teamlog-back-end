@@ -7,10 +7,10 @@ public class ProjectInvitationCreateRequest {
     private Long projectIdx;
     private Long inviteeIdx;
 
-    public ProjectInvitationCreateInput toInput(Long invitorIdx) {
+    public ProjectInvitationCreateInput toInput(Long inviterIdx) {
         ProjectInvitationCreateInput input = new ProjectInvitationCreateInput();
         input.setProjectIdx(this.projectIdx);
-        input.setInviterIdx(invitorIdx);
+        input.setInviterIdx(inviterIdx);
         input.setInviteeIdx(this.inviteeIdx);
 
         return input;

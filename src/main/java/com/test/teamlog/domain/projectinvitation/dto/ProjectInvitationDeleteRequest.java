@@ -7,10 +7,10 @@ public class ProjectInvitationDeleteRequest {
     private Long projectIdx;
     private Long inviteeIdx;
 
-    public ProjectInvitationDeleteInput toInput(Long invitorIdx) {
+    public ProjectInvitationDeleteInput toInput(Long inviterIdx) {
         ProjectInvitationDeleteInput input = new ProjectInvitationDeleteInput();
         input.setProjectIdx(this.projectIdx);
-        input.setInviterIdx(invitorIdx);
+        input.setInviterIdx(inviterIdx);
         input.setInviteeIdx(this.inviteeIdx);
 
         return input;

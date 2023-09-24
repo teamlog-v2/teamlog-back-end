@@ -7,6 +7,7 @@ import com.test.teamlog.domain.project.service.query.ProjectQueryService;
 import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationAcceptInput;
 import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationCreateInput;
 import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationDeleteInput;
+import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationReadInviteeResult;
 import com.test.teamlog.domain.projectinvitation.entity.ProjectInvitation;
 import com.test.teamlog.domain.projectinvitation.repository.ProjectInvitationRepository;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
@@ -17,6 +18,8 @@ import com.test.teamlog.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -112,5 +115,19 @@ public class ProjectInvitationService {
         projectInvitationRepository.delete(projectInvitation);
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 초대 삭제 성공");
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectInvitationReadInviteeResult> readAllInvitee(Long projectIdx, Long userIdx) {
+        final Project project
+                = projectQueryService.findById(projectIdx).orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectIdx));
+        final User inviter
+                = accountQueryService.findByIdx(userIdx).orElseThrow(() -> new ResourceNotFoundException("User", "ID", userIdx));
+
+        if (!projectMemberQueryService.isProjectMember(project, inviter)) {
+            throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 멤버가 아님 )");
+        }
+
+        return projectInvitationRepository.findAllByProjectAndAcceptedIsFalse(project);
     }
 }

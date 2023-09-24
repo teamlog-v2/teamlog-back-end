@@ -71,17 +71,18 @@ public class ProjectJoinApiController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Operation(summary = "프로젝트 멤버 초대 목록 조회")
-    @GetMapping("/projects/{id}/joins/invitation")
-    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForProject>> getProjectInvitationListForProject(@PathVariable("id") Long id) {
-        List<ProjectJoinDTO.ProjectJoinForProject> response = projectJoinService.getProjectInvitationListForProject(id);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 
     @Operation(summary = "유저가 가입 신청한 프로젝트 조회")
     @GetMapping("accounts/project-apply")
     public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForUser>> getProjectApplyListForUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         List<ProjectJoinDTO.ProjectJoinForUser> response = projectJoinService.getProjectApplyListForUser(currentUser.getUser());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(summary = "프로젝트 멤버 초대 목록 조회")
+    @GetMapping("/projects/{id}/joins/invitation")
+    public ResponseEntity<List<ProjectJoinDTO.ProjectJoinForProject>> getProjectInvitationListForProject(@PathVariable("id") Long id) {
+        List<ProjectJoinDTO.ProjectJoinForProject> response = projectJoinService.getProjectInvitationListForProject(id);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

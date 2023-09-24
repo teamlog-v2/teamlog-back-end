@@ -10,6 +10,6 @@ import java.util.Optional;
 
 
 @Repository
-public interface ProjectInvitationRepository extends JpaRepository<ProjectInvitation, Long> {
+public interface ProjectInvitationRepository extends JpaRepository<ProjectInvitation, Long>, ProjectInvitationCustom {
     Optional<ProjectInvitation> findByProjectAndInvitee(Project project, User invitee);
 }

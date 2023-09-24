@@ -21,15 +21,15 @@ public class ProjectInvitation extends BaseTimeEntity {
     @JoinColumn(name = "project_idx", nullable = false)
     private Project project;
 
-    @ManyToOne
-    @JoinColumn(name = "invitor_idx", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "inviter_idx", nullable = false)
     private User inviter;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invitee_idx", nullable = false)
     private User invitee;
 
-    @Column(name = "is_invited", nullable = false)
+    @Column(name = "is_accepted", nullable = false)
     private boolean isAccepted;
 
     public void update() {

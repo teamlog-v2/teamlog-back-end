@@ -1,8 +1,6 @@
 package com.test.teamlog.domain.projectinvitation.controller;
 
-import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationAcceptRequest;
-import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationCreateRequest;
-import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationDeleteRequest;
+import com.test.teamlog.domain.projectinvitation.dto.*;
 import com.test.teamlog.domain.projectinvitation.service.ProjectInvitationService;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.security.UserAdapter;
@@ -13,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "프로젝트 초대 관리")
 @RestController
@@ -47,5 +47,15 @@ public class ProjectInvitationApiController {
 
         final ApiResponse apiResponse = projectInvitationService.delete(request.toInput(currentUser.getUser().getIdx()));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/invitees")
+    public ResponseEntity<List<ProjectInvitationReadInviteeResponse>> readAllInvitees(
+            @RequestParam Long projectIdx,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser
+    ) {
+        final List<ProjectInvitationReadInviteeResult> resultList = projectInvitationService.readAllInvitee(currentUser.getUser().getIdx(), projectIdx);
+        final List<ProjectInvitationReadInviteeResponse> responseList = resultList.stream().map(ProjectInvitationReadInviteeResponse::from).toList();
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 }
