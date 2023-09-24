@@ -20,7 +20,7 @@ import java.util.List;
 
 import static com.test.teamlog.domain.post.entity.QPost.post;
 import static com.test.teamlog.domain.postlike.entity.QPostLike.postLike;
-import static com.test.teamlog.entity.QPostMedia.postMedia;
+import static com.test.teamlog.domain.postmedia.entity.QPostMedia.postMedia;
 
 @Repository
 @RequiredArgsConstructor

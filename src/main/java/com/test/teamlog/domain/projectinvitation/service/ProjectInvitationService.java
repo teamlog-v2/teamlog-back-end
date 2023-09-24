@@ -6,6 +6,7 @@ import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.query.ProjectQueryService;
 import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationAcceptInput;
 import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationCreateInput;
+import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationDeleteInput;
 import com.test.teamlog.domain.projectinvitation.entity.ProjectInvitation;
 import com.test.teamlog.domain.projectinvitation.repository.ProjectInvitationRepository;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
@@ -82,5 +83,34 @@ public class ProjectInvitationService {
         projectInvitation.accept();
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 초대 수락 성공");
+    }
+
+    @Transactional
+    public ApiResponse delete(ProjectInvitationDeleteInput input) {
+        final Long projectIdx = input.getProjectIdx();
+        final Long inviterIdx = input.getInviterIdx();
+        final Long inviteeIdx = input.getInviteeIdx();
+
+        final Project project
+                = projectQueryService.findById(projectIdx).orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectIdx));
+        final User inviter
+                = accountQueryService.findByIdx(inviterIdx).orElseThrow(() -> new ResourceNotFoundException("User", "ID", inviterIdx));
+        final User invitee
+                = accountQueryService.findByIdx(inviteeIdx).orElseThrow(() -> new ResourceNotFoundException("User", "ID", inviteeIdx));
+
+        final ProjectInvitation projectInvitation = projectInvitationRepository.findByProjectAndInvitee(project, invitee)
+                .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectIdx));
+
+        if (!projectMemberQueryService.isProjectMember(project, inviter)) {
+            throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 멤버가 아님 )");
+        }
+
+        if (!projectInvitation.isAccepted()) {
+            throw new ResourceAlreadyExistsException("이미 프로젝트 초대를 수락했습니다.");
+        }
+
+        projectInvitationRepository.delete(projectInvitation);
+
+        return new ApiResponse(Boolean.TRUE, "프로젝트 초대 삭제 성공");
     }
 }
