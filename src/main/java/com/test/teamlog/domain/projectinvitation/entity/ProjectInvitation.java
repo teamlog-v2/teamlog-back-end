@@ -35,4 +35,9 @@ public class ProjectInvitation extends BaseTimeEntity {
     public void update() {
         setUpdateTimeToNow();
     }
+
+    public void accept() {
+        this.isAccepted = true;
+        setUpdateTimeToNow();
+    }
 }

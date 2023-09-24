@@ -1,5 +1,6 @@
 package com.test.teamlog.domain.projectinvitation.controller;
 
+import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationAcceptRequest;
 import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationCreateRequest;
 import com.test.teamlog.domain.projectinvitation.service.ProjectInvitationService;
 import com.test.teamlog.global.dto.ApiResponse;
@@ -27,5 +28,14 @@ public class ProjectInvitationApiController {
 
         final ApiResponse apiResponse = projectInvitationService.create(request.toInput(currentUser.getUser().getIdx()));
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
+
+    @PutMapping
+    public ResponseEntity<ApiResponse> accept(
+            @RequestBody ProjectInvitationAcceptRequest request,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+
+        final ApiResponse apiResponse = projectInvitationService.accept(request.toInput(currentUser.getUser().getIdx()));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }

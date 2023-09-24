@@ -4,6 +4,7 @@ import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.query.ProjectQueryService;
+import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationAcceptInput;
 import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationCreateInput;
 import com.test.teamlog.domain.projectinvitation.entity.ProjectInvitation;
 import com.test.teamlog.domain.projectinvitation.repository.ProjectInvitationRepository;
@@ -55,5 +56,31 @@ public class ProjectInvitationService {
         }
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 초대 성공");
+    }
+
+    @Transactional
+    public ApiResponse accept(ProjectInvitationAcceptInput input) {
+        final Long projectIdx = input.getProjectIdx();
+        final Long inviteeIdx = input.getInviteeIdx();
+
+        final Project project
+                = projectQueryService.findById(projectIdx).orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectIdx));
+        final User invitee
+                = accountQueryService.findByIdx(inviteeIdx).orElseThrow(() -> new ResourceNotFoundException("User", "ID", inviteeIdx));
+
+        final ProjectInvitation projectInvitation = projectInvitationRepository.findByProjectAndInvitee(project, invitee)
+                .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectIdx));
+
+        if (projectInvitation == null) {
+            throw new ResourceNotFoundException("ProjectInvitation", "ProjectIdx, InviteeIdx", projectIdx + ", " + inviteeIdx);
+        }
+
+        if (projectInvitation.isAccepted()) {
+            throw new ResourceAlreadyExistsException("이미 프로젝트 초대를 수락했습니다.");
+        }
+
+        projectInvitation.accept();
+
+        return new ApiResponse(Boolean.TRUE, "프로젝트 초대 수락 성공");
     }
 }
