@@ -13,6 +13,10 @@ import java.util.Optional;
 public class AccountQueryService {
     private final AccountRepository accountRepository;
 
+    public Optional<User> findByIdx(Long idx) {
+        return accountRepository.findById(idx);
+    }
+
     public List<User> findUsersNotInProjectMember(Long projectId) {
         return accountRepository.findUsersNotInProjectMember(projectId);
     }
