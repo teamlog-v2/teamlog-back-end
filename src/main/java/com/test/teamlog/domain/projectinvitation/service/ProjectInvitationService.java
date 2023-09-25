@@ -4,10 +4,7 @@ import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.query.ProjectQueryService;
-import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationAcceptInput;
-import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationCreateInput;
-import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationDeleteInput;
-import com.test.teamlog.domain.projectinvitation.dto.ProjectInvitationReadInviteeResult;
+import com.test.teamlog.domain.projectinvitation.dto.*;
 import com.test.teamlog.domain.projectinvitation.entity.ProjectInvitation;
 import com.test.teamlog.domain.projectinvitation.repository.ProjectInvitationRepository;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
@@ -129,5 +126,13 @@ public class ProjectInvitationService {
         }
 
         return projectInvitationRepository.findAllByProjectAndAcceptedIsFalse(project);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProjectInvitationReadPendingResult> readAllPending(Long userIdx) {
+        final User user
+                = accountQueryService.findByIdx(userIdx).orElseThrow(() -> new ResourceNotFoundException("User", "ID", userIdx));
+
+        return projectInvitationRepository.findAllByUserAndAcceptedIsFalse(user);
     }
 }

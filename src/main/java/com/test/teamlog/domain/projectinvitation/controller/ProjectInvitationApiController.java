@@ -58,4 +58,14 @@ public class ProjectInvitationApiController {
         final List<ProjectInvitationReadInviteeResponse> responseList = resultList.stream().map(ProjectInvitationReadInviteeResponse::from).toList();
         return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<ProjectInvitationReadPendingResponse>> readAllPending(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser
+    ) {
+        final List<ProjectInvitationReadPendingResult> resultList = projectInvitationService.readAllPending(currentUser.getUser().getIdx());
+        final List<ProjectInvitationReadPendingResponse> responseList = resultList.stream().map(ProjectInvitationReadPendingResponse::from).toList();
+
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
+    }
 }
