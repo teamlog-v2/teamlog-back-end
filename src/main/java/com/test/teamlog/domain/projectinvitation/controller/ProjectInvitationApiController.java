@@ -31,7 +31,7 @@ public class ProjectInvitationApiController {
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    @PutMapping
+    @PostMapping("/accept")
     public ResponseEntity<ApiResponse> accept(
             @RequestBody ProjectInvitationAcceptRequest request,
             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
@@ -40,25 +40,45 @@ public class ProjectInvitationApiController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    @DeleteMapping
-    public ResponseEntity<ApiResponse> delete(
-            @RequestBody ProjectInvitationDeleteRequest request,
+    @DeleteMapping("/reject")
+    public ResponseEntity<ApiResponse> reject(
+            @RequestBody ProjectInvitationRejectRequest request,
             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
 
-        final ApiResponse apiResponse = projectInvitationService.delete(request.toInput(currentUser.getUser().getIdx()));
+        final ApiResponse apiResponse = projectInvitationService.reject(request.toInput(currentUser.getUser().getIdx()));
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @DeleteMapping("/cancel")
+    public ResponseEntity<ApiResponse> cancel(
+            @RequestBody ProjectInvitationCancelRequest request,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+
+        final ApiResponse apiResponse = projectInvitationService.cancel(request.toInput(currentUser.getUser().getIdx()));
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    /**
+     * 특정 프로젝트에 초대 받은 유저 목록 조회
+     * @param projectIdx
+     * @param currentUser
+     * @return
+     */
     @GetMapping("/invitees")
     public ResponseEntity<List<ProjectInvitationReadInviteeResponse>> readAllInvitees(
             @RequestParam Long projectIdx,
             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser
     ) {
-        final List<ProjectInvitationReadInviteeResult> resultList = projectInvitationService.readAllInvitee(currentUser.getUser().getIdx(), projectIdx);
+        final List<ProjectInvitationReadInviteeResult> resultList = projectInvitationService.readAllInvitee(projectIdx, currentUser.getUser().getIdx());
         final List<ProjectInvitationReadInviteeResponse> responseList = resultList.stream().map(ProjectInvitationReadInviteeResponse::from).toList();
         return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 
+    /**
+     * 본인이 아직 수락하지 않은 프로젝트 초대 목록 조회
+     * @param currentUser
+     * @return
+     */
     @GetMapping("/pending")
     public ResponseEntity<List<ProjectInvitationReadPendingResponse>> readAllPending(
             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser
