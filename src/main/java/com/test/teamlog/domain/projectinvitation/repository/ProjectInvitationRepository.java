@@ -6,10 +6,15 @@ import com.test.teamlog.domain.projectinvitation.entity.ProjectInvitation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 
 @Repository
 public interface ProjectInvitationRepository extends JpaRepository<ProjectInvitation, Long>, ProjectInvitationCustom {
+    List<ProjectInvitation> findAllByInvitee(User invitee);
+
+    List<ProjectInvitation> findAllByProjectAndInviter(Project project, User inviter);
+
     Optional<ProjectInvitation> findByProjectAndInvitee(Project project, User invitee);
 }

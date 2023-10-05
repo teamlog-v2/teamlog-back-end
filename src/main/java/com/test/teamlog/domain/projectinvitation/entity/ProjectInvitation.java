@@ -1,18 +1,21 @@
 package com.test.teamlog.domain.projectinvitation.entity;
 
-
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.project.entity.Project;
-import com.test.teamlog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ProjectInvitation extends BaseTimeEntity {
+public class ProjectInvitation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
@@ -29,15 +32,7 @@ public class ProjectInvitation extends BaseTimeEntity {
     @JoinColumn(name = "invitee_idx", nullable = false)
     private User invitee;
 
-    @Column(name = "is_accepted", nullable = false)
-    private boolean isAccepted;
-
-    public void update() {
-        setUpdateTimeToNow();
-    }
-
-    public void accept() {
-        this.isAccepted = true;
-        setUpdateTimeToNow();
-    }
+    @CreatedDate
+    @Column(name = "create_time")
+    private LocalDateTime createTime;
 }
