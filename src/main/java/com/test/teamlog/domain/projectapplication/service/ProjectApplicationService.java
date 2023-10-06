@@ -49,7 +49,7 @@ public class ProjectApplicationService {
             throw new BadRequestException("이미 프로젝트 멤버입니다.");
         }
 
-        final ProjectApplication projectApplication = projectApplicationRepository.findByProjectAndAndApplicant(project, applicant).orElse(null);
+        final ProjectApplication projectApplication = projectApplicationRepository.findByProjectAndApplicant(project, applicant).orElse(null);
 
         if (projectApplication != null) {
             throw new ResourceAlreadyExistsException("이미 존재하는 프로젝트 참여 신청입니다.");

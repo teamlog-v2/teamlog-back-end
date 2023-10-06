@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface ProjectApplicationRepository extends JpaRepository<ProjectApplication, Long>, ProjectInvitationCustom {
-    Optional<ProjectApplication> findByProjectAndAndApplicant(Project project, User applicant);
+    Optional<ProjectApplication> findByProjectAndApplicant(Project project, User applicant);
 
     List<ProjectApplication> findAllByProject(Project project);
 
