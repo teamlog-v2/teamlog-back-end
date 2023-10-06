@@ -11,6 +11,7 @@ import org.hibernate.annotations.BatchSize;
 import java.util.ArrayList;
 import java.util.List;
 
+// FIXME: 추후 class 이름 Account로 변경
 @Entity
 @Getter
 @Setter
