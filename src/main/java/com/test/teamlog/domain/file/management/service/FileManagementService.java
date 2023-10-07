@@ -46,7 +46,7 @@ public class FileManagementService {
         this.downloadUrlPrefix = fileConfig.getDownloadUrlPrefix();
     }
 
-    public void uploadFile(MultipartFile file) throws IOException {
+    public FileInfo uploadFile(MultipartFile file) throws IOException {
         checkValidation(file);
 
         // 경로 생성
@@ -61,7 +61,7 @@ public class FileManagementService {
 
         // 파일 정보 저장
         final FileInfo fileInfo = FileInfo.create(file.getContentType(), originalFileName, storedFileName, downloadUrlPrefix + "/" + storedFileName);
-        fileInfoCommandService.save(fileInfo);
+        return fileInfoCommandService.save(fileInfo);
     }
 
     public FileResourceInfo downloadFile(String storedFileName) throws MalformedURLException, UnsupportedEncodingException {

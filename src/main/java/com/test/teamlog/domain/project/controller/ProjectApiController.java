@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,8 +38,8 @@ public class ProjectApiController {
     @Operation(summary = "프로젝트 수정")
     @PutMapping("/projects/{id}")
     public ResponseEntity<ProjectUpdateResponse> update(@PathVariable("id") long id,
-                                                             @Valid @RequestBody ProjectUpdateRequest request,
-                                                             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+                                                        @Valid @RequestBody ProjectUpdateRequest request,
+                                                        @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         final ProjectUpdateResult result = projectService.update(id, request.toInput(), currentUser.getUser());
         return new ResponseEntity<>(ProjectUpdateResponse.from(result), HttpStatus.OK);
     }
@@ -54,7 +55,7 @@ public class ProjectApiController {
     @Operation(summary = "단일 프로젝트 조회")
     @GetMapping("/projects/{id}")
     public ResponseEntity<ProjectReadResponse> readOne(@PathVariable("id") long id,
-                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         final ProjectReadResult result = projectService.readOne(id, currentUser.getUser());
         return new ResponseEntity<>(ProjectReadResponse.from(result), HttpStatus.OK);
     }
@@ -71,10 +72,14 @@ public class ProjectApiController {
     @Operation(summary = "프로젝트 썸네일 변경")
     @PutMapping("/projects/{projectId}/thumbnail")
     public ResponseEntity<ApiResponse> updateThumbnail(@PathVariable("projectId") Long projectId,
-                                                       @RequestPart(value = "thumbnail", required = true) MultipartFile image,
+                                                       @RequestPart(value = "thumbnail") MultipartFile image,
                                                        @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = projectService.updateThumbnail(projectId, image, currentUser.getUser());
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        try {
+            ApiResponse apiResponse = projectService.updateThumbnail(projectId, image, currentUser.getUser());
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(summary = "프로젝트 썸네일 삭제")
@@ -97,7 +102,7 @@ public class ProjectApiController {
     @Operation(summary = "프로젝트 검색")
     @GetMapping("/projects")
     public ResponseEntity<List<ProjectSearchResponse>> search(@RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         final List<ProjectSearchResult> resultList = projectService.search(name, currentUser.getUser());
         final List<ProjectSearchResponse> responseList = resultList.stream().map(ProjectSearchResponse::from).collect(Collectors.toList());
 
@@ -107,7 +112,7 @@ public class ProjectApiController {
     @Operation(summary = "유저 프로젝트 리스트 조회")
     @GetMapping("/projects/accounts/{userId}")
     public ResponseEntity<List<ProjectReadByUserResponse>> readAllByUser(@PathVariable("userId") String userId,
-                                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+                                                                         @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         final List<ProjectReadByUserResult> resultList = projectService.readAllByUser(userId, currentUser.getUser());
         final List<ProjectReadByUserResponse> responseList = resultList.stream().map(ProjectReadByUserResponse::from).collect(Collectors.toList());
         return new ResponseEntity<>(responseList, HttpStatus.OK);
@@ -116,7 +121,7 @@ public class ProjectApiController {
     @Operation(summary = "유저 팔로잉 프로젝트 조회")
     @GetMapping("/accounts/{id}/following-projects")
     public ResponseEntity<List<ProjectReadUserFollowingResponse>> readAllUserFollowing(@PathVariable("id") String identification,
-                                                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+                                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         final List<ProjectReadUserFollowingResult> resultList = projectService.readAllUserFollowing(identification, currentUser.getUser());
         List<ProjectReadUserFollowingResponse> response = resultList.stream().map(ProjectReadUserFollowingResponse::from).collect(Collectors.toList());
         return new ResponseEntity<>(response, HttpStatus.OK);

@@ -1,6 +1,7 @@
 package com.test.teamlog.domain.project.entity;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
@@ -39,6 +40,10 @@ public class Project extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "master_user_id", nullable = false)
     private User master;
+
+    @OneToOne
+    @JoinColumn(name = "thumbnail_file_idx")
+    private FileInfo thumbnailFile;
 
     private String thumbnail;
 
@@ -93,5 +98,9 @@ public class Project extends BaseTimeEntity {
         if (user == null) return false;
 
         return this.master.getIdentification().equals(user.getIdentification());
+    }
+
+    public void updateThumbnail(FileInfo thumbnailFile) {
+        this.thumbnailFile = thumbnailFile;
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,8 +82,12 @@ public class AccountApiController {
     public ResponseEntity<ApiResponse> update(@Valid @RequestPart(value = "key") UserRequest.UserUpdateRequest userRequest,
                                               @RequestPart(value = "profileImg", required = false) MultipartFile image,
                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = accountService.updateUser(userRequest, image, currentUser.getUser());
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        try {
+            ApiResponse apiResponse = accountService.updateUser(userRequest, image, currentUser.getUser());
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Operation(summary = "회원 삭제")
@@ -96,8 +101,12 @@ public class AccountApiController {
     @PutMapping("/profile-image")
     public ResponseEntity<ApiResponse> updateUserProfileImage(@RequestPart(value = "profileImg", required = true) MultipartFile image,
                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = accountService.updateUserProfileImage(image, currentUser.getUser());
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        try {
+            ApiResponse apiResponse = accountService.updateUserProfileImage(image, currentUser.getUser());
+            return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Operation(summary = "프로필 이미지 삭제")

@@ -1,6 +1,8 @@
 package com.test.teamlog.domain.post.service;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.file.info.entity.FileInfo;
+import com.test.teamlog.domain.file.management.service.FileManagementService;
 import com.test.teamlog.domain.post.dto.PostCreateInput;
 import com.test.teamlog.domain.post.dto.PostReadByProjectInput;
 import com.test.teamlog.domain.post.dto.PostResult;
@@ -8,6 +10,7 @@ import com.test.teamlog.domain.post.dto.PostUpdateInput;
 import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.post.repository.PostRepository;
 import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
+import com.test.teamlog.domain.postmedia.entity.PostMedia;
 import com.test.teamlog.domain.posttag.entity.PostTag;
 import com.test.teamlog.domain.postupdatehistory.entity.PostUpdateHistory;
 import com.test.teamlog.domain.project.entity.Project;
@@ -15,12 +18,10 @@ import com.test.teamlog.domain.project.service.query.ProjectQueryService;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.domain.userfollow.entity.UserFollow;
 import com.test.teamlog.domain.userfollow.service.query.UserFollowQueryService;
-import com.test.teamlog.domain.postmedia.entity.PostMedia;
-import com.test.teamlog.global.exception.ResourceNotFoundException;
-import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.dto.PagedResponse;
-import com.test.teamlog.domain.postmedia.service.FileStorageService;
+import com.test.teamlog.global.entity.AccessModifier;
+import com.test.teamlog.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -35,7 +36,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,8 +48,8 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
 
-    private final FileStorageService fileStorageService;
     private final ProjectQueryService projectQueryService;
+    private final FileManagementService fileManagementService;
     private final UserFollowQueryService userFollowQueryService;
     private final ProjectMemberQueryService projectMemberQueryService;
 
@@ -148,7 +149,7 @@ public class PostService {
     public Long create(PostCreateInput input,
                        MultipartFile[] media,
                        MultipartFile[] files,
-                       User currentUser) {
+                       User currentUser) throws IOException {
         Project project = findProjectById(input.getProjectId());
         projectMemberQueryService.isProjectMember(project, currentUser);
 
@@ -164,37 +165,43 @@ public class PostService {
         }
 
         post.addPostUpdateHistory(new PostUpdateHistory(post, currentUser));
-        Post newPost = postRepository.save(post);
 
         storeMediaFiles(media, post);
         storeFiles(files, post);
 
-        project.setUpdateTime(LocalDateTime.now());
+        Post newPost = postRepository.save(post);
         return newPost.getId();
     }
 
-    private void storeFiles(MultipartFile[] files, Post post) {
-        if (files == null) return;
-
+    private void storeFiles(MultipartFile[] files, Post post) throws IOException {
+        List<PostMedia> postMediaList = new ArrayList<>();
         for (MultipartFile file : files) {
-            fileStorageService.storeFile(file, post, Boolean.FALSE);
+            final FileInfo fileInfo = fileManagementService.uploadFile(file);
+            postMediaList.add(PostMedia.create(post, false, fileInfo));
         }
+
+        post.addAllPostMedia(postMediaList);
     }
 
-    private void storeMediaFiles(MultipartFile[] media, Post post) {
+    private void storeMediaFiles(MultipartFile[] media, Post post) throws IOException {
         if (media == null) return;
 
+        List<PostMedia> postMediaList = new ArrayList<>();
         for (MultipartFile file : media) {
-            fileStorageService.storeFile(file, post, Boolean.TRUE);
+            final FileInfo fileInfo = fileManagementService.uploadFile(file);
+            postMediaList.add(PostMedia.create(post, true, fileInfo));
         }
+
+        post.addAllPostMedia(postMediaList);
     }
+
 
     // 포스트 수정
     @Transactional
     public Long update(Long id,
                        PostUpdateInput input,
                        MultipartFile[] media,
-                       MultipartFile[] files, User currentUser) {
+                       MultipartFile[] files, User currentUser) throws IOException {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         projectMemberQueryService.isProjectMember(post.getProject(), currentUser);
@@ -202,7 +209,6 @@ public class PostService {
         post.update(input.getContents(), input.getAccessModifier(), input.getCommentModifier(), makeLocation(input.getLatitude(), input.getLongitude()), input.getAddress());
 
         // 취소한 파일 삭제 후 새로운 파일 저장
-        fileStorageService.deleteFileById(input.getDeletedFileIdList());
         storeMediaFiles(media, post);
         storeFiles(files, post);
 
@@ -259,7 +265,6 @@ public class PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         projectMemberQueryService.isProjectMember(post.getProject(), currentUser);
 
-        fileStorageService.deleteFilesByPost(post);
         postRepository.delete(post);
         return new ApiResponse(Boolean.TRUE, "포스트 삭제 성공");
     }
