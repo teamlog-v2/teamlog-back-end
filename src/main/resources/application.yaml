@@ -38,7 +38,8 @@ cookie:
 
 ## File Storage Properties
 file:
-    upload-dir: /Users/jduckling_1024/project/storage
+    upload-dir: /Users/jduckling_1024/project/teamlog-v2/storage
+    download-url-prefix: localhost:8090/api/files/download
 
 # Swagger
 springdoc:
