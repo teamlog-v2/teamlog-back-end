@@ -2,8 +2,8 @@ package com.test.teamlog.domain.account.controller;
 
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.service.AccountService;
-import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.global.security.UserAdapter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,11 +54,12 @@ public class AccountApiController {
 
     @Operation(summary = "로그인 검증")
     @GetMapping("/validate")
-    public ResponseEntity<UserValidateResponse> validateUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+    public ResponseEntity<UserValidateResponse> validate(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         if (currentUser == null) {
             return new ResponseEntity<>(new UserValidateResponse(), HttpStatus.UNAUTHORIZED);
         } else {
-            return new ResponseEntity<>(UserValidateResponse.of(currentUser.getUser()), HttpStatus.OK);
+            final UserValidateResult result = accountService.validate(currentUser.getUser().getIdx());
+            return new ResponseEntity<>(UserValidateResponse.from(result), HttpStatus.OK);
         }
     }
 

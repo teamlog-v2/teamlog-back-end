@@ -1,5 +1,6 @@
 package com.test.teamlog.domain.projectinvitation.dto;
 
+import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.projectinvitation.entity.ProjectInvitation;
 import lombok.Data;
 
@@ -13,9 +14,12 @@ public class ProjectInvitationReadPendingResult {
     public static ProjectInvitationReadPendingResult from(ProjectInvitation projectInvitation) {
         final ProjectInvitationReadPendingResult result = new ProjectInvitationReadPendingResult();
         result.setIdx(projectInvitation.getIdx());
-        result.setProjectIdx(projectInvitation.getProject().getId());
-        result.setProjectName(projectInvitation.getProject().getName());
-        result.setThumbnail(projectInvitation.getProject().getThumbnail());
+
+        final Project project = projectInvitation.getProject();
+        result.setProjectIdx(project.getId());
+        result.setProjectName(project.getName());
+
+        if (project.getThumbnail() != null) result.setThumbnail(project.getThumbnail().getStoredFilePath());
 
         return result;
     }

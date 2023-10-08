@@ -1,6 +1,7 @@
 package com.test.teamlog.domain.projectinvitation.dto;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.projectinvitation.entity.ProjectInvitation;
 import lombok.Data;
 
@@ -20,7 +21,9 @@ public class ProjectInvitationReadInviteeResult {
 
         result.setInviteeIdentification(invitee.getIdentification());
         result.setInviteeName(invitee.getName());
-        result.setInviteeProfileImgPath(invitee.getProfileImgPath());
+
+        final FileInfo profileImage = invitee.getProfileImage();
+        if (profileImage != null) result.setInviteeProfileImgPath(profileImage.getStoredFilePath());
 
         result.setInviterIdentification(inviter.getIdentification());
         result.setInviterName(inviter.getName());

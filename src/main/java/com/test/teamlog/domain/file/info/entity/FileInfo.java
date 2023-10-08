@@ -25,7 +25,7 @@ public class FileInfo {
     private String storedFileName;
 
     @Column(nullable = false)
-    private String downloadUrl;
+    private String storedFilePath;
 
     @CreatedDate
     @Column(name = "create_time")
@@ -34,12 +34,12 @@ public class FileInfo {
     public static FileInfo create(String contentType,
                                   String originalFileName,
                                   String storedFileName,
-                                  String filePath) {
+                                  String storedFilePath) {
         return FileInfo.builder()
                 .contentType(contentType)
                 .originalFileName(originalFileName)
                 .storedFileName(storedFileName)
-                .downloadUrl(filePath)
+                .storedFilePath(storedFilePath)
                 .build();
     }
 }

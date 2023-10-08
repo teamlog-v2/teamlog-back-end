@@ -16,6 +16,7 @@ import com.test.teamlog.domain.projectmember.entity.ProjectMember;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.entity.AccessModifier;
+import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.exception.ResourceForbiddenException;
 import com.test.teamlog.global.exception.ResourceNotFoundException;
 import com.test.teamlog.payload.ProjectDTO;
@@ -57,10 +58,11 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        if (project.getThumbnail() != null) {
-            project.setThumbnail(null);
+        if (project.isProjectMaster(currentUser)) {
+            throw new BadRequestException("프로젝트 멤버가 아닙니다.");
         }
 
+        project.updateThumbnail(null);
         return new ApiResponse(Boolean.TRUE, "프로젝트 썸네일 삭제 성공");
     }
 
@@ -131,9 +133,6 @@ public class ProjectService {
         }
 
         final ProjectReadResult result = ProjectReadResult.from(project);
-
-        // TODO: 프로젝트 썸네일 관련 로직 추가
-
         result.setRelation(detectRelation(project, currentUser));
 
         return result;

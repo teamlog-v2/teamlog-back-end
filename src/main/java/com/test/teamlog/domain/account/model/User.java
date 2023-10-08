@@ -39,9 +39,6 @@ public class User {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private FileInfo profileImage;
 
-    @Column(name = "profile_img_path")
-    private String profileImgPath;
-
     @Builder.Default
     @OneToMany(mappedBy="toUser", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)

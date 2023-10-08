@@ -16,4 +16,8 @@ public class UserFollowQueryService {
     public List<UserFollow> readAllByFromUser(User currentUser) {
         return userFollowRepository.findAllByFromUser(currentUser);
     }
+
+    public boolean isFollow(User currentUser, User targetUser) {
+        return userFollowRepository.findByFromUserAndToUser(currentUser, targetUser).isPresent();
+    }
 }

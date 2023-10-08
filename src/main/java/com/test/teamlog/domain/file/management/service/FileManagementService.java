@@ -31,7 +31,7 @@ import static org.springframework.util.MimeTypeUtils.APPLICATION_OCTET_STREAM_VA
 public class FileManagementService {
 
     private final Path directory;
-    private final String downloadUrlPrefix;
+    private final String storedFilePathPrefix;
 
     private final FileInfoQueryService fileInfoQueryService;
     private final FileInfoCommandService fileInfoCommandService;
@@ -43,7 +43,7 @@ public class FileManagementService {
         this.fileInfoQueryService = fileInfoQueryService;
 
         this.directory = Path.of(fileConfig.getUploadDir());
-        this.downloadUrlPrefix = fileConfig.getDownloadUrlPrefix();
+        this.storedFilePathPrefix = fileConfig.getStoredPathPrefix();
     }
 
     public FileInfo uploadFile(MultipartFile file) throws IOException {
@@ -60,7 +60,7 @@ public class FileManagementService {
         file.transferTo(filePath);
 
         // 파일 정보 저장
-        final FileInfo fileInfo = FileInfo.create(file.getContentType(), originalFileName, storedFileName, downloadUrlPrefix + "/" + storedFileName);
+        final FileInfo fileInfo = FileInfo.create(file.getContentType(), originalFileName, storedFileName, storedFilePathPrefix + "/" + storedFileName);
         return fileInfoCommandService.save(fileInfo);
     }
 

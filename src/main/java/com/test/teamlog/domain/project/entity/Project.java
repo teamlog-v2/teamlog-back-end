@@ -42,10 +42,8 @@ public class Project extends BaseTimeEntity {
     private User master;
 
     @OneToOne
-    @JoinColumn(name = "thumbnail_file_idx")
-    private FileInfo thumbnailFile;
-
-    private String thumbnail;
+    @JoinColumn(name = "thumbnail_idx")
+    private FileInfo thumbnail;
 
     @Builder.Default
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -101,6 +99,6 @@ public class Project extends BaseTimeEntity {
     }
 
     public void updateThumbnail(FileInfo thumbnailFile) {
-        this.thumbnailFile = thumbnailFile;
+        this.thumbnail = thumbnailFile;
     }
 }

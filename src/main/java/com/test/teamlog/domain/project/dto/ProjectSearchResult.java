@@ -1,8 +1,8 @@
 package com.test.teamlog.domain.project.dto;
 
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.project.entity.Project;
 import lombok.Data;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDateTime;
 
@@ -17,18 +17,14 @@ public class ProjectSearchResult {
     private String thumbnail; // 대표 이미지
 
     public static ProjectSearchResult from(Project project) {
-        // FIXME: 추후 파일 관련된 부분은 일괄 수정
-        final String imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/resources/")
-                .path(project.getThumbnail())
-                .toUriString();
-
         ProjectSearchResult result = new ProjectSearchResult();
         result.setId(project.getId());
         result.setName(project.getName());
         result.setPostCount(project.getPosts().size());
         result.setUpdateTime(project.getUpdateTime());
-        result.setThumbnail(imgUri);
+
+        final FileInfo thumbnail = project.getThumbnail();
+        if (thumbnail != null) result.setThumbnail(thumbnail.getStoredFilePath());
 
         return result;
     }
