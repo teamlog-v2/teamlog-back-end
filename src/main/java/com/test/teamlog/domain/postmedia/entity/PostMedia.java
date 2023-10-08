@@ -18,9 +18,6 @@ public class PostMedia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "file_name", nullable = false)
-    private String fileName;
-
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
@@ -31,14 +28,6 @@ public class PostMedia {
     @OneToOne
     @JoinColumn(name = "file_info_idx", nullable = false)
     private FileInfo fileInfo;
-
-    // TODO: 삭제
-    @Column(name = "stored_file_name", nullable = false)
-    private String storedFileName;
-
-    // TODO: 삭제
-    @Column(name = "content_type", nullable = false)
-    private String contentType;
 
     public void setPost(Post post) {
         if (this.post != null) {
@@ -55,5 +44,4 @@ public class PostMedia {
                 .fileInfo(fileInfo)
                 .build();
     }
-
 }

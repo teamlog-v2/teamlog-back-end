@@ -28,14 +28,13 @@ public class PostApiController {
 
     @Operation(summary = "게시물 생성")
     @PostMapping
-    public ResponseEntity<PostResponse> create(@RequestPart(value = "key") PostCreateRequest request,
+    public ResponseEntity<Long> create(@RequestPart(value = "key") PostCreateRequest request,
                                                @RequestPart(value = "media", required = false) MultipartFile[] media,
                                                @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         try {
             Long postId = postService.create(request.toInput(), media, files, currentUser.getUser());
-            PostResult result = postService.readOne(postId, currentUser.getUser());
-            return new ResponseEntity<>(PostResponse.from(result), HttpStatus.CREATED);
+            return new ResponseEntity<>(postId, HttpStatus.CREATED);
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

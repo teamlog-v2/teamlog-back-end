@@ -13,8 +13,10 @@ public class PostMediaResult {
     public static PostMediaResult from(PostMedia postMedia) {
         PostMediaResult result = new PostMediaResult();
         result.setId(postMedia.getId());
-        result.setContentType(postMedia.getContentType());
-        result.setFileName(postMedia.getFileName());
+        result.setContentType(postMedia.getFileInfo().getContentType());
+        result.setFileName(postMedia.getFileInfo().getOriginalFileName());
+        result.setFileDownloadUri(postMedia.getFileInfo().getStoredFilePath());
+
         return result;
     }
 }

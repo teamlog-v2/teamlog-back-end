@@ -296,10 +296,8 @@ public class PostService {
             final PostMediaResult postMediaResult = PostMediaResult.from(postMedia);
 
             if (postMedia.getIsMedia()) {
-                postMediaResult.setFileDownloadUri(makeFileDownloadUri(postMedia, "/resources/"));
                 mediaList.add(postMediaResult);
             } else {
-                postMediaResult.setFileDownloadUri(makeFileDownloadUri(postMedia, "/api/downloadFile/"));
                 fileList.add(postMediaResult);
             }
         }
@@ -313,7 +311,7 @@ public class PostService {
     private String makeFileDownloadUri(PostMedia postMedia, String path) {
         return ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path(path)
-                .path(postMedia.getStoredFileName())
+                .path(postMedia.getFileInfo().getStoredFileName())
                 .toUriString();
     }
 
