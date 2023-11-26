@@ -3,18 +3,20 @@ package com.test.teamlog.domain.account.service;
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.file.management.service.FileManagementService;
 import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.domain.token.service.TokenService;
+import com.test.teamlog.domain.userfollow.service.query.UserFollowQueryService;
+import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.global.exception.ResourceNotFoundException;
 import com.test.teamlog.global.utility.PasswordUtil;
-import com.test.teamlog.global.dto.ApiResponse;
-import com.test.teamlog.domain.postmedia.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -24,7 +26,8 @@ public class AccountService {
     private final AccountRepository accountRepository;
 
     private final TokenService tokenService;
-    private final FileStorageService fileStorageService;
+    private final UserFollowQueryService userFollowQueryService;
+    private final FileManagementService fileManagementService;
 
     public List<UserSearchResult> search(String id, String name) {
         List<User> userList = accountRepository.searchUserByIdentificationAndName(id, name);
@@ -32,21 +35,24 @@ public class AccountService {
         return userList.stream().map(UserSearchResult::from).toList();
     }
 
+    public UserValidateResult validate(Long userId) {
+        final User currentUser = accountRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", userId));
+
+        return UserValidateResult.from(currentUser);
+    }
+
     @Transactional(readOnly = true)
     public UserReadDetailResult readDetail(String identification, User currentUser) {
-        UserReadDetailResult result;
+        User user = accountRepository.findByIdentification(identification)
+                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", identification));
+
+        UserReadDetailResult result = UserReadDetailResult.from(user);
 
         if (currentUser == null || !identification.equals(currentUser.getIdentification())) {
-            User user = accountRepository.findByIdentification(identification)
-                    .orElseThrow(() -> new ResourceNotFoundException("USER", "id", identification));
-            result = UserReadDetailResult.from(user);
             result.setIsMe(currentUser != null ? Boolean.FALSE : null);
-            result.setIsFollow(currentUser != null ?
-                    accountRepository.isFollow(currentUser.getIdentification(), user.getIdentification()) :
-                    null
-            );
+            result.setIsFollow(currentUser != null ? userFollowQueryService.isFollow(currentUser, user) : null);
         } else {
-            result = UserReadDetailResult.from(currentUser);
             result.setIsMe(Boolean.TRUE);
             result.setIsFollow(Boolean.FALSE);
         }
@@ -80,20 +86,14 @@ public class AccountService {
     }
 
     @Transactional
-    public ApiResponse updateUser(UserRequest.UserUpdateRequest userRequest, MultipartFile image, User currentUser) {
+    public ApiResponse updateUser(UserRequest.UserUpdateRequest userRequest, MultipartFile image, User currentUser) throws IOException {
         if (userRequest.getDefaultImage()) {
-            if (currentUser.getProfileImgPath() != null) {
-                fileStorageService.deleteFile(currentUser.getProfileImgPath());
-                currentUser.setProfileImgPath(null);
+            if (currentUser.getProfileImage() != null) {
+                currentUser.setProfileImage(null);
             }
         } else {
             if (image != null) {
-                if (currentUser.getProfileImgPath() != null) {
-                    fileStorageService.deleteFile(currentUser.getProfileImgPath());
-                    currentUser.setProfileImgPath(null);
-                }
-                String profileImgPath = fileStorageService.storeFile(image, null, null);
-                currentUser.setProfileImgPath(profileImgPath);
+                currentUser.updateProfileImage(fileManagementService.uploadFile(image));
             }
         }
         currentUser.setName(userRequest.getName());
@@ -103,23 +103,17 @@ public class AccountService {
     }
 
     @Transactional
-    public ApiResponse updateUserProfileImage(MultipartFile image, User currentUser) {
-        if (currentUser.getProfileImgPath() != null) {
-            fileStorageService.deleteFile(currentUser.getProfileImgPath());
-            currentUser.setProfileImgPath(null);
-        }
-        String profileImgPath = fileStorageService.storeFile(image, null, null);
-        currentUser.setProfileImgPath(profileImgPath);
+    public ApiResponse updateUserProfileImage(MultipartFile image, User currentUser) throws IOException {
+        currentUser.updateProfileImage(fileManagementService.uploadFile(image));
+
         accountRepository.save(currentUser);
         return new ApiResponse(Boolean.TRUE, "프로필 이미지 수정 성공");
     }
 
     @Transactional
     public ApiResponse deleteUserProfileImage(User currentUser) {
-        if (currentUser.getProfileImgPath() != null) {
-            fileStorageService.deleteFile(currentUser.getProfileImgPath());
-            currentUser.setProfileImgPath(null);
-        }
+        currentUser.setProfileImage(null);
+
         accountRepository.save(currentUser);
         return new ApiResponse(Boolean.TRUE, "프로필 이미지 삭제 성공");
     }

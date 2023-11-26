@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -19,7 +19,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final String SIGN_IN_ENDPOINT = "/api/accounts/sign-in";
     private final String SIGN_UP_ENDPOINT = "/api/accounts/sign-up";
     private final String REISSUE_ENDPOINT = "/api/tokens/reissue";
-    private final Set<String> EXCLUDE_ENDPOINTS = Set.of(SIGN_IN_ENDPOINT, SIGN_UP_ENDPOINT, REISSUE_ENDPOINT);
+    private final String FILE_DOWNLOAD_ENDPOINT = "/api/files/download";
+    private final List<String> EXCLUDE_ENDPOINTS = List.of(SIGN_IN_ENDPOINT, SIGN_UP_ENDPOINT, REISSUE_ENDPOINT, FILE_DOWNLOAD_ENDPOINT);
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -38,6 +39,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return EXCLUDE_ENDPOINTS.contains(request.getServletPath());
+        return EXCLUDE_ENDPOINTS.stream().anyMatch(endpoint -> request.getServletPath().startsWith(endpoint));
     }
 }

@@ -2,6 +2,8 @@ package com.test.teamlog.domain.project.service;
 
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
+import com.test.teamlog.domain.file.info.entity.FileInfo;
+import com.test.teamlog.domain.file.management.service.FileManagementService;
 import com.test.teamlog.domain.posttag.entity.PostTag;
 import com.test.teamlog.domain.project.dto.*;
 import com.test.teamlog.domain.project.entity.Project;
@@ -12,18 +14,18 @@ import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
 import com.test.teamlog.domain.projectjoin.service.query.ProjectJoinQueryService;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
+import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.global.entity.AccessModifier;
+import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.exception.ResourceForbiddenException;
 import com.test.teamlog.global.exception.ResourceNotFoundException;
-import com.test.teamlog.global.entity.AccessModifier;
-import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.payload.ProjectDTO;
-import com.test.teamlog.domain.project.dto.Relation;
-import com.test.teamlog.domain.postmedia.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,23 +36,19 @@ import java.util.stream.Collectors;
 public class ProjectService {
     private final ProjectRepository projectRepository;
 
-    private final FileStorageService fileStorageService;
     private final AccountQueryService accountQueryService;
+    private final FileManagementService fileManagementService;
     private final ProjectJoinQueryService projectJoinQueryService;
     private final ProjectMemberQueryService projectMemberQueryService;
     private final ProjectFollowQueryService projectFollowQueryService;
 
     @Transactional
-    public ApiResponse updateThumbnail(Long projectId, MultipartFile image, User currentUser) {
+    public ApiResponse updateThumbnail(Long projectId, MultipartFile image, User currentUser) throws IOException {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        if (project.getThumbnail() != null) {
-            fileStorageService.deleteFile(project.getThumbnail());
-        }
-
-        String thumbnailPath = fileStorageService.storeFile(image, null, null);
-        project.setThumbnail(thumbnailPath);
+        final FileInfo fileInfo = fileManagementService.uploadFile(image);
+        project.updateThumbnail(fileInfo);
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 썸네일 수정 성공");
     }
@@ -60,11 +58,11 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        if (project.getThumbnail() != null) {
-            fileStorageService.deleteFile(project.getThumbnail());
-            project.setThumbnail(null);
+        if (project.isProjectMaster(currentUser)) {
+            throw new BadRequestException("프로젝트 멤버가 아닙니다.");
         }
 
+        project.updateThumbnail(null);
         return new ApiResponse(Boolean.TRUE, "프로젝트 썸네일 삭제 성공");
     }
 
@@ -135,9 +133,6 @@ public class ProjectService {
         }
 
         final ProjectReadResult result = ProjectReadResult.from(project);
-
-        // TODO: 프로젝트 썸네일 관련 로직 추가
-
         result.setRelation(detectRelation(project, currentUser));
 
         return result;

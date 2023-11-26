@@ -1,17 +1,14 @@
 package com.test.teamlog.domain.account.dto;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 public class UserRequest {
-
-
-
     @Data
     public static class UserUpdateRequest {
         private String id;
@@ -20,29 +17,6 @@ public class UserRequest {
         private String name;
         private String introduction;
         private Boolean defaultImage;
-    }
-
-    @Data
-    public static class UserResponse {
-        private Boolean isMe;
-        private Boolean isFollow;
-        private String identification;
-        private String name;
-        private String introduction;
-        private String profileImgPath;
-        public UserResponse(User user) {
-            this.identification = user.getIdentification();
-            this.name = user.getName();
-            this.introduction = user.getIntroduction();
-            String imgUri = null;
-            if(user.getProfileImgPath() != null){
-                imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/resources/")
-                        .path(user.getProfileImgPath())
-                        .toUriString();
-            }
-            this.profileImgPath = imgUri;
-        }
     }
 
     // FIXME: UserFollow 리팩할 때 삭제
@@ -57,14 +31,9 @@ public class UserRequest {
         public UserSimpleInfo(User user) {
             this.id = user.getIdentification();
             this.name = user.getName();
-            String imgUri = null;
-            if(user.getProfileImgPath() != null){
-                imgUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/resources/")
-                        .path(user.getProfileImgPath())
-                        .toUriString();
-            }
-            this.profileImgPath = imgUri;
+
+            final FileInfo profileImage = user.getProfileImage();
+            if (profileImage != null) this.profileImgPath = profileImage.getStoredFilePath();
         }
     }
 

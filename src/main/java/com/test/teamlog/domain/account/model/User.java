@@ -1,5 +1,6 @@
 package com.test.teamlog.domain.account.model;
 
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.postlike.entity.PostLike;
 import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
 import com.test.teamlog.domain.task.entity.TaskPerformer;
@@ -34,8 +35,9 @@ public class User {
 
     private String introduction;
 
-    @Column(name = "profile_img_path")
-    private String profileImgPath;
+    @JoinColumn(name = "profile_image_idx")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private FileInfo profileImage;
 
     @Builder.Default
     @OneToMany(mappedBy="toUser", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -61,4 +63,8 @@ public class User {
     @OneToMany(mappedBy="user", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<TaskPerformer> taskPerformers = new ArrayList<>();
+
+    public void updateProfileImage(FileInfo profileImage) {
+        this.profileImage = profileImage;
+    }
 }

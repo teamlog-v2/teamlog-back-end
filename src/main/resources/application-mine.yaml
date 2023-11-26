@@ -38,8 +38,7 @@ cookie:
 
 ## File Storage Properties
 file:
-    upload-dir: ../teamlog-front-end/public/storage
-    stored-path-prefix: /storage
+    upload-dir: /Users/jduckling_1024/project/storage
 
 # Swagger
 springdoc:

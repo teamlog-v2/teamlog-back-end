@@ -1,6 +1,7 @@
 package com.test.teamlog.domain.projectapplication.dto;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.projectapplication.entity.ProjectApplication;
 import lombok.Data;
 
@@ -15,7 +16,9 @@ public class ProjectApplicationReadPendingResult {
         final User applicant = projectApplication.getApplicant();
         result.setApplicantIdentification(applicant.getIdentification());
         result.setApplicantName(applicant.getName());
-        result.setApplicantProfileImgPath(applicant.getProfileImgPath());
+
+        final FileInfo profileImage = applicant.getProfileImage();
+        if (profileImage != null) result.setApplicantProfileImgPath(profileImage.getStoredFilePath());
 
         return result;
     }

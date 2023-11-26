@@ -1,6 +1,7 @@
 package com.test.teamlog.domain.userfollow.dto;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.userfollow.entity.UserFollow;
 import lombok.Data;
 
@@ -17,7 +18,9 @@ public class UserFollowingReadResult {
         UserFollowingReadResult result = new UserFollowingReadResult();
         result.setIdentification(toUser.getIdentification());
         result.setName(toUser.getName());
-        result.setProfileImgPath(toUser.getProfileImgPath());
+
+        final FileInfo profileImage = toUser.getProfileImage();
+        if (profileImage != null) result.setProfileImgPath(profileImage.getStoredFilePath());
 
         return result;
 

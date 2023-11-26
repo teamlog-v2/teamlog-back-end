@@ -1,5 +1,6 @@
 package com.test.teamlog.domain.project.dto;
 
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.domain.project.entity.Project;
 import lombok.Data;
@@ -30,6 +31,9 @@ public class ProjectReadResult {
         response.setMemberCount(project.getProjectMembers().size());
         response.setFollowerCount(project.getProjectFollowers().size());
         response.setCreateTime(project.getCreateTime());
+
+        final FileInfo thumbnail = project.getThumbnail();
+        if (thumbnail != null) response.setThumbnail(thumbnail.getStoredFilePath());
 
         return response;
     }

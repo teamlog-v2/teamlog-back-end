@@ -1,8 +1,8 @@
 package com.test.teamlog.domain.account.dto;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import lombok.Data;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Data
 public class UserReadDetailResult {
@@ -18,13 +18,9 @@ public class UserReadDetailResult {
         result.setIdentification(user.getIdentification());
         result.setName(user.getName());
         result.setIntroduction(user.getIntroduction());
-        String imgUri = user.getProfileImgPath() != null ?
-                ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/resources/")
-                        .path(user.getProfileImgPath())
-                        .toUriString() :
-                null;
-        result.setProfileImgPath(imgUri);
+
+        final FileInfo profileImage = user.getProfileImage();
+        if (profileImage != null) result.setProfileImgPath(profileImage.getStoredFilePath());
 
         return result;
     }

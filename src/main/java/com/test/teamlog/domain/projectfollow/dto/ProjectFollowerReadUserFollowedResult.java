@@ -1,5 +1,6 @@
 package com.test.teamlog.domain.projectfollow.dto;
 
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.projectfollow.entity.ProjectFollower;
 import lombok.Data;
@@ -26,7 +27,9 @@ public class ProjectFollowerReadUserFollowedResult {
         result.setPostCount(project.getPosts().size());
         result.setUpdateTime(project.getUpdateTime());
         result.setUpdateTimeStr(project.getUpdateTime().toString());
-        result.setThumbnail(project.getThumbnail());
+
+        final FileInfo thumbnail = project.getThumbnail();
+        if (thumbnail != null) result.setThumbnail(thumbnail.getStoredFilePath());
 
         return result;
     }

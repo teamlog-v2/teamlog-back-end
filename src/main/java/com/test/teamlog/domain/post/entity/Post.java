@@ -95,6 +95,12 @@ public class Post extends BaseTimeEntity {
         this.postUpdateHistories.add(postUpdateHistory);
     }
 
+    public void addAllPostMedia(List<PostMedia> postMediaList) {
+        if (CollectionUtils.isEmpty(postMediaList)) return;
+
+        this.media.addAll(postMediaList);
+    }
+
     public void update(String contents,
                        AccessModifier accessModifier,
                        AccessModifier commentModifier,

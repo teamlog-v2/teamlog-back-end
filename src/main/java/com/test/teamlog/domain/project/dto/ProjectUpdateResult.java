@@ -1,5 +1,6 @@
 package com.test.teamlog.domain.project.dto;
 
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.domain.project.entity.Project;
 import lombok.Data;
@@ -25,12 +26,14 @@ public class ProjectUpdateResult {
         response.setId(project.getId());
         response.setName(project.getName());
         response.setIntroduction(project.getIntroduction());
-        response.setThumbnail(project.getThumbnail());
         response.setAccessModifier(project.getAccessModifier());
         response.setCreateTime(project.getCreateTime());
         response.setMasterId(project.getMaster().getIdentification());
         response.setMemberCount(project.getProjectMembers().size());
         response.setFollowerCount(project.getProjectFollowers().size());
+
+        final FileInfo thumbnail = project.getThumbnail();
+        if (thumbnail != null) response.setThumbnail(thumbnail.getStoredFilePath());
 
         return response;
     }

@@ -1,6 +1,7 @@
 package com.test.teamlog.domain.task.dto;
 
 import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.task.entity.Task;
 import com.test.teamlog.domain.task.entity.TaskPerformer;
 import lombok.Data;
@@ -49,7 +50,9 @@ public class TaskCreateResult {
             final TaskPerformerResult result = new TaskPerformerResult();
             result.setId(user.getIdentification());
             result.setName(user.getName());
-            result.setProfileImgPath(user.getProfileImgPath());
+
+            final FileInfo profileImage = user.getProfileImage();
+            if (profileImage != null) result.setProfileImgPath(profileImage.getStoredFilePath());
 
             return result;
         }

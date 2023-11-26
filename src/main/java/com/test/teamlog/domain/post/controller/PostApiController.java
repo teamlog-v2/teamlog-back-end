@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,13 +28,16 @@ public class PostApiController {
 
     @Operation(summary = "게시물 생성")
     @PostMapping
-    public ResponseEntity<PostResponse> create(@RequestPart(value = "key") PostCreateRequest request,
+    public ResponseEntity<Long> create(@RequestPart(value = "key") PostCreateRequest request,
                                                @RequestPart(value = "media", required = false) MultipartFile[] media,
                                                @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        Long newPostId = postService.create(request.toInput(), media, files, currentUser.getUser());
-        PostResult result = postService.readOne(newPostId, currentUser.getUser());
-        return new ResponseEntity<>(PostResponse.from(result), HttpStatus.CREATED);
+        try {
+            Long postId = postService.create(request.toInput(), media, files, currentUser.getUser());
+            return new ResponseEntity<>(postId, HttpStatus.CREATED);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(summary = "게시물 수정")
@@ -46,10 +50,13 @@ public class PostApiController {
                                                @RequestPart(value = "media", required = false) MultipartFile[] media,
                                                @RequestPart(value = "files", required = false) MultipartFile[] files,
                                                @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        final Long postId = postService.update(id, request.toInput(), media, files, currentUser.getUser());
-        PostResult result = postService.readOne(postId, currentUser.getUser());
-
-        return new ResponseEntity<>(PostResponse.from(result), HttpStatus.OK);
+        try {
+            Long postId = postService.update(id, request.toInput(), media, files, currentUser.getUser());
+            PostResult result = postService.readOne(postId, currentUser.getUser());
+            return new ResponseEntity<>(PostResponse.from(result), HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(summary = "게시물 삭제")
@@ -69,7 +76,6 @@ public class PostApiController {
 
         return new ResponseEntity<>(PostResponse.from(result), HttpStatus.OK);
     }
-
 
 
     // TODO: API 사용 여부 확인
