@@ -7,19 +7,17 @@ import com.test.teamlog.domain.comment.dto.CommentCreateInput;
 import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
 import com.test.teamlog.domain.comment.dto.CommentUpdateInput;
 import com.test.teamlog.domain.comment.entity.Comment;
+import com.test.teamlog.domain.comment.entity.CommentMention;
 import com.test.teamlog.domain.comment.repository.CommentRepository;
 import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.post.service.query.PostQueryService;
-import com.test.teamlog.domain.comment.entity.CommentMention;
-import com.test.teamlog.global.exception.ResourceForbiddenException;
-import com.test.teamlog.global.exception.ResourceNotFoundException;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.dto.PagedResponse;
+import com.test.teamlog.global.exception.ResourceForbiddenException;
+import com.test.teamlog.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -44,37 +42,29 @@ public class CommentService {
     }
 
     // 게시물의 부모 댓글 조회
-    public PagedResponse<CommentInfoResponse> getParentComments(Long postId, int page, int size, User currentUser) {
+    public PagedResponse<CommentInfoResponse> readCommentListByPostId(long postId, Pageable pageable, User currentUser) {
         Post post = postQueryService.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
-        Page<Comment> parentComments = commentRepository.findParentCommentListByPost(post, pageable);
+        Page<Comment> commentList = commentRepository.findParentCommentListByPost(post, pageable);
 
-        final List<CommentInfoResponse> responseList = makeCommentInfoResponseList(currentUser, parentComments.getContent());
-        return new PagedResponse<>(responseList, parentComments.getNumber(), parentComments.getSize(),
-                parentComments.getTotalElements(), parentComments.getTotalPages(), parentComments.isLast());
+        final List<CommentInfoResponse> responseList = makeCommentInfoResponseList(currentUser, commentList.getContent());
+        return new PagedResponse<>(responseList, commentList.getNumber(), commentList.getSize(),
+                commentList.getTotalElements(), commentList.getTotalPages(), commentList.isLast());
     }
 
     // 대댓글 조회
-    public PagedResponse<CommentInfoResponse> getChildComments(Long parentCommentId, int page, int size, User currentUser) {
+    public PagedResponse<CommentInfoResponse> readChildCommentList(Long parentCommentId, Pageable pageable, User currentUser) {
         Comment comment = commentRepository.findById(parentCommentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", parentCommentId));
 
-        if (size == 0) {
-            Pageable pageable = PageRequest.of(page, 1, Sort.Direction.DESC, "createTime");
-            Page<Comment> childComments = commentRepository.getChildCommentsByParentComment(comment, pageable);
-            return new PagedResponse<>(Collections.emptyList(), 0, 0, childComments.getTotalElements(), 0, true);
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
-        Page<Comment> childComments = commentRepository.getChildCommentsByParentComment(comment, pageable);
+        Page<Comment> childCommentList = commentRepository.findAllByParentComment(comment, pageable);
 
         final List<CommentInfoResponse> responseList
-                = makeCommentInfoResponseList(currentUser, comment, childComments.getContent());
+                = makeCommentInfoResponseList(currentUser, comment, childCommentList.getContent());
 
-        return new PagedResponse<>(responseList, childComments.getNumber(), childComments.getSize(),
-                childComments.getTotalElements(), childComments.getTotalPages(), childComments.isLast());
+        return new PagedResponse<>(responseList, childCommentList.getNumber(), childCommentList.getSize(),
+                childCommentList.getTotalElements(), childCommentList.getTotalPages(), childCommentList.isLast());
     }
 
     private List<CommentInfoResponse> makeCommentInfoResponseList(User currentUser, List<Comment> commentList) {
