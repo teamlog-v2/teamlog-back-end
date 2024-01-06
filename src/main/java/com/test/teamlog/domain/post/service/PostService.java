@@ -29,7 +29,6 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -87,8 +86,7 @@ public class PostService {
     }
 
     // 모든 포스트 조회
-    public PagedResponse<PostResult> readAll(int page, int size, User currentUser) {
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "createTime");
+    public PagedResponse<PostResult> readAll(Pageable pageable, User currentUser) {
         Page<Post> posts = postRepository.findAll(pageable);
 
         List<PostResult> resultList
