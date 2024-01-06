@@ -172,6 +172,8 @@ public class PostService {
     }
 
     private void storeFiles(MultipartFile[] files, Post post) throws IOException {
+        if (files == null) return;
+
         List<PostMedia> postMediaList = new ArrayList<>();
         for (MultipartFile file : files) {
             final FileInfo fileInfo = fileManagementService.uploadFile(file);
