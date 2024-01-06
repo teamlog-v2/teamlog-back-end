@@ -2,6 +2,7 @@ package com.test.teamlog.domain.post.controller;
 
 import com.test.teamlog.domain.post.dto.*;
 import com.test.teamlog.domain.post.service.PostService;
+import com.test.teamlog.global.dto.CustomPageRequest;
 import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.dto.PagedResponse;
@@ -81,10 +82,9 @@ public class PostApiController {
     // TODO: API 사용 여부 확인
     @Operation(summary = "모든 게시물 조회")
     @GetMapping
-    public ResponseEntity<PagedResponse<PostResponse>> readAll(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                                               @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+    public ResponseEntity<PagedResponse<PostResponse>> readAll(@ModelAttribute CustomPageRequest pageRequest,
                                                                @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        PagedResponse<PostResult> result = postService.readAll(page, size, currentUser.getUser());
+        PagedResponse<PostResult> result = postService.readAll(pageRequest.toPageRequest(), currentUser.getUser());
         final List<PostResponse> responseList = result.getContent().stream().map(PostResponse::from).collect(Collectors.toList());
         final PagedResponse<PostResponse> response
                 = new PagedResponse<>(responseList, result.getPage(), result.getSize(), result.getTotalElements(), result.getTotalPages(), result.isLast());

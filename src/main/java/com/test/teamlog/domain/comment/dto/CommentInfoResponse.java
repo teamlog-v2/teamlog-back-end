@@ -16,6 +16,7 @@ public class CommentInfoResponse {
     private Boolean isMyComment;
     private Long id;
     private String contents;
+    private Integer childCommentCount;
     private UserRequest.UserSimpleInfo writer;
     private List<String> commentMentions;
     private LocalDateTime writeTime;
@@ -24,6 +25,7 @@ public class CommentInfoResponse {
         CommentInfoResponse response = new CommentInfoResponse();
         response.setId(comment.getId());
         response.setContents(comment.getContents());
+        response.setChildCommentCount(comment.getChildComments().size());
         response.setCommentMentions(comment.getCommentMentions().stream().map(c -> c.getTargetUser().getIdentification()).collect(Collectors.toList()));
         response.setWriteTime(comment.getCreateTime());
 

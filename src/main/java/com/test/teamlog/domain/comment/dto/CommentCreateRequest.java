@@ -16,7 +16,7 @@ public class CommentCreateRequest {
         input.setParentCommentId(parentCommentId);
         input.setPostId(postId);
         input.setContents(contents);
-        input.setCommentMentions(commentMentions);
+        input.setCommentMentions(commentMentions); 
 
         return input;
     }

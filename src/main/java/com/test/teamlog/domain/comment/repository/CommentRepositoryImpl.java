@@ -2,7 +2,6 @@ package com.test.teamlog.domain.comment.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.test.teamlog.domain.comment.entity.Comment;
-import com.test.teamlog.domain.comment.entity.QComment;
 import com.test.teamlog.domain.post.entity.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,24 +31,6 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .select(comment.count())
                 .from(comment)
                 .where(comment.post.eq(post), comment.parentComment.isNull())
-                .fetchOne();
-
-        return new PageImpl<>(content, pageable, total);
-    }
-
-    @Override
-    public Page<Comment> getChildCommentsByParentComment(Comment comment, Pageable pageable) {
-        final List<Comment> content = jpaQueryFactory.selectFrom(QComment.comment)
-                .where(QComment.comment.parentComment.eq(comment))
-                .orderBy(QComment.comment.createTime.desc())
-                .limit(pageable.getPageSize())
-                .offset(pageable.getOffset())
-                .fetch();
-
-        Long total = jpaQueryFactory
-                .select(QComment.comment.count())
-                .from(QComment.comment)
-                .where(QComment.comment.parentComment.eq(comment))
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total);

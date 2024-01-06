@@ -8,6 +8,4 @@ import org.springframework.data.repository.query.Param;
 
 public interface CommentRepositoryCustom {
     Page<Comment> findParentCommentListByPost(@Param("post") Post post, Pageable pageable);
-
-    Page<Comment> getChildCommentsByParentComment(@Param("comment") Comment comment, Pageable pageable);
 }
