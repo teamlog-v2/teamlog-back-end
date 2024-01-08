@@ -4,6 +4,7 @@ import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.comment.dto.CommentCreateInput;
+import com.test.teamlog.domain.comment.dto.CommentCreateResult;
 import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
 import com.test.teamlog.domain.comment.dto.CommentUpdateInput;
 import com.test.teamlog.domain.comment.entity.Comment;
@@ -61,7 +62,7 @@ public class CommentService {
         Page<Comment> childCommentList = commentRepository.findAllByParentComment(comment, pageable);
 
         final List<CommentInfoResponse> responseList
-                = makeCommentInfoResponseList(currentUser, comment, childCommentList.getContent());
+                = makeCommentInfoResponseList(currentUser, childCommentList.getContent());
 
         return new PagedResponse<>(responseList, childCommentList.getNumber(), childCommentList.getSize(),
                 childCommentList.getTotalElements(), childCommentList.getTotalPages(), childCommentList.isLast());
@@ -70,18 +71,12 @@ public class CommentService {
     private List<CommentInfoResponse> makeCommentInfoResponseList(User currentUser, List<Comment> commentList) {
         if (CollectionUtils.isEmpty(commentList)) return Collections.emptyList();
 
-        return makeCommentInfoResponseList(currentUser, commentList.get(0), commentList);
-    }
-
-    private List<CommentInfoResponse> makeCommentInfoResponseList(User currentUser, Comment comment, List<Comment> commentList) {
-        if (CollectionUtils.isEmpty(commentList)) return Collections.emptyList();
-
         List<CommentInfoResponse> responseList = new ArrayList<>();
 
         for (Comment cmt : commentList) {
             UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(cmt.getWriter());
             Boolean isMyComment
-                    = currentUser != null && comment.getWriter().getIdentification().equals(currentUser.getIdentification()) ? Boolean.TRUE : Boolean.FALSE;
+                    = currentUser != null && cmt.getWriter().getIdentification().equals(currentUser.getIdentification()) ? Boolean.TRUE : Boolean.FALSE;
 
             final CommentInfoResponse response = CommentInfoResponse.of(cmt);
             response.setIsMyComment(isMyComment);
@@ -95,7 +90,7 @@ public class CommentService {
 
     // 댓글 생성
     @Transactional
-    public ApiResponse create(CommentCreateInput input, User currentUser) {
+    public CommentCreateResult create(CommentCreateInput input, User currentUser) {
         Post post = postQueryService.findById(input.getPostId())
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", input.getPostId()));
 
@@ -107,8 +102,8 @@ public class CommentService {
         Comment comment = input.toComment(currentUser, post, parentComment);
         comment.addCommentMentions(makeCommentMentionList(input.getCommentMentions(), comment));
 
-        commentRepository.save(comment);
-        return new ApiResponse(Boolean.TRUE, "댓글 생성 성공");
+        final Comment newComment = commentRepository.save(comment);
+        return CommentCreateResult.of(newComment);
     }
 
     private List<CommentMention> makeCommentMentionList(List<String> commentMentionIdentificationList, Comment comment) {

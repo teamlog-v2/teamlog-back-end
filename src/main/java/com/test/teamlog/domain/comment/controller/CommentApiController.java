@@ -1,8 +1,6 @@
 package com.test.teamlog.domain.comment.controller;
 
-import com.test.teamlog.domain.comment.dto.CommentCreateRequest;
-import com.test.teamlog.domain.comment.dto.CommentInfoResponse;
-import com.test.teamlog.domain.comment.dto.CommentUpdateRequest;
+import com.test.teamlog.domain.comment.dto.*;
 import com.test.teamlog.domain.comment.service.CommentService;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.dto.CustomPageRequest;
@@ -28,10 +26,10 @@ public class CommentApiController {
 
     @Operation(summary = "댓글 생성")
     @PostMapping("/comments")
-    public ResponseEntity<ApiResponse> create(@RequestBody CommentCreateRequest request,
-                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = commentService.create(request.toInput(), currentUser.getUser());
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    public ResponseEntity<CommentCreateResponse> create(@RequestBody CommentCreateRequest request,
+                                                        @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        final CommentCreateResult result = commentService.create(request.toInput(), currentUser.getUser());
+        return new ResponseEntity<>(CommentCreateResponse.of(result), HttpStatus.CREATED);
     }
 
     @Operation(summary = "댓글 수정")
