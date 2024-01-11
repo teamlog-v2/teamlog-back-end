@@ -1,6 +1,5 @@
 package com.test.teamlog.domain.projectjoin.service;
 
-import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
@@ -10,9 +9,9 @@ import com.test.teamlog.domain.projectjoin.dto.ProjectJoinInviteInput;
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
 import com.test.teamlog.domain.projectjoin.repository.ProjectJoinRepository;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
+import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.global.exception.ResourceNotFoundException;
-import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.payload.ProjectJoinDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -169,19 +168,8 @@ public class ProjectJoinService {
         Project project = projectQueryService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        List<ProjectJoin> projectJoins = projectJoinRepository.findAllByProjectAndIsAcceptedTrueAndIsInvitedFalse(project);
-
-        List<ProjectJoinDTO.ProjectJoinForProject> response = new ArrayList<>();
-        for (ProjectJoin join : projectJoins) {
-            UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(join.getUser());
-            ProjectJoinDTO.ProjectJoinForProject temp = ProjectJoinDTO.ProjectJoinForProject.builder()
-                    .id(join.getId())
-                    .projectName(join.getProject().getName())
-                    .user(user)
-                    .build();
-            response.add(temp);
-        }
-        return response;
+        List<ProjectJoin> projectJoinList = projectJoinRepository.findAllByProjectAndIsAcceptedTrueAndIsInvitedFalse(project);
+        return projectJoinList.stream().map(ProjectJoinDTO.ProjectJoinForProject::from).toList();
     }
 
     // 프로젝트 멤버로 초대한 사용자 목록 조회
@@ -189,19 +177,8 @@ public class ProjectJoinService {
         Project project = projectQueryService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        List<ProjectJoin> projectJoins = projectJoinRepository.findAllByProjectAndIsAcceptedFalseAndIsInvitedTrue(project);
-
-        List<ProjectJoinDTO.ProjectJoinForProject> response = new ArrayList<>();
-        for (ProjectJoin join : projectJoins) {
-            UserRequest.UserSimpleInfo user = new UserRequest.UserSimpleInfo(join.getUser());
-            ProjectJoinDTO.ProjectJoinForProject temp = ProjectJoinDTO.ProjectJoinForProject.builder()
-                    .id(join.getId())
-                    .projectName(join.getProject().getName())
-                    .user(user)
-                    .build();
-            response.add(temp);
-        }
-        return response;
+        List<ProjectJoin> projectJoinList = projectJoinRepository.findAllByProjectAndIsAcceptedFalseAndIsInvitedTrue(project);
+        return projectJoinList.stream().map(ProjectJoinDTO.ProjectJoinForProject::from).toList();
     }
 
     // 유저가 받은 프로젝트 초대 조회

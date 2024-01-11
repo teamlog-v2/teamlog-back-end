@@ -1,6 +1,5 @@
 package com.test.teamlog.domain.projectmember.service;
 
-import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
@@ -10,15 +9,14 @@ import com.test.teamlog.domain.projectjoin.service.query.ProjectJoinQueryService
 import com.test.teamlog.domain.projectmember.dto.ProjectMemberReadResult;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
 import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
+import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.exception.ResourceForbiddenException;
 import com.test.teamlog.global.exception.ResourceNotFoundException;
-import com.test.teamlog.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -91,16 +89,16 @@ public class ProjectMemberService {
 
 
     // 프로젝트 멤버 아닌 유저 리스트
-    @Deprecated
-    public List<UserRequest.UserSimpleInfo> readAllNotInProjectMember(Long projectId) {
-
-        List<User> userList = accountQueryService.findUsersNotInProjectMember(projectId);
-        List<UserRequest.UserSimpleInfo> response = new ArrayList<>();
-        for (User user : userList) {
-            response.add(new UserRequest.UserSimpleInfo(user));
-        }
-        return response;
-    }
+//    @Deprecated
+//    public List<UserRequest.UserSimpleInfo> readAllNotInProjectMember(Long projectId) {
+//
+//        List<User> userList = accountQueryService.findUsersNotInProjectMember(projectId);
+//        List<UserRequest.UserSimpleInfo> response = new ArrayList<>();
+//        for (User user : userList) {
+//            response.add(new UserRequest.UserSimpleInfo(user));
+//        }
+//        return response;
+//    }
 
     private Project findProjectById(Long projectId) {
         return projectQueryService.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));

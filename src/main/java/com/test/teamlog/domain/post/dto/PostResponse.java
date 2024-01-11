@@ -1,6 +1,5 @@
 package com.test.teamlog.domain.post.dto;
 
-import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
 import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.payload.ProjectDTO;
@@ -17,7 +16,7 @@ public class PostResponse {
     private Long id;
     private Boolean isILikeIt;
     private ProjectDTO.ProjectSimpleInfo project;
-    private UserRequest.UserSimpleInfo writer;
+    private UserSimpleInfoResponse writer;
     private AccessModifier accessModifier;
     private AccessModifier commentModifier;
     private String contents;
@@ -37,7 +36,7 @@ public class PostResponse {
         response.setId(result.getId());
         response.setIsILikeIt(result.getIsILikeIt());
         response.setProject(result.getProject());
-        response.setWriter(result.getWriter());
+        response.setWriter(UserSimpleInfoResponse.from(result.getWriter()));
         response.setAccessModifier(result.getAccessModifier());
         response.setCommentModifier(result.getCommentModifier());
         response.setContents(result.getContents());
@@ -53,5 +52,21 @@ public class PostResponse {
         response.setFiles(result.getFiles());
 
         return response;
+    }
+
+    @Data
+    static class UserSimpleInfoResponse {
+        private String id;
+        private String name;
+        private String profileImgPath;
+
+        static UserSimpleInfoResponse from(PostResult.UserSimpleInfoResult result) {
+            UserSimpleInfoResponse userSimpleInfoResult = new UserSimpleInfoResponse();
+            userSimpleInfoResult.setId(result.getId());
+            userSimpleInfoResult.setName(result.getName());
+            userSimpleInfoResult.setProfileImgPath(result.getProfileImgPath());
+
+            return userSimpleInfoResult;
+        }
     }
 }

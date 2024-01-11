@@ -1,9 +1,9 @@
 package com.test.teamlog.domain.post.dto;
 
-import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
 import com.test.teamlog.global.entity.AccessModifier;
-import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.payload.ProjectDTO;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -18,7 +18,7 @@ public class PostResult {
     private Long id;
     private Boolean isILikeIt;
     private ProjectDTO.ProjectSimpleInfo project;
-    private UserRequest.UserSimpleInfo writer;
+    private UserSimpleInfoResult writer;
     private AccessModifier accessModifier;
     private AccessModifier commentModifier;
     private String contents;
@@ -37,7 +37,7 @@ public class PostResult {
         PostResult result = new PostResult();
         result.setId(post.getId());
         result.setProject(new ProjectDTO.ProjectSimpleInfo(post.getProject()));
-        result.setWriter(new UserRequest.UserSimpleInfo(post.getWriter()));
+        result.setWriter(UserSimpleInfoResult.from(post.getWriter()));
         result.setAccessModifier(post.getAccessModifier());
         result.setCommentModifier(post.getCommentModifier());
         result.setContents(post.getContents());
@@ -56,26 +56,19 @@ public class PostResult {
         return result;
     }
 
-//    PostResponse.builder()
-//            .isILikeIt(isILikeIt)
-//                .id(post.getId())
-//            .project(new ProjectDTO.ProjectSimpleInfo(post.getProject()))
-//            .writer(writer)
-//                .accessModifier(post.getAccessModifier())
-//            .commentModifier(post.getCommentModifier())
-//            .contents(post.getContents())
-//            .hashtags(hashtagNameList)
-//                .media(media)
-//                .files(files)
-//                .likeCount(likeCount)
-//                .commentCount(commentCount)
-//                .writeTime(post.getCreateTime())
-//            .writeTimeStr(post.getCreateTime().toString())
-//            .build();
-//
-//        if (post.getLocation() != null) {
-//        postResponse.setLatitude(post.getLocation().getX());
-//        postResponse.setLongitude(post.getLocation().getY());
-//        postResponse.setAddress(post.getAddress());
-//    }
+    @Data
+    static class UserSimpleInfoResult {
+        private String id;
+        private String name;
+        private String profileImgPath;
+
+        static UserSimpleInfoResult from(User user) {
+            UserSimpleInfoResult userSimpleInfoResult = new UserSimpleInfoResult();
+            userSimpleInfoResult.setId(user.getIdentification());
+            userSimpleInfoResult.setName(user.getName());
+            userSimpleInfoResult.setProfileImgPath(user.getProfileImage().getStoredFilePath());
+
+            return userSimpleInfoResult;
+        }
+    }
 }
