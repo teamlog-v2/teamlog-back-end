@@ -19,7 +19,6 @@ import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.exception.ResourceForbiddenException;
 import com.test.teamlog.global.exception.ResourceNotFoundException;
-import com.test.teamlog.payload.ProjectDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -202,19 +201,6 @@ public class ProjectService {
         project.update(input.getName(), input.getIntroduction(), input.getAccessModifier());
 
         return ProjectUpdateResult.of(project, Relation.MASTER);
-    }
-
-    // 프로젝트 팀
-    @Transactional
-    public ProjectDTO.ProjectResponse setTeamInProject(Long id, ProjectDTO.ProjectRequest request, User currentUser) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
-        validateMasterUser(project, currentUser);
-
-        projectRepository.save(project);
-        ProjectDTO.ProjectResponse result = new ProjectDTO.ProjectResponse(project);
-        result.setRelation(Relation.MASTER);
-        return result;
     }
 
     // 프로젝트 마스터 위임

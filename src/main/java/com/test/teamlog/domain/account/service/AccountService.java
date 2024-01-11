@@ -86,8 +86,8 @@ public class AccountService {
     }
 
     @Transactional
-    public ApiResponse updateUser(UserRequest.UserUpdateRequest userRequest, MultipartFile image, User currentUser) throws IOException {
-        if (userRequest.getDefaultImage()) {
+    public ApiResponse updateUser(UserUpdateRequest request, MultipartFile image, User currentUser) throws IOException {
+        if (request.getDefaultImage()) {
             if (currentUser.getProfileImage() != null) {
                 currentUser.setProfileImage(null);
             }
@@ -96,8 +96,8 @@ public class AccountService {
                 currentUser.updateProfileImage(fileManagementService.uploadFile(image));
             }
         }
-        currentUser.setName(userRequest.getName());
-        currentUser.setIntroduction(userRequest.getIntroduction());
+        currentUser.setName(request.getName());
+        currentUser.setIntroduction(request.getIntroduction());
         accountRepository.save(currentUser);
         return new ApiResponse(Boolean.TRUE, "사용자 정보 수정 성공");
     }

@@ -1,11 +1,10 @@
 package com.test.teamlog.domain.projectmember.controller;
 
-import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.projectmember.dto.ProjectMemberReadResponse;
 import com.test.teamlog.domain.projectmember.dto.ProjectMemberReadResult;
-import com.test.teamlog.global.security.UserAdapter;
-import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.domain.projectmember.service.ProjectMemberService;
+import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.global.security.UserAdapter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -59,11 +58,11 @@ public class ProjectMemberApiController {
     }
 
     // FIXME: 개선 포인트. 해당 API는 삭제 예정이며 우선 dto는 ProjectMemberRead- 로 사용 (형태가 동일하다)
-    @Deprecated
-    @Operation(summary = "프로젝트 멤버가 아닌 유저 조회")
-    @GetMapping("/projects/{projectId}/not-members")
-    public ResponseEntity<List<UserRequest.UserSimpleInfo>> readAllNotInProjectMember(@PathVariable("projectId") Long projectId) {
-        List<UserRequest.UserSimpleInfo> response = projectMemberService.readAllNotInProjectMember(projectId);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+//    @Deprecated
+//    @Operation(summary = "프로젝트 멤버가 아닌 유저 조회")
+//    @GetMapping("/projects/{projectId}/not-members")
+//    public ResponseEntity<List<UserRequest.UserSimpleInfo>> readAllNotInProjectMember(@PathVariable("projectId") Long projectId) {
+//        List<UserRequest.UserSimpleInfo> response = projectMemberService.readAllNotInProjectMember(projectId);
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 }

@@ -1,8 +1,8 @@
 package com.test.teamlog.domain.post.controller;
 
+import com.test.teamlog.domain.post.dto.PostHistoryResponse;
 import com.test.teamlog.domain.post.service.PostHistoryService;
 import com.test.teamlog.global.security.UserAdapter;
-import com.test.teamlog.payload.PostDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,9 +25,9 @@ public class PostHistoryApiController {
     private final PostHistoryService postService;
     @Operation(summary = "게시물 수정 내역 조회")
     @GetMapping("/{id}/historys")
-    public ResponseEntity<List<PostDTO.PostHistoryInfo>> readPostUpdateHistory(@PathVariable("id") long id, @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostDTO.PostHistoryInfo> response = postService.readPostUpdateHistory(id, currentUser.getUser());
+    public ResponseEntity<List<PostHistoryResponse>> readPostUpdateHistory(@PathVariable("id") long id, @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+        final List<PostHistoryResponse> responseList = postService.readPostUpdateHistory(id, currentUser.getUser());
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 }
