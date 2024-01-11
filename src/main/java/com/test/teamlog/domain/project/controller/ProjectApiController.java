@@ -2,9 +2,8 @@ package com.test.teamlog.domain.project.controller;
 
 import com.test.teamlog.domain.project.dto.*;
 import com.test.teamlog.domain.project.service.ProjectService;
-import com.test.teamlog.global.security.UserAdapter;
 import com.test.teamlog.global.dto.ApiResponse;
-import com.test.teamlog.payload.ProjectDTO;
+import com.test.teamlog.global.security.UserAdapter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -88,15 +87,6 @@ public class ProjectApiController {
                                                        @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         ApiResponse apiResponse = projectService.deleteThumbnail(projectId, currentUser.getUser());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-
-    @Operation(summary = "프로젝트 팀 변경")
-    @PutMapping("/projects/{id}/team")
-    public ResponseEntity<ProjectDTO.ProjectResponse> setTeamInProject(@PathVariable("id") long id,
-                                                                       @RequestBody ProjectDTO.ProjectRequest request,
-                                                                       @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ProjectDTO.ProjectResponse response = projectService.setTeamInProject(id, request, currentUser.getUser());
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "프로젝트 검색")

@@ -80,7 +80,7 @@ public class AccountApiController {
 
     @Operation(summary = "회원 정보 수정")
     @PutMapping
-    public ResponseEntity<ApiResponse> update(@Valid @RequestPart(value = "key") UserRequest.UserUpdateRequest userRequest,
+    public ResponseEntity<ApiResponse> update(@Valid @RequestPart(value = "key") UserUpdateRequest userRequest,
                                               @RequestPart(value = "profileImg", required = false) MultipartFile image,
                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
         try {

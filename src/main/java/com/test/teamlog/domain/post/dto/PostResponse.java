@@ -2,7 +2,6 @@ package com.test.teamlog.domain.post.dto;
 
 import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
 import com.test.teamlog.global.entity.AccessModifier;
-import com.test.teamlog.payload.ProjectDTO;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,7 @@ import java.util.List;
 public class PostResponse {
     private Long id;
     private Boolean isILikeIt;
-    private ProjectDTO.ProjectSimpleInfo project;
+    private ProjectSimpleInfoResponse project;
     private UserSimpleInfoResponse writer;
     private AccessModifier accessModifier;
     private AccessModifier commentModifier;
@@ -35,7 +34,7 @@ public class PostResponse {
         PostResponse response = new PostResponse();
         response.setId(result.getId());
         response.setIsILikeIt(result.getIsILikeIt());
-        response.setProject(result.getProject());
+        response.setProject(ProjectSimpleInfoResponse.from(result.getProject()));
         response.setWriter(UserSimpleInfoResponse.from(result.getWriter()));
         response.setAccessModifier(result.getAccessModifier());
         response.setCommentModifier(result.getCommentModifier());
@@ -67,6 +66,20 @@ public class PostResponse {
             userSimpleInfoResult.setProfileImgPath(result.getProfileImgPath());
 
             return userSimpleInfoResult;
+        }
+    }
+
+    @Data
+    static class ProjectSimpleInfoResponse {
+        private Long id;
+        private String name;
+
+        static ProjectSimpleInfoResponse from(PostResult.ProjectSimpleInfoResult project) {
+            ProjectSimpleInfoResponse projectSimpleInfoResponse = new ProjectSimpleInfoResponse();
+            projectSimpleInfoResponse.setId(project.getId());
+            projectSimpleInfoResponse.setName(project.getName());
+
+            return projectSimpleInfoResponse;
         }
     }
 }
