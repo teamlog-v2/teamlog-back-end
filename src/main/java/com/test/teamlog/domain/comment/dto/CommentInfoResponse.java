@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.comment.dto;
 
-import com.test.teamlog.domain.account.dto.UserRequest;
+import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.comment.entity.Comment;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -17,18 +17,35 @@ public class CommentInfoResponse {
     private Long id;
     private String contents;
     private Integer childCommentCount;
-    private UserRequest.UserSimpleInfo writer;
+    private UserSimpleInfoResult writer;
     private List<String> commentMentions;
     private LocalDateTime writeTime;
 
-    public static CommentInfoResponse of(Comment comment) {
+    public static CommentInfoResponse from(Comment comment) {
         CommentInfoResponse response = new CommentInfoResponse();
         response.setId(comment.getId());
         response.setContents(comment.getContents());
         response.setChildCommentCount(comment.getChildComments().size());
         response.setCommentMentions(comment.getCommentMentions().stream().map(c -> c.getTargetUser().getIdentification()).collect(Collectors.toList()));
         response.setWriteTime(comment.getCreateTime());
+        response.setWriter(UserSimpleInfoResult.from(comment.getWriter()));
 
         return response;
+    }
+
+    @Data
+    static class UserSimpleInfoResult {
+        private String id;
+        private String name;
+        private String profileImgPath;
+
+        public static UserSimpleInfoResult from(User user) {
+            UserSimpleInfoResult userFollowInfo = new UserSimpleInfoResult();
+            userFollowInfo.setId(user.getIdentification());
+            userFollowInfo.setName(user.getName());
+            userFollowInfo.setProfileImgPath(user.getProfileImage().getStoredFilePath());
+
+            return userFollowInfo;
+        }
     }
 }

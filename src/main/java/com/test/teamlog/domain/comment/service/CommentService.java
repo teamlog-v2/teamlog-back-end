@@ -1,6 +1,5 @@
 package com.test.teamlog.domain.comment.service;
 
-import com.test.teamlog.domain.account.dto.UserRequest;
 import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.comment.dto.CommentCreateInput;
@@ -61,8 +60,7 @@ public class CommentService {
 
         Page<Comment> childCommentList = commentRepository.findAllByParentComment(comment, pageable);
 
-        final List<CommentInfoResponse> responseList
-                = makeCommentInfoResponseList(currentUser, childCommentList.getContent());
+        final List<CommentInfoResponse> responseList = makeCommentInfoResponseList(currentUser, childCommentList.getContent());
 
         return new PagedResponse<>(responseList, childCommentList.getNumber(), childCommentList.getSize(),
                 childCommentList.getTotalElements(), childCommentList.getTotalPages(), childCommentList.isLast());
@@ -74,13 +72,11 @@ public class CommentService {
         List<CommentInfoResponse> responseList = new ArrayList<>();
 
         for (Comment cmt : commentList) {
-            UserRequest.UserSimpleInfo writer = new UserRequest.UserSimpleInfo(cmt.getWriter());
             Boolean isMyComment
-                    = currentUser != null && cmt.getWriter().getIdentification().equals(currentUser.getIdentification()) ? Boolean.TRUE : Boolean.FALSE;
+                    = (currentUser != null && cmt.getWriter().getIdentification().equals(currentUser.getIdentification())) ? Boolean.TRUE : Boolean.FALSE;
 
-            final CommentInfoResponse response = CommentInfoResponse.of(cmt);
+            CommentInfoResponse response = CommentInfoResponse.from(cmt);
             response.setIsMyComment(isMyComment);
-            response.setWriter(writer);
 
             responseList.add(response);
         }
