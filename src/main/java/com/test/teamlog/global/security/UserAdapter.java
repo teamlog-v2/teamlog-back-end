@@ -12,7 +12,6 @@ public class UserAdapter extends org.springframework.security.core.userdetails.U
 
     public UserAdapter(User user) {
         super(user.getIdentification(), user.getPassword(), Collections.emptySet());
-        user.getProfileImage();
         this.user = user;
     }
 }
