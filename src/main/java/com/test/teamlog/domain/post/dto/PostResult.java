@@ -63,12 +63,15 @@ public class PostResult {
         private String profileImgPath;
 
         static UserSimpleInfoResult from(User user) {
-            UserSimpleInfoResult userSimpleInfoResult = new UserSimpleInfoResult();
-            userSimpleInfoResult.setId(user.getIdentification());
-            userSimpleInfoResult.setName(user.getName());
-            userSimpleInfoResult.setProfileImgPath(user.getProfileImage().getStoredFilePath());
+            UserSimpleInfoResult result = new UserSimpleInfoResult();
+            result.setId(user.getIdentification());
+            result.setName(user.getName());
 
-            return userSimpleInfoResult;
+            if (user.getProfileImage() != null) {
+                result.setProfileImgPath(user.getProfileImage().getStoredFilePath());
+            }
+
+            return result;
         }
     }
 

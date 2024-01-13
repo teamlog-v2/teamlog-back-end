@@ -41,7 +41,10 @@ public class CommentCreateResult {
             UserSimpleInfoResult userFollowInfo = new UserSimpleInfoResult();
             userFollowInfo.setId(user.getIdentification());
             userFollowInfo.setName(user.getName());
-            userFollowInfo.setProfileImgPath(user.getProfileImage().getStoredFilePath());
+
+            if (user.getProfileImage() != null) {
+                userFollowInfo.setProfileImgPath(user.getProfileImage().getStoredFilePath());
+            }
 
             return userFollowInfo;
         }
