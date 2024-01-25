@@ -19,13 +19,18 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "account")
+@Table(name = "account", uniqueConstraints = @UniqueConstraint(columnNames = {"identification", "auth_type"}))
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
+
     @Column(nullable = false, unique = true)
     private String identification;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_type", nullable = false, columnDefinition = "VARCHAR(20)")
+    private AuthType authType;
 
     @Column(nullable = false)
     private String password;
