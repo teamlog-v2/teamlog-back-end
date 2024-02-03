@@ -18,10 +18,8 @@ public class FileInfo {
 
     private String contentType;
 
-    @Column(nullable = false)
     private String originalFileName;
 
-    @Column(nullable = false)
     private String storedFileName;
 
     @Column(nullable = false)

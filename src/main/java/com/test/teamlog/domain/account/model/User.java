@@ -29,7 +29,7 @@ public class User {
     private String identification;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "auth_type", nullable = false, columnDefinition = "VARCHAR(20)")
+    @Column(name = "auth_type", nullable = false, columnDefinition = "text")
     private AuthType authType;
 
     @Column(nullable = false)
