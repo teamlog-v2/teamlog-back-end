@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.postlike.entity;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,7 +16,7 @@ import lombok.*;
         name = "post_like",
         uniqueConstraints={
                 @UniqueConstraint(
-                        columnNames={"user_id","post_id"}
+                        columnNames={"account_id","post_id"}
                 )
         }
 )
@@ -26,8 +26,8 @@ public class PostLike {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
@@ -41,11 +41,11 @@ public class PostLike {
         post.getPostLikes().add(this);
     }
 
-    public void setUser(User user) {
-        if(this.user != null) {
-            this.user.getPostLikes().remove(this);
+    public void setAccount(Account account) {
+        if(this.account != null) {
+            this.account.getPostLikes().remove(this);
         }
-        this.user = user;
+        this.account = account;
         post.getPostLikes().add(this);
     }
 }

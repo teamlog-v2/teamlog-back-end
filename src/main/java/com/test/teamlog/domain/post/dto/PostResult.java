@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.post.dto;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.postmedia.dto.PostMediaResult;
 import com.test.teamlog.domain.project.entity.Project;
@@ -18,7 +18,7 @@ public class PostResult {
     private Long id;
     private Boolean isILikeIt;
     private ProjectSimpleInfoResult project;
-    private UserSimpleInfoResult writer;
+    private AccountSimpleInfoResult writer;
     private AccessModifier accessModifier;
     private AccessModifier commentModifier;
     private String contents;
@@ -37,7 +37,7 @@ public class PostResult {
         PostResult result = new PostResult();
         result.setId(post.getId());
         result.setProject(ProjectSimpleInfoResult.from(post.getProject()));
-        result.setWriter(UserSimpleInfoResult.from(post.getWriter()));
+        result.setWriter(AccountSimpleInfoResult.from(post.getWriter()));
         result.setAccessModifier(post.getAccessModifier());
         result.setCommentModifier(post.getCommentModifier());
         result.setContents(post.getContents());
@@ -57,18 +57,18 @@ public class PostResult {
     }
 
     @Data
-    static class UserSimpleInfoResult {
+    static class AccountSimpleInfoResult {
         private String id;
         private String name;
         private String profileImgPath;
 
-        static UserSimpleInfoResult from(User user) {
-            UserSimpleInfoResult result = new UserSimpleInfoResult();
-            result.setId(user.getIdentification());
-            result.setName(user.getName());
+        static AccountSimpleInfoResult from(Account account) {
+            AccountSimpleInfoResult result = new AccountSimpleInfoResult();
+            result.setId(account.getIdentification());
+            result.setName(account.getName());
 
-            if (user.getProfileImage() != null) {
-                result.setProfileImgPath(user.getProfileImage().getStoredFilePath());
+            if (account.getProfileImage() != null) {
+                result.setProfileImgPath(account.getProfileImage().getStoredFilePath());
             }
 
             return result;

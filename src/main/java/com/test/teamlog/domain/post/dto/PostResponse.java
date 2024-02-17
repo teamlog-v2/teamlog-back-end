@@ -15,7 +15,7 @@ public class PostResponse {
     private Long id;
     private Boolean isILikeIt;
     private ProjectSimpleInfoResponse project;
-    private UserSimpleInfoResponse writer;
+    private AccountSimpleInfoResponse writer;
     private AccessModifier accessModifier;
     private AccessModifier commentModifier;
     private String contents;
@@ -35,7 +35,7 @@ public class PostResponse {
         response.setId(result.getId());
         response.setIsILikeIt(result.getIsILikeIt());
         response.setProject(ProjectSimpleInfoResponse.from(result.getProject()));
-        response.setWriter(UserSimpleInfoResponse.from(result.getWriter()));
+        response.setWriter(AccountSimpleInfoResponse.from(result.getWriter()));
         response.setAccessModifier(result.getAccessModifier());
         response.setCommentModifier(result.getCommentModifier());
         response.setContents(result.getContents());
@@ -54,18 +54,18 @@ public class PostResponse {
     }
 
     @Data
-    static class UserSimpleInfoResponse {
+    static class AccountSimpleInfoResponse {
         private String id;
         private String name;
         private String profileImgPath;
 
-        static UserSimpleInfoResponse from(PostResult.UserSimpleInfoResult result) {
-            UserSimpleInfoResponse userSimpleInfoResult = new UserSimpleInfoResponse();
-            userSimpleInfoResult.setId(result.getId());
-            userSimpleInfoResult.setName(result.getName());
-            userSimpleInfoResult.setProfileImgPath(result.getProfileImgPath());
+        static AccountSimpleInfoResponse from(PostResult.AccountSimpleInfoResult result) {
+            AccountSimpleInfoResponse accountSimpleInfoResult = new AccountSimpleInfoResponse();
+            accountSimpleInfoResult.setId(result.getId());
+            accountSimpleInfoResult.setName(result.getName());
+            accountSimpleInfoResult.setProfileImgPath(result.getProfileImgPath());
 
-            return userSimpleInfoResult;
+            return accountSimpleInfoResult;
         }
     }
 

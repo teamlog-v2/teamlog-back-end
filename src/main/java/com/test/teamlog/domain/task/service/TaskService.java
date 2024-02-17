@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.task.service;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.query.ProjectQueryService;
@@ -83,11 +83,11 @@ public class TaskService {
 
     // 태스크 생성
     @Transactional
-    public TaskCreateResult create(Long projectId, TaskCreateInput input, User currentUser) {
+    public TaskCreateResult create(Long projectId, TaskCreateInput input, Account currentAccount) {
         Project project = projectQueryService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectId));
         // 멤버만 가능
-        projectMemberQueryService.validateProjectMember(project, currentUser);
+        projectMemberQueryService.validateProjectMember(project, currentAccount);
 
         Task task = input.toTask();
         task.setPriority(taskRepository.getCountByPostAndStatus(project, input.getStatus()));
@@ -95,18 +95,18 @@ public class TaskService {
 
         List<TaskPerformer> performerList = new ArrayList<>();
         if (input.getPerformerIdList() != null) {
-            final List<User> userList = accountQueryService.findAllByIdentificationIn(input.getPerformerIdList());
-            final Map<String, User> identificationToUserMap
-                    = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
+            final List<Account> accountList = accountQueryService.findAllByIdentificationIn(input.getPerformerIdList());
+            final Map<String, Account> identificationToAccountMap
+                    = accountList.stream().collect(Collectors.toMap(Account::getIdentification, Function.identity()));
 
             List<String> invalidIdentificationList = new ArrayList<>();
-            for (String userIdentification : input.getPerformerIdList()) {
-                if (!identificationToUserMap.containsKey(userIdentification)) {
-                    invalidIdentificationList.add(userIdentification);
+            for (String accountIdentification : input.getPerformerIdList()) {
+                if (!identificationToAccountMap.containsKey(accountIdentification)) {
+                    invalidIdentificationList.add(accountIdentification);
                     continue;
                 }
 
-                performerList.add(makeTaskPerformer(task, identificationToUserMap.get(userIdentification)));
+                performerList.add(makeTaskPerformer(task, identificationToAccountMap.get(accountIdentification)));
             }
 
             if (!CollectionUtils.isEmpty(invalidIdentificationList)) {
@@ -120,10 +120,10 @@ public class TaskService {
         return TaskCreateResult.from(newTask);
     }
 
-    private TaskPerformer makeTaskPerformer(Task task, User user) {
+    private TaskPerformer makeTaskPerformer(Task task, Account account) {
         return TaskPerformer.builder()
                 .task(task)
-                .user(user)
+                .account(account)
                 .build();
     }
 
@@ -133,12 +133,12 @@ public class TaskService {
     @Transactional
     public TaskUpdateResult update(Long taskId,
                                    TaskUpdateInput input,
-                                   User currentUser) {
+                                   Account currentAccount) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", taskId));
 
         // 멤버만 가능
-        projectMemberQueryService.validateProjectMember(task.getProject(), currentUser);
+        projectMemberQueryService.validateProjectMember(task.getProject(), currentAccount);
 
         LocalDateTime deadline
                 = input.getDeadline() != null ?
@@ -156,18 +156,18 @@ public class TaskService {
 
         List<TaskPerformer> taskPerformerList = new ArrayList<>();
 
-        final List<User> userList = accountQueryService.findAllByIdentificationIn(newTaskPerformerIdList);
-        final Map<String, User> identificationToUserMap
-                = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
+        final List<Account> accountList = accountQueryService.findAllByIdentificationIn(newTaskPerformerIdList);
+        final Map<String, Account> identificationToAccountMap
+                = accountList.stream().collect(Collectors.toMap(Account::getIdentification, Function.identity()));
         List<String> invalidIdentificationList = new ArrayList<>();
 
         for (String performerId : newTaskPerformerIdList) {
-            if (!identificationToUserMap.containsKey(performerId)) {
+            if (!identificationToAccountMap.containsKey(performerId)) {
                 invalidIdentificationList.add(performerId);
                 continue;
             }
 
-            taskPerformerList.add(makeTaskPerformer(task, identificationToUserMap.get(performerId)));
+            taskPerformerList.add(makeTaskPerformer(task, identificationToAccountMap.get(performerId)));
         }
 
         if (!CollectionUtils.isEmpty(invalidIdentificationList)) {
@@ -189,12 +189,12 @@ public class TaskService {
     // 태스크 상태 업데이트
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Transactional
-    public void updateTaskStatus(Long id, @Valid TaskUpdateStatusRequest request, User currentUser) {
+    public void updateTaskStatus(Long id, @Valid TaskUpdateStatusRequest request, Account currentAccount) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
 
         // 멤버만 가능
-        projectMemberQueryService.validateProjectMember(task.getProject(), currentUser);
+        projectMemberQueryService.validateProjectMember(task.getProject(), currentAccount);
 
         if (request.getStatus().equals(task.getStatus())) {
             if (request.getPriority() == task.getPriority()) return;
@@ -216,12 +216,12 @@ public class TaskService {
     // 태스크 삭제
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Transactional
-    public ApiResponse delete(Long id, User currentUser) {
+    public ApiResponse delete(Long id, Account currentAccount) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
 
         // 멤버만 가능
-        projectMemberQueryService.validateProjectMember(task.getProject(), currentUser);
+        projectMemberQueryService.validateProjectMember(task.getProject(), currentAccount);
 
         taskRepository.reorderInPreviousStatus(task.getProject(), task.getStatus(), task.getPriority()); // 기존 status 정리
         taskRepository.delete(task);

@@ -1,7 +1,5 @@
 package com.test.teamlog.global.dto;
 
-import com.test.teamlog.domain.account.model.User;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

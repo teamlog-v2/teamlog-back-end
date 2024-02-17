@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.account.dto;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import lombok.Data;
 
 @Data
@@ -8,10 +8,10 @@ public class SignUpResult {
     private String identification;
     private String name;
 
-    public static SignUpResult from(User user) {
+    public static SignUpResult from(Account account) {
         SignUpResult result = new SignUpResult();
-        result.setIdentification(user.getIdentification());
-        result.setName(user.getName());
+        result.setIdentification(account.getIdentification());
+        result.setName(account.getName());
 
         return result;
     }

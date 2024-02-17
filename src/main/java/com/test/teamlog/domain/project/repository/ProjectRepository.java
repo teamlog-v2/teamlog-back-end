@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.project.repository;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 
 import com.test.teamlog.domain.project.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +16,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, Project
     List<Project> searchProjectByName(@Param("name") String name);
 
     // FIXME: QueryDsl 도입 후 order by는 파라미터로 받기
-    @Query("select j.project from ProjectMember j where j.user = :user order by j.project.updateTime desc")
-    List<Project> findProjectByUser(@Param("user") User user);
+    @Query("select j.project from ProjectMember j where j.account = :account order by j.project.updateTime desc")
+    List<Project> findProjectByAccount(@Param("account") Account account);
 }

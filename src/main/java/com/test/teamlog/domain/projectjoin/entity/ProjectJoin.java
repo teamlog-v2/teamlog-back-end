@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.projectjoin.entity;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -14,7 +14,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "project_join",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"project_id", "user_id"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"project_id", "account_id"}))
 public class ProjectJoin extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +25,8 @@ public class ProjectJoin extends BaseTimeEntity {
     private Project project;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @Column(name = "is_accepted", nullable = false)
     private Boolean isAccepted; // 수락
@@ -45,20 +45,20 @@ public class ProjectJoin extends BaseTimeEntity {
         project.getProjectJoins().add(this);
     }
 
-    public static ProjectJoin createInvitation(Project project, User user) {
+    public static ProjectJoin createInvitation(Project project, Account account) {
         return ProjectJoin.builder()
                 .project(project)
-                .user(user)
+                .account(account)
                 .isAccepted(false)
                 .isApplied(false)
                 .isInvited(true)
                 .build();
     }
 
-    public static ProjectJoin createApplication(Project project, User user) {
+    public static ProjectJoin createApplication(Project project, Account account) {
         return ProjectJoin.builder()
                 .project(project)
-                .user(user)
+                .account(account)
                 .isAccepted(false)
                 .isApplied(true)
                 .isInvited(false)

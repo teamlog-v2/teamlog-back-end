@@ -2,44 +2,44 @@ package com.test.teamlog.domain.account.repository;
 
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static com.test.teamlog.domain.account.model.QUser.user;
+import static com.test.teamlog.domain.account.model.QAccount.account;
+import static com.test.teamlog.domain.accountfollow.entity.QAccountFollow.accountFollow;
 import static com.test.teamlog.domain.projectjoin.entity.QProjectJoin.projectJoin;
 import static com.test.teamlog.domain.projectmember.entity.QProjectMember.projectMember;
-import static com.test.teamlog.domain.userfollow.entity.QUserFollow.userFollow;
 
 @Repository
 @RequiredArgsConstructor
 public class AccountRepositoryImpl implements AccountRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
-    public boolean isFollow(String fromUserId, String toUserId) {
+    public boolean isFollow(String accountaccountId, String toAccountId) {
         return jpaQueryFactory
-                .selectFrom(userFollow)
+                .selectFrom(accountFollow)
                 .where(
-                        userFollow.fromUser.identification.eq(fromUserId),
-                        userFollow.toUser.identification.eq(toUserId)
+                        accountFollow.fromAccount.identification.eq(accountaccountId),
+                        accountFollow.toAccount.identification.eq(toAccountId)
                 )
                 .fetchFirst() != null;
     }
 
     @Override
-    public List<User> findUsersNotInProjectMember(Long projectId) {
+    public List<Account> findAccountNotInProjectMember(Long projectId) {
         return jpaQueryFactory
-                .selectFrom(user)
-                .where(user.idx.notIn(
+                .selectFrom(account)
+                .where(account.idx.notIn(
                         JPAExpressions
-                                .select(projectMember.user.idx)
+                                .select(projectMember.account.idx)
                                 .from(projectMember)
                                 .where(projectMember.project.id.eq(projectId)
-                                )), user.idx.notIn(
+                                )), account.idx.notIn(
                         JPAExpressions
-                                .select(projectJoin.user.idx)
+                                .select(projectJoin.account.idx)
                                 .from(projectJoin)
                                 .where(projectJoin.project.id.eq(projectId))
                 )).fetch();

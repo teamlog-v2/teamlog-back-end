@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.post.entity;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.comment.entity.Comment;
 import com.test.teamlog.domain.postlike.entity.PostLike;
 import com.test.teamlog.domain.postmedia.entity.PostMedia;
@@ -35,8 +35,8 @@ public class Post extends BaseTimeEntity {
     private String contents;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_user_id", nullable = false)
-    private User writer;
+    @JoinColumn(name = "writer_account_id", nullable = false)
+    private Account writer;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "access_modifier", nullable = false, columnDefinition = "smallint")

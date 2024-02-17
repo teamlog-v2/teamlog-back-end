@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.projectfollow.entity;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.project.entity.Project;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,7 +16,7 @@ import lombok.*;
         name = "project_follower",
         uniqueConstraints={
                 @UniqueConstraint(
-                        columnNames={"user_id","project_id"}
+                        columnNames={"account_id","project_id"}
                 )
         }
 )
@@ -26,8 +26,8 @@ public class ProjectFollower {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
-    private User user;
+    @JoinColumn(name = "account_id",nullable = false)
+    private Account account;
 
     @ManyToOne
     @JoinColumn(name = "project_id",nullable = false)
@@ -41,22 +41,22 @@ public class ProjectFollower {
         project.getProjectFollowers().add(this);
     }
 
-    public void setUser(User user) {
-        if(this.user != null) {
-            this.user.getProjectFollowers().remove(this);
+    public void setAccount(Account account) {
+        if(this.account != null) {
+            this.account.getProjectFollowers().remove(this);
         }
-        this.user = user;
-        user.getProjectFollowers().add(this);
+        this.account = account;
+        account.getProjectFollowers().add(this);
     }
 
-    public static ProjectFollower create(Project project, User user) {
+    public static ProjectFollower create(Project project, Account account) {
         ProjectFollower projectFollower = ProjectFollower.builder()
                 .project(project)
-                .user(user)
+                .account(account)
                 .build();
 
         project.getProjectFollowers().add(projectFollower);
-        user.getProjectFollowers().add(projectFollower);
+        account.getProjectFollowers().add(projectFollower);
 
         return projectFollower;
     }

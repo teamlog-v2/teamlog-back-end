@@ -1,7 +1,6 @@
 package com.test.teamlog.domain.task.entity;
 
-import com.test.teamlog.domain.account.model.User;
-import com.test.teamlog.domain.task.entity.Task;
+import com.test.teamlog.domain.account.model.Account;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,8 +22,8 @@ public class TaskPerformer {
     private Task task;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
-    private User user;
+    @JoinColumn(name = "account_id",nullable = false)
+    private Account account;
 
     public void setTask(Task task) {
         if(this.task != null) {
@@ -34,12 +33,12 @@ public class TaskPerformer {
         task.getTaskPerformers().add(this);
     }
 
-    public void setUser(User user) {
-        if(this.user != null) {
-            this.user.getTaskPerformers().remove(this);
+    public void setAccount(Account account) {
+        if(this.account != null) {
+            this.account.getTaskPerformers().remove(this);
         }
-        this.user = user;
-        user.getTaskPerformers().add(this);
+        this.account = account;
+        account.getTaskPerformers().add(this);
     }
 
 }

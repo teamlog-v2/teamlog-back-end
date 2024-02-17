@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.projectapplication.dto;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.projectapplication.entity.ProjectApplication;
 import lombok.Data;
@@ -13,7 +13,7 @@ public class ProjectApplicationReadApplicantsResult {
 
     public static ProjectApplicationReadApplicantsResult from(ProjectApplication projectApplication) {
         ProjectApplicationReadApplicantsResult result = new ProjectApplicationReadApplicantsResult();
-        final User applicant = projectApplication.getApplicant();
+        final Account applicant = projectApplication.getApplicant();
         result.setApplicantIdentification(applicant.getIdentification());
         result.setApplicantName(applicant.getName());
 

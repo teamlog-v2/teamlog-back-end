@@ -1,11 +1,11 @@
 package com.test.teamlog.domain.account.repository;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 
 import java.util.List;
 
 public interface AccountRepositoryCustom {
-    boolean isFollow(String fromUserId, String toUserId);
+    boolean isFollow(String accountaccountId, String toAccountId);
 
-    List<User> findUsersNotInProjectMember(Long projectId);
+    List<Account> findAccountNotInProjectMember(Long projectId);
 }

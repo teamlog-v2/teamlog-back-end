@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.post.service;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.post.dto.PostHistoryResponse;
 import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.post.service.query.PostQueryService;
@@ -25,10 +25,10 @@ public class PostHistoryService {
     private final ProjectMemberQueryService projectMemberQueryService;
 
     @Transactional
-    public List<PostHistoryResponse> readPostUpdateHistory(Long postId, User currentUser) {
+    public List<PostHistoryResponse> readPostUpdateHistory(Long postId, Account currentAccount) {
         Post post = postQueryService.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-        projectMemberQueryService.validateProjectMember(post.getProject(), currentUser);
+        projectMemberQueryService.validateProjectMember(post.getProject(), currentAccount);
 
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
         List<PostUpdateHistory> historyList = postUpdateHistoryRepository.findAllByPost(post, sort);

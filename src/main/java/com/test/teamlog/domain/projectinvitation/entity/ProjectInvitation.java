@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.projectinvitation.entity;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.project.entity.Project;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,11 +26,11 @@ public class ProjectInvitation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inviter_idx", nullable = false)
-    private User inviter;
+    private Account inviter;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invitee_idx", nullable = false)
-    private User invitee;
+    private Account invitee;
 
     @CreatedDate
     @Column(name = "create_time")

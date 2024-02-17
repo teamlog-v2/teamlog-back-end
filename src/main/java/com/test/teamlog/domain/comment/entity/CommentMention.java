@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.comment.entity;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,8 +22,8 @@ public class CommentMention {
     private Comment comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target_user_id", nullable = false)
-    private User targetUser;
+    @JoinColumn(name = "target_account_id", nullable = false)
+    private Account targetAccount;
 
     public void setComment(Comment comment) {
         if(this.comment != null) {

@@ -7,12 +7,12 @@ import java.util.List;
 @Data
 public class ProjectJoinInviteRequest {
     private Long projectId;
-    private List<String> userIdList;
+    private List<String> accountIdList;
 
     public ProjectJoinInviteInput toInput() {
         ProjectJoinInviteInput input = new ProjectJoinInviteInput();
         input.setProjectId(this.projectId);
-        input.setUserIdentificationList(this.userIdList);
+        input.setAccountIdentificationList(this.accountIdList);
 
         return input;
     }

@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.postupdatehistory.entity;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,15 +27,15 @@ public class PostUpdateHistory {
     private Post post;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @CreatedDate
     @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;
 
-    public PostUpdateHistory(Post post, User user) {
+    public PostUpdateHistory(Post post, Account account) {
         this.post = post;
-        this.user = user;
+        this.account = account;
     }
 }

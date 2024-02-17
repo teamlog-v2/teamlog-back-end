@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.projectapplication.service;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.query.ProjectQueryService;
@@ -41,8 +41,8 @@ public class ProjectApplicationService {
         final Project project = projectQueryService.findById(projectIdx)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectIdx));
 
-        final User applicant = accountQueryService.findByIdx(applicantIdx)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "ID", applicantIdx));
+        final Account applicant = accountQueryService.findByIdx(applicantIdx)
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "ID", applicantIdx));
 
         // 프로젝트 멤버 여부 확인
         if (projectMemberQueryService.isProjectMember(project, applicant)) {
@@ -68,20 +68,20 @@ public class ProjectApplicationService {
         final Project project = projectApplication.getProject();
 
         final Long accountIdx = input.getAccountIdx();
-        final User user = accountQueryService.findByIdx(accountIdx)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "ID", accountIdx));
+        final Account account = accountQueryService.findByIdx(accountIdx)
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "ID", accountIdx));
 
-        final User applicant = projectApplication.getApplicant();
+        final Account applicant = projectApplication.getApplicant();
 
         // 요청 수락자가 프로젝트 멤버인지 확인
-        projectMemberQueryService.findByProjectAndUser(project, user).orElseThrow(() -> new BadRequestException("프로젝트 멤버가 아닙니다."));
+        projectMemberQueryService.findByProjectAndUAccount(project, account).orElseThrow(() -> new BadRequestException("프로젝트 멤버가 아닙니다."));
 
         // 요청자가 이미 프로젝트 멤버인지 확인
-        projectMemberQueryService.findByProjectAndUser(project, applicant).ifPresent(projectMember -> {
+        projectMemberQueryService.findByProjectAndUAccount(project, applicant).ifPresent(projectMember -> {
             throw new BadRequestException("이미 프로젝트 멤버입니다.");
         });
 
-        projectMemberCommandService.save(ProjectMember.create(project, user));
+        projectMemberCommandService.save(ProjectMember.create(project, account));
         projectApplicationRepository.delete(projectApplication);
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 신청 수락 성공");
@@ -94,10 +94,10 @@ public class ProjectApplicationService {
 
         final Project project = projectApplication.getProject();
 
-        final User user = accountQueryService.findByIdx(accountIdx)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "ID", accountIdx));
+        final Account account = accountQueryService.findByIdx(accountIdx)
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "ID", accountIdx));
 
-        projectMemberQueryService.findByProjectAndUser(project, user).orElseThrow(() -> new BadRequestException("프로젝트 멤버가 아닙니다."));
+        projectMemberQueryService.findByProjectAndUAccount(project, account).orElseThrow(() -> new BadRequestException("프로젝트 멤버가 아닙니다."));
         projectApplicationRepository.delete(projectApplication);
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 신청 거절 성공");
@@ -118,18 +118,18 @@ public class ProjectApplicationService {
     @Transactional(readOnly = true)
     public List<ProjectApplicationReadApplicantsResult> readAllApplicants(Long projectIdx, Long accountIdx) {
         final Project project = projectQueryService.findById(projectIdx).orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectIdx));
-        final User user = accountQueryService.findByIdx(accountIdx).orElseThrow(() -> new ResourceNotFoundException("User", "ID", accountIdx));
+        final Account account = accountQueryService.findByIdx(accountIdx).orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "ID", accountIdx));
 
-        if (!projectMemberQueryService.isProjectMember(project, user)) throw new BadRequestException("프로젝트 멤버가 아닙니다.");
+        if (!projectMemberQueryService.isProjectMember(project, account)) throw new BadRequestException("프로젝트 멤버가 아닙니다.");
 
         final List<ProjectApplication> projectApplicationList = projectApplicationRepository.findAllByProject(project);
         return projectApplicationList.stream().map(ProjectApplicationReadApplicantsResult::from).toList();
     }
 
     public List<ProjectApplicationReadPendingResult> readAllPending(Long accountIdx) {
-        final User user = accountQueryService.findByIdx(accountIdx).orElseThrow(() -> new ResourceNotFoundException("User", "ID", accountIdx));
+        final Account account = accountQueryService.findByIdx(accountIdx).orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "ID", accountIdx));
 
-        final List<ProjectApplication> projectApplicationList = projectApplicationRepository.findAllByApplicant(user);
+        final List<ProjectApplication> projectApplicationList = projectApplicationRepository.findAllByApplicant(account);
         return projectApplicationList.stream().map(ProjectApplicationReadPendingResult::from).toList();
     }
 }

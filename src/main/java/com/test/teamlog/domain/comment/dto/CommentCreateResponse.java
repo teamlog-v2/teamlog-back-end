@@ -11,7 +11,7 @@ public class CommentCreateResponse {
     private Long id;
     private String contents;
     private Integer childCommentCount;
-    private UserFollowInfoResponse writer;
+    private AccountFollowInfoResponse writer;
     private List<String> commentMentions;
     private LocalDateTime writeTime;
 
@@ -21,7 +21,7 @@ public class CommentCreateResponse {
         response.setId(result.getId());
         response.setContents(result.getContents());
         response.setChildCommentCount(result.getChildCommentCount());
-        response.setWriter(UserFollowInfoResponse.from(result.getWriter()));
+        response.setWriter(AccountFollowInfoResponse.from(result.getWriter()));
         response.setCommentMentions(result.getCommentMentions());
         response.setWriteTime(result.getWriteTime());
 
@@ -29,18 +29,18 @@ public class CommentCreateResponse {
     }
 
     @Data
-    static class UserFollowInfoResponse {
+    static class AccountFollowInfoResponse {
         private String id;
         private String name;
         private String profileImgPath;
 
-        public static UserFollowInfoResponse from(CommentCreateResult.UserSimpleInfoResult result) {
-            UserFollowInfoResponse userFollowInfo = new UserFollowInfoResponse();
-            userFollowInfo.setId(result.getId());
-            userFollowInfo.setName(result.getName());
-            userFollowInfo.setProfileImgPath(result.getProfileImgPath());
+        public static AccountFollowInfoResponse from(CommentCreateResult.AccountSimpleInfoResult result) {
+            AccountFollowInfoResponse accountFollowInfo = new AccountFollowInfoResponse();
+            accountFollowInfo.setId(result.getId());
+            accountFollowInfo.setName(result.getName());
+            accountFollowInfo.setProfileImgPath(result.getProfileImgPath());
 
-            return userFollowInfo;
+            return accountFollowInfo;
         }
     }
 }

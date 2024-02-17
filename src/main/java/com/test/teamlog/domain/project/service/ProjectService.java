@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.project.service;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.file.management.service.FileManagementService;
@@ -42,7 +42,7 @@ public class ProjectService {
     private final ProjectFollowQueryService projectFollowQueryService;
 
     @Transactional
-    public ApiResponse updateThumbnail(Long projectId, MultipartFile image, User currentUser) throws IOException {
+    public ApiResponse updateThumbnail(Long projectId, MultipartFile image, Account currentAccount) throws IOException {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
@@ -53,11 +53,11 @@ public class ProjectService {
     }
 
     @Transactional
-    public ApiResponse deleteThumbnail(Long projectId, User currentUser) {
+    public ApiResponse deleteThumbnail(Long projectId, Account currentAccount) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        if (project.isProjectMaster(currentUser)) {
+        if (project.isProjectMaster(currentAccount)) {
             throw new BadRequestException("프로젝트 멤버가 아닙니다.");
         }
 
@@ -66,38 +66,38 @@ public class ProjectService {
     }
 
     // 유저가 팔로우 중인 프로젝트
-    public List<ProjectReadUserFollowingResult> readAllUserFollowing(String identification, User currentUser) {
-        User user;
+    public List<ProjectReadAccountFollowingResult> readAllAccountFollowing(String identification, Account currentAccount) {
+        Account account;
 
         boolean isMyProjectList = false;
-        if (currentUser == null) {
-            user = readByIdentification(identification);
+        if (currentAccount == null) {
+            account = readByIdentification(identification);
         } else {
-            isMyProjectList = currentUser.getIdentification().equals(identification);
-            user = isMyProjectList ? currentUser : readByIdentification(identification);
+            isMyProjectList = currentAccount.getIdentification().equals(identification);
+            account = isMyProjectList ? currentAccount : readByIdentification(identification);
         }
 
-        List<ProjectFollower> userFollowingProjectList = projectFollowQueryService.findAllByUser(user);
-        List<ProjectReadUserFollowingResult> resultList = new ArrayList<>();
+        List<ProjectFollower> accountFollowingProjectList = projectFollowQueryService.findAllByAccount(account);
+        List<ProjectReadAccountFollowingResult> resultList = new ArrayList<>();
 
-        for (ProjectFollower userFollowingProject : userFollowingProjectList) {
-            Project project = userFollowingProject.getProject();
-            if (!isMyProjectList && isNotMemberAndPrivateProject(currentUser, project))
+        for (ProjectFollower accountFollowingProject : accountFollowingProjectList) {
+            Project project = accountFollowingProject.getProject();
+            if (!isMyProjectList && isNotMemberAndPrivateProject(currentAccount, project))
                 continue;
 
-            resultList.add(ProjectReadUserFollowingResult.from(project));
+            resultList.add(ProjectReadAccountFollowingResult.from(project));
         }
 
         return resultList;
     }
 
     // 프로젝트 검색
-    public List<ProjectSearchResult> search(String name, User currentUser) {
+    public List<ProjectSearchResult> search(String name, Account currentAccount) {
         List<Project> projectList = projectRepository.searchProjectByName(name);
         List<ProjectSearchResult> responseList = new ArrayList<>();
 
         for (Project project : projectList) {
-            if (isNotMemberAndPrivateProject(currentUser, project))
+            if (isNotMemberAndPrivateProject(currentAccount, project))
                 continue;
 
             responseList.add(ProjectSearchResult.from(project));
@@ -106,12 +106,12 @@ public class ProjectService {
     }
 
     // 프로젝트와의 관계
-    private Relation detectRelation(Project project, User currentUser) {
-        if (currentUser == null) return Relation.NONE;
-        if (project.isProjectMaster(currentUser)) return Relation.MASTER;
-        if (projectMemberQueryService.isProjectMember(project, currentUser)) return Relation.MEMBER;
+    private Relation detectRelation(Project project, Account currentAccount) {
+        if (currentAccount == null) return Relation.NONE;
+        if (project.isProjectMaster(currentAccount)) return Relation.MASTER;
+        if (projectMemberQueryService.isProjectMember(project, currentAccount)) return Relation.MEMBER;
 
-        ProjectJoin projectJoin = projectJoinQueryService.findByProjectAndUser(project, currentUser).orElse(null);
+        ProjectJoin projectJoin = projectJoinQueryService.findByProjectAndAccount(project, currentAccount).orElse(null);
 
         if (projectJoin != null) {
             if (projectJoin.getIsAccepted() && !projectJoin.getIsInvited()) return Relation.APPLIED;
@@ -122,63 +122,63 @@ public class ProjectService {
     }
 
     // 단일 프로젝트 조회
-    public ProjectReadResult readOne(Long id, User currentUser) {
+    public ProjectReadResult readOne(Long id, Account currentAccount) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
 
         // Private 시 검증
         if (project.getAccessModifier() == AccessModifier.PRIVATE) {
-            projectMemberQueryService.validateProjectMember(project, currentUser);
+            projectMemberQueryService.validateProjectMember(project, currentAccount);
         }
 
         final ProjectReadResult result = ProjectReadResult.from(project);
-        result.setRelation(detectRelation(project, currentUser));
+        result.setRelation(detectRelation(project, currentAccount));
 
         return result;
     }
 
     // 사용자 프로젝트 리스트 조회
-    public List<ProjectReadByUserResult> readAllByUser(String identification, User currentUser) {
-        User user;
+    public List<ProjectReadByAccountResult> readAllByAccount(String identification, Account currentAccount) {
+        Account account;
 
         boolean isMyProjectList = false;
-        if (currentUser == null) {
-            user = readByIdentification(identification);
+        if (currentAccount == null) {
+            account = readByIdentification(identification);
         } else {
-            isMyProjectList = currentUser.getIdentification().equals(identification);
-            user = isMyProjectList ? currentUser : readByIdentification(identification);
+            isMyProjectList = currentAccount.getIdentification().equals(identification);
+            account = isMyProjectList ? currentAccount : readByIdentification(identification);
         }
 
-        List<Project> projectList = projectRepository.findProjectByUser(user);
-        List<ProjectReadByUserResult> resultList = new ArrayList<>();
+        List<Project> projectList = projectRepository.findProjectByAccount(account);
+        List<ProjectReadByAccountResult> resultList = new ArrayList<>();
 
         for (Project project : projectList) {
-            if (!isMyProjectList && isNotMemberAndPrivateProject(currentUser, project)) {
+            if (!isMyProjectList && isNotMemberAndPrivateProject(currentAccount, project)) {
                 continue;
             }
 
-            resultList.add(ProjectReadByUserResult.from(project));
+            resultList.add(ProjectReadByAccountResult.from(project));
         }
 
         return resultList;
     }
 
     // 본인이 속하지 않은 비공개 프로젝트인지 확인
-    private boolean isNotMemberAndPrivateProject(User currentUser, Project project) {
-        return !projectMemberQueryService.isProjectMember(project, currentUser) && project.getAccessModifier() == AccessModifier.PRIVATE;
+    private boolean isNotMemberAndPrivateProject(Account currentAccount, Project project) {
+        return !projectMemberQueryService.isProjectMember(project, currentAccount) && project.getAccessModifier() == AccessModifier.PRIVATE;
     }
 
     /**
      * 프로젝트 생성
      *
      * @param input
-     * @param currentUser
+     * @param currentAccount
      * @return
      */
     @Transactional
-    public ProjectCreateResult create(ProjectCreateInput input, User currentUser) {
-        final Project project = input.toProject(currentUser);
-        project.addProjectMember(ProjectMember.create(project, currentUser));
+    public ProjectCreateResult create(ProjectCreateInput input, Account currentAccount) {
+        final Project project = input.toProject(currentAccount);
+        project.addProjectMember(ProjectMember.create(project, currentAccount));
 
         final Project newProject = projectRepository.save(project);
         return ProjectCreateResult.of(newProject, Relation.MASTER);
@@ -189,14 +189,14 @@ public class ProjectService {
      *
      * @param id
      * @param input
-     * @param currentUser
+     * @param currentAccount
      * @return
      */
     @Transactional
-    public ProjectUpdateResult update(Long id, ProjectUpdateInput input, User currentUser) {
+    public ProjectUpdateResult update(Long id, ProjectUpdateInput input, Account currentAccount) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
-        validateMasterUser(project, currentUser);
+        validateMasterAccount(project, currentAccount);
 
         project.update(input.getName(), input.getIntroduction(), input.getAccessModifier());
 
@@ -205,12 +205,12 @@ public class ProjectService {
 
     // 프로젝트 마스터 위임
     @Transactional
-    public ApiResponse delegateMaster(Long id, String newMasterIdentification, User currentUser) {
+    public ApiResponse delegateMaster(Long id, String newMasterIdentification, Account currentAccount) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
-        validateMasterUser(project, currentUser);
+        validateMasterAccount(project, currentAccount);
 
-        final User newMaster = readByIdentification(newMasterIdentification); // 존재하는지 검증
+        final Account newMaster = readByIdentification(newMasterIdentification); // 존재하는지 검증
         project.delegateMaster(newMaster);
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 마스터 위임 성공");
@@ -218,18 +218,18 @@ public class ProjectService {
 
     // 프로젝트 삭제
     @Transactional
-    public ApiResponse delete(Long id, User currentUser) {
+    public ApiResponse delete(Long id, Account currentAccount) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", id));
-        validateMasterUser(project, currentUser);
+        validateMasterAccount(project, currentAccount);
 
         projectRepository.delete(project);
         return new ApiResponse(Boolean.TRUE, "프로젝트 삭제 성공");
     }
 
     // 마스터 검증
-    private void validateMasterUser(Project project, User currentUser) {
-        if (!project.isProjectMaster(currentUser)) {
+    private void validateMasterAccount(Project project, Account currentAccount) {
+        if (!project.isProjectMaster(currentAccount)) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 마스터 아님 )");
         }
     }
@@ -245,8 +245,8 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
     }
 
-    private User readByIdentification(String identification) {
+    private Account readByIdentification(String identification) {
         return accountQueryService.findByIdentification(identification)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "identification", identification));
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "identification", identification));
     }
 }

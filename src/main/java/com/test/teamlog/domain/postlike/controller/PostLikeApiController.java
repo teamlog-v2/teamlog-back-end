@@ -3,7 +3,7 @@ package com.test.teamlog.domain.postlike.controller;
 import com.test.teamlog.domain.postlike.dto.PostLikerResponse;
 import com.test.teamlog.domain.postlike.dto.PostLikerResult;
 import com.test.teamlog.domain.postlike.service.PostLikeService;
-import com.test.teamlog.global.security.UserAdapter;
+import com.test.teamlog.global.security.AccountAdapter;
 import com.test.teamlog.global.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,16 +27,16 @@ public class PostLikeApiController {
     @Operation(summary = "게시물 좋아요")
     @PostMapping("/{postId}/like")
     public ResponseEntity<ApiResponse> like(@PathVariable("postId") long postId,
-                                            @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = postService.create(postId, currentUser.getUser());
+                                            @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        ApiResponse apiResponse = postService.create(postId, currentAccount.getAccount());
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     @Operation(summary = "게시물 좋아요 취소")
     @DeleteMapping("/{postId}/like")
     public ResponseEntity<ApiResponse> unlike(@PathVariable("postId") long postId,
-                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = postService.delete(postId, currentUser.getUser());
+                                              @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        ApiResponse apiResponse = postService.delete(postId, currentAccount.getAccount());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 

@@ -3,7 +3,7 @@ package com.test.teamlog.domain.account.controller;
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.service.AccountService;
 import com.test.teamlog.global.dto.ApiResponse;
-import com.test.teamlog.global.security.UserAdapter;
+import com.test.teamlog.global.security.AccountAdapter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,12 +54,12 @@ public class AccountApiController {
 
     @Operation(summary = "로그인 검증")
     @GetMapping("/validate")
-    public ResponseEntity<UserValidateResponse> validate(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        if (currentUser == null) {
-            return new ResponseEntity<>(new UserValidateResponse(), HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<AccountValidateResponse> validate(@Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        if (currentAccount == null) {
+            return new ResponseEntity<>(new AccountValidateResponse(), HttpStatus.UNAUTHORIZED);
         } else {
-            final UserValidateResult result = accountService.validate(currentUser.getUser().getIdx());
-            return new ResponseEntity<>(UserValidateResponse.from(result), HttpStatus.OK);
+            final AccountValidateResult result = accountService.validate(currentAccount.getAccount().getIdx());
+            return new ResponseEntity<>(AccountValidateResponse.from(result), HttpStatus.OK);
         }
     }
 
@@ -72,19 +72,19 @@ public class AccountApiController {
 
     @Operation(summary = "회원 정보 조회")
     @GetMapping("/{identification}")
-    public ResponseEntity<UserReadDetailResponse> readDetail(@PathVariable("identification") String identification,
-                                                             @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        UserReadDetailResult result = accountService.readDetail(identification, currentUser.getUser());
-        return new ResponseEntity<>(UserReadDetailResponse.from(result), HttpStatus.OK);
+    public ResponseEntity<AccountReadDetailResponse> readDetail(@PathVariable("identification") String identification,
+                                                                @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        AccountReadDetailResult result = accountService.readDetail(identification, currentAccount.getAccount());
+        return new ResponseEntity<>(AccountReadDetailResponse.from(result), HttpStatus.OK);
     }
 
     @Operation(summary = "회원 정보 수정")
     @PutMapping
-    public ResponseEntity<ApiResponse> update(@Valid @RequestPart(value = "key") UserUpdateRequest userRequest,
+    public ResponseEntity<ApiResponse> update(@Valid @RequestPart(value = "key") AccountUpdateRequest request,
                                               @RequestPart(value = "profileImg", required = false) MultipartFile image,
-                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+                                              @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
         try {
-            ApiResponse apiResponse = accountService.updateUser(userRequest, image, currentUser.getUser());
+            ApiResponse apiResponse = accountService.updateAccount(request, image, currentAccount.getAccount());
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -93,17 +93,17 @@ public class AccountApiController {
 
     @Operation(summary = "회원 삭제")
     @DeleteMapping
-    public ResponseEntity<ApiResponse> deleteUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = accountService.deleteUser(currentUser.getUser());
+    public ResponseEntity<ApiResponse> deleteAccount(@Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        ApiResponse apiResponse = accountService.deleteAccount(currentAccount.getAccount());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "프로필 이미지 변경")
     @PutMapping("/profile-image")
-    public ResponseEntity<ApiResponse> updateUserProfileImage(@RequestPart(value = "profileImg", required = true) MultipartFile image,
-                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+    public ResponseEntity<ApiResponse> updateProfileImage(@RequestPart(value = "profileImg", required = true) MultipartFile image,
+                                                          @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
         try {
-            ApiResponse apiResponse = accountService.updateUserProfileImage(image, currentUser.getUser());
+            ApiResponse apiResponse = accountService.updateProfileImage(image, currentAccount.getAccount());
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -112,17 +112,17 @@ public class AccountApiController {
 
     @Operation(summary = "프로필 이미지 삭제")
     @DeleteMapping("/profile-image")
-    public ResponseEntity<ApiResponse> deleteUserProfileImage(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = accountService.deleteUserProfileImage(currentUser.getUser());
+    public ResponseEntity<ApiResponse> deleteProfileImage(@Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        ApiResponse apiResponse = accountService.deleteProfileImage(currentAccount.getAccount());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "회원 검색")
     @GetMapping
-    public ResponseEntity<List<UserSearchResponse>> search(@RequestParam(value = "id", required = false, defaultValue = "") String identification,
-                                                                   @RequestParam(value = "name", required = false, defaultValue = "") String name,
-                                                                   @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        final List<UserSearchResult> resultList = accountService.search(identification, name);
-        return new ResponseEntity<>(resultList.stream().map(UserSearchResponse::from).collect(Collectors.toList()), HttpStatus.OK);
+    public ResponseEntity<List<AccountSearchResponse>> search(@RequestParam(value = "id", required = false, defaultValue = "") String identification,
+                                                              @RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                              @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        final List<AccountSearchResult> resultList = accountService.search(identification, name);
+        return new ResponseEntity<>(resultList.stream().map(AccountSearchResponse::from).collect(Collectors.toList()), HttpStatus.OK);
     }
 }

@@ -56,20 +56,20 @@ public class JwtTokenProvider {
         return token != null ? token.getRefreshToken() : null;
     }
 
-    public String getUserId(String token) {
-        return extractAllClaims(token).get("userId", String.class);
+    public String getAccountId(String token) {
+        return extractAllClaims(token).get("accountId", String.class);
     }
 
     /**
      * 토큰 생성
      *
-     * @param userId
+     * @param accountId
      * @param expireTime
      * @return 토큰, Access Token, Refersh Token 생성 시 사용
      */
-    private String doGenerateToken(String userId, long expireTime) {
+    private String doGenerateToken(String accountId, long expireTime) {
         Claims claims = Jwts.claims();
-        claims.put("userId", userId);
+        claims.put("accountId", accountId);
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -115,8 +115,8 @@ public class JwtTokenProvider {
      * @return
      */
     public Authentication authenticate(String token) {
-        final String userId = getUserId(token);
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+        final String accountId = getAccountId(token);
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(accountId);
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }

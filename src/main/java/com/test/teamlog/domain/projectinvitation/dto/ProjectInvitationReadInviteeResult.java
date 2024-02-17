@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.projectinvitation.dto;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.projectinvitation.entity.ProjectInvitation;
 import lombok.Data;
@@ -16,8 +16,8 @@ public class ProjectInvitationReadInviteeResult {
 
     public static ProjectInvitationReadInviteeResult from(ProjectInvitation projectInvitation) {
         final ProjectInvitationReadInviteeResult result = new ProjectInvitationReadInviteeResult();
-        final User invitee = projectInvitation.getInvitee();
-        final User inviter = projectInvitation.getInviter();
+        final Account invitee = projectInvitation.getInvitee();
+        final Account inviter = projectInvitation.getInviter();
 
         result.setInviteeIdentification(invitee.getIdentification());
         result.setInviteeName(invitee.getName());

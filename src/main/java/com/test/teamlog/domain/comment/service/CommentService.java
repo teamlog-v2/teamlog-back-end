@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.comment.service;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.comment.dto.CommentCreateInput;
 import com.test.teamlog.domain.comment.dto.CommentCreateResult;
@@ -36,44 +36,44 @@ public class CommentService {
     private final AccountQueryService accountQueryService;
 
     // 유저가 작성한 댓글 조회
-    public List<CommentInfoResponse> getCommentByUser(User currentUser) {
-        List<Comment> commentList = commentRepository.findAllByWriter(currentUser);
-        return makeCommentInfoResponseList(currentUser, commentList);
+    public List<CommentInfoResponse> getCommentByAccount(Account currentAccount) {
+        List<Comment> commentList = commentRepository.findAllByWriter(currentAccount);
+        return makeCommentInfoResponseList(currentAccount, commentList);
     }
 
     // 게시물의 부모 댓글 조회
-    public PagedResponse<CommentInfoResponse> readCommentListByPostId(long postId, Pageable pageable, User currentUser) {
+    public PagedResponse<CommentInfoResponse> readCommentListByPostId(long postId, Pageable pageable, Account currentAccount) {
         Post post = postQueryService.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
 
         Page<Comment> commentList = commentRepository.findParentCommentListByPost(post, pageable);
 
-        final List<CommentInfoResponse> responseList = makeCommentInfoResponseList(currentUser, commentList.getContent());
+        final List<CommentInfoResponse> responseList = makeCommentInfoResponseList(currentAccount, commentList.getContent());
         return new PagedResponse<>(responseList, commentList.getNumber(), commentList.getSize(),
                 commentList.getTotalElements(), commentList.getTotalPages(), commentList.isLast());
     }
 
     // 대댓글 조회
-    public PagedResponse<CommentInfoResponse> readChildCommentList(Long parentCommentId, Pageable pageable, User currentUser) {
+    public PagedResponse<CommentInfoResponse> readChildCommentList(Long parentCommentId, Pageable pageable, Account currentAccount) {
         Comment comment = commentRepository.findById(parentCommentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", parentCommentId));
 
         Page<Comment> childCommentList = commentRepository.findAllByParentComment(comment, pageable);
 
-        final List<CommentInfoResponse> responseList = makeCommentInfoResponseList(currentUser, childCommentList.getContent());
+        final List<CommentInfoResponse> responseList = makeCommentInfoResponseList(currentAccount, childCommentList.getContent());
 
         return new PagedResponse<>(responseList, childCommentList.getNumber(), childCommentList.getSize(),
                 childCommentList.getTotalElements(), childCommentList.getTotalPages(), childCommentList.isLast());
     }
 
-    private List<CommentInfoResponse> makeCommentInfoResponseList(User currentUser, List<Comment> commentList) {
+    private List<CommentInfoResponse> makeCommentInfoResponseList(Account currentAccount, List<Comment> commentList) {
         if (CollectionUtils.isEmpty(commentList)) return Collections.emptyList();
 
         List<CommentInfoResponse> responseList = new ArrayList<>();
 
         for (Comment cmt : commentList) {
             Boolean isMyComment
-                    = (currentUser != null && cmt.getWriter().getIdentification().equals(currentUser.getIdentification())) ? Boolean.TRUE : Boolean.FALSE;
+                    = (currentAccount != null && cmt.getWriter().getIdentification().equals(currentAccount.getIdentification())) ? Boolean.TRUE : Boolean.FALSE;
 
             CommentInfoResponse response = CommentInfoResponse.from(cmt);
             response.setIsMyComment(isMyComment);
@@ -86,7 +86,7 @@ public class CommentService {
 
     // 댓글 생성
     @Transactional
-    public CommentCreateResult create(CommentCreateInput input, User currentUser) {
+    public CommentCreateResult create(CommentCreateInput input, Account currentAccount) {
         Post post = postQueryService.findById(input.getPostId())
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", input.getPostId()));
 
@@ -95,7 +95,7 @@ public class CommentService {
                         .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", input.getParentCommentId())) :
                 null;
 
-        Comment comment = input.toComment(currentUser, post, parentComment);
+        Comment comment = input.toComment(currentAccount, post, parentComment);
         comment.addCommentMentions(makeCommentMentionList(input.getCommentMentions(), comment));
 
         final Comment newComment = commentRepository.save(comment);
@@ -105,28 +105,28 @@ public class CommentService {
     private List<CommentMention> makeCommentMentionList(List<String> commentMentionIdentificationList, Comment comment) {
         if (CollectionUtils.isEmpty(commentMentionIdentificationList)) return Collections.emptyList();
 
-        final List<User> userList = accountQueryService.findAllByIdentificationIn(commentMentionIdentificationList);
-        final Map<String, User> userMap
-                = userList.stream().collect(Collectors.toMap(User::getIdentification, Function.identity()));
+        final List<Account> accountList = accountQueryService.findAllByIdentificationIn(commentMentionIdentificationList);
+        final Map<String, Account> accountMap
+                = accountList.stream().collect(Collectors.toMap(Account::getIdentification, Function.identity()));
 
         List<CommentMention> commentMentions = new ArrayList<>();
-        List<String> invalidUserIdentificationList = new ArrayList<>(); // 존재하지 않는 사용자 목록
+        List<String> invalidaccountIdentificationList = new ArrayList<>(); // 존재하지 않는 사용자 목록
 
         for (String identification : commentMentionIdentificationList) {
-            if (!userMap.containsKey(identification)) {
-                invalidUserIdentificationList.add(identification);
+            if (!accountMap.containsKey(identification)) {
+                invalidaccountIdentificationList.add(identification);
                 continue;
             }
 
             CommentMention commentMention = CommentMention.builder()
                     .comment(comment)
-                    .targetUser(userMap.get(identification))
+                    .targetAccount(accountMap.get(identification))
                     .build();
             commentMentions.add(commentMention);
         }
 
-        if (!invalidUserIdentificationList.isEmpty()) {
-            throw new ResourceNotFoundException("User", "identification", invalidUserIdentificationList.toString());
+        if (!invalidaccountIdentificationList.isEmpty()) {
+            throw new ResourceNotFoundException("ACCOUNT", "identification", invalidaccountIdentificationList.toString());
         }
 
         return commentMentions;
@@ -134,10 +134,10 @@ public class CommentService {
 
     // 댓글 수정
     @Transactional
-    public ApiResponse update(Long id, CommentUpdateInput input, User user) {
+    public ApiResponse update(Long id, CommentUpdateInput input, Account account) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
-        if (!comment.getWriter().getIdentification().equals(user.getIdentification())) {
+        if (!comment.getWriter().getIdentification().equals(account.getIdentification())) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 댓글 작성자 아님 )");
         }
 
@@ -148,9 +148,9 @@ public class CommentService {
 
         // 새 멘션 대상과 멘션 대상에서 제외된 사람들 목록 설정
         for (CommentMention commentMention : originalCommentMentions) {
-            final String targetUserIdentification = commentMention.getTargetUser().getIdentification();
-            if (newCommentMentionSet.contains(targetUserIdentification)) {
-                newCommentMentionSet.remove(targetUserIdentification);
+            final String targetaccountIdentification = commentMention.getTargetAccount().getIdentification();
+            if (newCommentMentionSet.contains(targetaccountIdentification)) {
+                newCommentMentionSet.remove(targetaccountIdentification);
             } else {
                 deletedCommentMentions.add(commentMention);
             }
@@ -166,10 +166,10 @@ public class CommentService {
 
     // 댓글 삭제
     @Transactional
-    public ApiResponse deleteComment(Long id, User user) {
+    public ApiResponse deleteComment(Long id, Account account) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
-        if (!comment.getWriter().getIdentification().equals(user.getIdentification())) {
+        if (!comment.getWriter().getIdentification().equals(account.getIdentification())) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 댓글 작성자 아님 )");
         }
 

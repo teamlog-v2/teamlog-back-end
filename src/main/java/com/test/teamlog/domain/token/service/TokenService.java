@@ -30,16 +30,16 @@ public class TokenService {
                 throw new ResourceNotFoundException("유효하지 않은 토큰입니다.");
             }
 
-            final String userId = jwtTokenProvider.getUserId(token);
-            final String savedRefreshToken = jwtTokenProvider.getRefreshToken(userId);
+            final String accountId = jwtTokenProvider.getAccountId(token);
+            final String savedRefreshToken = jwtTokenProvider.getRefreshToken(accountId);
 
             if (!token.equals(savedRefreshToken)) {
                 jwtTokenProvider.invalidateToken(token);
                 throw new ResourceNotFoundException("토큰이 유효하지 않습니다");
             }
 
-            final String accessToken = createAccessToken(userId);
-            final String refreshToken = createRefreshToken(userId);
+            final String accessToken = createAccessToken(accountId);
+            final String refreshToken = createRefreshToken(accountId);
 
             return new ReIssueResult(accessToken, refreshToken);
         } catch (Exception e) {

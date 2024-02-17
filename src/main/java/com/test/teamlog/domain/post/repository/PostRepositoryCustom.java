@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface PostRepositoryCustom {
-    boolean existsPostLikeByPostAndUser(Long postId, Long userId);
+    boolean existsPostLikeByPostAndAccount(Long postId, Long accountId);
 
     List<PostMedia> findAllPostMediaByPostId(Long postId);
 

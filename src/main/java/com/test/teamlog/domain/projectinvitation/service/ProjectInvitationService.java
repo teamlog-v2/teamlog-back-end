@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.projectinvitation.service;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.query.ProjectQueryService;
@@ -38,10 +38,10 @@ public class ProjectInvitationService {
 
         final Project project
                 = readProjectByIdx(projectIdx);
-        final User inviter
-                = readUserByIdx(inviterIdx);
-        final User invitee
-                = readUserByIdx(inviteeIdx);
+        final Account inviter
+                = readAccountByIdx(inviterIdx);
+        final Account invitee
+                = readAccountByIdx(inviteeIdx);
 
         if (!projectMemberQueryService.isProjectMember(project, inviter)) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 멤버가 아님 )");
@@ -65,8 +65,8 @@ public class ProjectInvitationService {
 
         final Project project
                 = readProjectByIdx(projectIdx);
-        final User invitee
-                = readUserByIdx(inviteeIdx);
+        final Account invitee
+                = readAccountByIdx(inviteeIdx);
 
         final ProjectInvitation projectInvitation = projectInvitationRepository.findByProjectAndInvitee(project, invitee)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectIdx));
@@ -92,8 +92,8 @@ public class ProjectInvitationService {
 
         final Project project
                 = readProjectByIdx(projectIdx);
-        final User invitee
-                = readUserByIdx(inviteeIdx);
+        final Account invitee
+                = readAccountByIdx(inviteeIdx);
 
         final ProjectInvitation projectInvitation = projectInvitationRepository.findByProjectAndInvitee(project, invitee)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectIdx));
@@ -111,10 +111,10 @@ public class ProjectInvitationService {
 
         final Project project
                 = readProjectByIdx(projectIdx);
-        final User inviter
-                = readUserByIdx(inviterIdx);
-        final User invitee
-                = readUserByIdx(inviteeIdx);
+        final Account inviter
+                = readAccountByIdx(inviterIdx);
+        final Account invitee
+                = readAccountByIdx(inviteeIdx);
 
         final ProjectInvitation projectInvitation = projectInvitationRepository.findByProjectAndInvitee(project, invitee)
                 .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectIdx));
@@ -129,11 +129,11 @@ public class ProjectInvitationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectInvitationReadInviteeResult> readAllInvitee(Long projectIdx, Long userIdx) {
+    public List<ProjectInvitationReadInviteeResult> readAllInvitee(Long projectIdx, Long accountIdx) {
         final Project project
                 = readProjectByIdx(projectIdx);
-        final User inviter
-                = readUserByIdx(userIdx);
+        final Account inviter
+                = readAccountByIdx(accountIdx);
 
         if (!projectMemberQueryService.isProjectMember(project, inviter)) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 멤버가 아님 )");
@@ -144,16 +144,16 @@ public class ProjectInvitationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ProjectInvitationReadPendingResult> readAllPending(Long userIdx) {
-        final User user
-                = readUserByIdx(userIdx);
+    public List<ProjectInvitationReadPendingResult> readAllPending(Long accountIdx) {
+        final Account account
+                = readAccountByIdx(accountIdx);
 
-        final List<ProjectInvitation> projectInvitationList = projectInvitationRepository.findAllByInvitee(user);
+        final List<ProjectInvitation> projectInvitationList = projectInvitationRepository.findAllByInvitee(account);
         return projectInvitationList.stream().map(ProjectInvitationReadPendingResult::from).toList();
     }
 
-    private User readUserByIdx(Long inviteeIdx) {
-        return accountQueryService.findByIdx(inviteeIdx).orElseThrow(() -> new ResourceNotFoundException("User", "ID", inviteeIdx));
+    private Account readAccountByIdx(Long inviteeIdx) {
+        return accountQueryService.findByIdx(inviteeIdx).orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "ID", inviteeIdx));
     }
 
     private Project readProjectByIdx(Long projectIdx) {

@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.postlike.service;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.post.service.query.PostQueryService;
 import com.test.teamlog.domain.postlike.dto.PostLikerResult;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * User와 Post 간의 중간 테이블에 대한 Service
+ * Account와 Post 간의 중간 테이블에 대한 Service
  */
 @Service
 @RequiredArgsConstructor
@@ -30,20 +30,20 @@ public class PostLikeService {
      * 좋아요
      *
      * @param postId
-     * @param currentUser
+     * @param currentAccount
      * @return
      */
     @Transactional
-    public ApiResponse create(Long postId, User currentUser) {
+    public ApiResponse create(Long postId, Account currentAccount) {
         Post post = readPostById(postId);
 
-        if (postLikeRepository.findByPostAndUser(post, currentUser).isPresent()) {
+        if (postLikeRepository.findByPostAndAccount(post, currentAccount).isPresent()) {
             throw new ResourceAlreadyExistsException("이미 좋아요를 누른 게시물입니다.");
         }
 
         final PostLike postLike = PostLike.builder()
                 .post(post)
-                .user(currentUser)
+                .account(currentAccount)
                 .build();
 
         postLikeRepository.save(postLike);
@@ -54,15 +54,15 @@ public class PostLikeService {
      * 좋아요 취소
      *
      * @param postId
-     * @param currentUser
+     * @param currentAccount
      * @return
      */
     @Transactional
-    public ApiResponse delete(Long postId, User currentUser) {
+    public ApiResponse delete(Long postId, Account currentAccount) {
         final Post post = readPostById(postId);
 
-        PostLike postLike = postLikeRepository.findByPostAndUser(post, currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("PostLiker", "UserId", currentUser.getIdentification()));
+        PostLike postLike = postLikeRepository.findByPostAndAccount(post, currentAccount)
+                .orElseThrow(() -> new ResourceNotFoundException("PostLiker", "accountId", currentAccount.getIdentification()));
 
         postLikeRepository.delete(postLike);
         return new ApiResponse(Boolean.TRUE, "포스트 좋아요 취소 성공");
