@@ -4,11 +4,9 @@ import com.test.teamlog.domain.account.model.Account;
 import jakarta.persistence.*;
 import lombok.*;
 
-
-
 @Entity
 @Builder
-@Setter @Getter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
@@ -33,13 +31,9 @@ public class AccountFollow {
     private Account toAccount;
 
     public static AccountFollow create(Account fromAccount, Account toAccount) {
-        AccountFollow accountFollow = new AccountFollow();
-        accountFollow.setFromAccount(fromAccount);
-        accountFollow.setToAccount(toAccount);
-
-        toAccount.getFollowers().add(accountFollow);
-        fromAccount.getFollowings().add(accountFollow);
-
-        return accountFollow;
+        return AccountFollow.builder()
+                .fromAccount(fromAccount)
+                .toAccount(toAccount)
+                .build();
     }
 }

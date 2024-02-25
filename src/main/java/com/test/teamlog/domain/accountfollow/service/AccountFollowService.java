@@ -91,8 +91,8 @@ public class AccountFollowService {
 
     // 팔로우
     @Transactional
-    public ApiResponse follow(Account currentAccount, String targetaccountId) {
-        Account targetAccount = readByIdentification(targetaccountId);
+    public ApiResponse follow(Account currentAccount, String targetAccountId) {
+        Account targetAccount = readByIdentification(targetAccountId);
 
         accountFollowRepository.save(AccountFollow.create(currentAccount, targetAccount));
         return new ApiResponse(Boolean.TRUE, "팔로우 성공");
@@ -100,10 +100,10 @@ public class AccountFollowService {
 
     // 언팔로우
     @Transactional
-    public ApiResponse unfollow(String targetaccountId, Account currentAccount) {
-        Account targetAccount = readByIdentification(targetaccountId);
+    public ApiResponse unfollow(String targetAccountId, Account currentAccount) {
+        Account targetAccount = readByIdentification(targetAccountId);
         AccountFollow accountFollow = accountFollowRepository.findByFromAccountAndToAccount(currentAccount, targetAccount)
-                .orElseThrow(() -> new ResourceNotFoundException("AccountFollow", "FromaccountId", currentAccount.getIdentification()));
+                .orElseThrow(() -> new ResourceNotFoundException("AccountFollow", "FromAccountId", currentAccount.getIdentification()));
 
         accountFollowRepository.delete(accountFollow);
         return new ApiResponse(Boolean.TRUE, "언팔로우 성공");

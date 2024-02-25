@@ -8,7 +8,7 @@ import lombok.*;
 
 @Entity
 @Builder
-@Setter @Getter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "comment_mention")

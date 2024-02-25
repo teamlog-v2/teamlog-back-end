@@ -9,7 +9,6 @@ import lombok.*;
 
 @Entity
 @Builder
-@Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

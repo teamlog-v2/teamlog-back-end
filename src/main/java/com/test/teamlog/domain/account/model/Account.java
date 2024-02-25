@@ -14,7 +14,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -52,6 +51,12 @@ public class Account {
     @OneToMany(mappedBy= "fromAccount", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
     private List<AccountFollow> followings = new ArrayList<>(); // 내가 팔로우 하는 사람들
+
+    public void update(String name, String introduction, FileInfo profileImage) {
+        this.name = name;
+        this.introduction = introduction;
+        this.profileImage = profileImage;
+    }
 
     public void updateProfileImage(FileInfo profileImage) {
         this.profileImage = profileImage;

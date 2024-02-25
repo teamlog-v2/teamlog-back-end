@@ -13,7 +13,7 @@ import java.util.List;
 
 @Entity
 @Builder
-@Setter @Getter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Task extends BaseTimeEntity {
@@ -66,4 +66,12 @@ public class Task extends BaseTimeEntity {
         this.deadline = deadline;
     }
 
+    // TODO: 구현 방향 검토
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
+    }
 }

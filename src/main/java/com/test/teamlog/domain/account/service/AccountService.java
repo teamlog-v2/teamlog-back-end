@@ -3,6 +3,7 @@ package com.test.teamlog.domain.account.service;
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.file.management.service.FileManagementService;
 import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.domain.token.service.TokenService;
@@ -87,18 +88,14 @@ public class AccountService {
 
     @Transactional
     public ApiResponse updateAccount(AccountUpdateRequest request, MultipartFile image, Account currentAccount) throws IOException {
-        if (request.getDefaultImage()) {
-            if (currentAccount.getProfileImage() != null) {
-                currentAccount.setProfileImage(null);
-            }
-        } else {
-            if (image != null) {
-                currentAccount.updateProfileImage(fileManagementService.uploadFile(image));
-            }
-        }
-        currentAccount.setName(request.getName());
-        currentAccount.setIntroduction(request.getIntroduction());
-        accountRepository.save(currentAccount);
+        // FIXME: LazyInitializationException 이슈로 잠시 추가한 것으로 개선 필요
+        final Account account = accountRepository.findByIdentification(currentAccount.getIdentification())
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "id", currentAccount.getIdentification()));
+
+        final FileInfo profileImage = image != null ? fileManagementService.uploadFile(image) : null;
+
+        account.update(request.getName(), request.getIntroduction(), profileImage);
+
         return new ApiResponse(Boolean.TRUE, "사용자 정보 수정 성공");
     }
 
@@ -112,7 +109,7 @@ public class AccountService {
 
     @Transactional
     public ApiResponse deleteProfileImage(Account currentAccount) {
-        currentAccount.setProfileImage(null);
+        currentAccount.updateProfileImage(null);
 
         accountRepository.save(currentAccount);
         return new ApiResponse(Boolean.TRUE, "프로필 이미지 삭제 성공");
