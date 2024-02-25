@@ -41,14 +41,6 @@ public class ProjectFollower {
         project.getProjectFollowers().add(this);
     }
 
-    public void setAccount(Account account) {
-        if(this.account != null) {
-            this.account.getProjectFollowers().remove(this);
-        }
-        this.account = account;
-        account.getProjectFollowers().add(this);
-    }
-
     public static ProjectFollower create(Project project, Account account) {
         ProjectFollower projectFollower = ProjectFollower.builder()
                 .project(project)
@@ -56,7 +48,6 @@ public class ProjectFollower {
                 .build();
 
         project.getProjectFollowers().add(projectFollower);
-        account.getProjectFollowers().add(projectFollower);
 
         return projectFollower;
     }

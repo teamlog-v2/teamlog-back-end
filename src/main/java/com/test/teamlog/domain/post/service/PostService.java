@@ -227,7 +227,7 @@ public class PostService {
     }
 
     private void updatePostTagList(List<String> inputHashTagNameList, Post post) {
-        List<PostTag> originalHashTags = post.getHashtags();
+        List<PostTag> originalHashTags = post.getHashtagList();
 
         if (CollectionUtils.isEmpty(inputHashTagNameList)) {
             post.removeHashTags(originalHashTags);
@@ -274,7 +274,7 @@ public class PostService {
         final PostResult result = PostResult.of(post);
 
         // 해시태그 설정
-        List<PostTag> hashtagList = post.getHashtags();
+        List<PostTag> hashtagList = post.getHashtagList();
         List<String> hashtagNameList
                 = !CollectionUtils.isEmpty(hashtagList) ?
                 hashtagList.stream().map(PostTag::getName).collect(Collectors.toList()) :

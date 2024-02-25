@@ -32,13 +32,4 @@ public class TaskPerformer {
         this.task = task;
         task.getTaskPerformers().add(this);
     }
-
-    public void setAccount(Account account) {
-        if(this.account != null) {
-            this.account.getTaskPerformers().remove(this);
-        }
-        this.account = account;
-        account.getTaskPerformers().add(this);
-    }
-
 }

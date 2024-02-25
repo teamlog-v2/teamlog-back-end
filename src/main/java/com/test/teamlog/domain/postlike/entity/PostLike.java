@@ -42,9 +42,6 @@ public class PostLike {
     }
 
     public void setAccount(Account account) {
-        if(this.account != null) {
-            this.account.getPostLikes().remove(this);
-        }
         this.account = account;
         post.getPostLikes().add(this);
     }

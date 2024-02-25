@@ -48,7 +48,7 @@ public class Project extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<Post> posts = new ArrayList<Post>();
+    private List<Post> posts = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -68,7 +68,7 @@ public class Project extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<Task> tasks = new ArrayList<Task>();
+    private List<Task> tasks = new ArrayList<>();
 
     public void delegateMaster(Account master) {
         this.master = master;
