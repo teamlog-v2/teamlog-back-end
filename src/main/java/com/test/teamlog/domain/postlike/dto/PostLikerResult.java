@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.postlike.dto;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.postlike.entity.PostLike;
 import lombok.Data;
@@ -13,11 +13,11 @@ public class PostLikerResult {
 
     public static PostLikerResult from(PostLike postLike) {
         PostLikerResult result = new PostLikerResult();
-        final User user = postLike.getUser();
-        result.setId(user.getIdentification());
-        result.setName(user.getName());
+        final Account account = postLike.getAccount();
+        result.setId(account.getIdentification());
+        result.setName(account.getName());
 
-        final FileInfo profileImage = user.getProfileImage();
+        final FileInfo profileImage = account.getProfileImage();
         if (profileImage != null) result.setProfileImgPath(profileImage.getStoredFilePath());
 
         return result;

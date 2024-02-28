@@ -5,7 +5,7 @@ import com.test.teamlog.domain.comment.service.CommentService;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.dto.CustomPageRequest;
 import com.test.teamlog.global.dto.PagedResponse;
-import com.test.teamlog.global.security.UserAdapter;
+import com.test.teamlog.global.security.AccountAdapter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,8 +27,8 @@ public class CommentApiController {
     @Operation(summary = "댓글 생성")
     @PostMapping("/comments")
     public ResponseEntity<CommentCreateResponse> create(@RequestBody CommentCreateRequest request,
-                                                        @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        final CommentCreateResult result = commentService.create(request.toInput(), currentUser.getUser());
+                                                        @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        final CommentCreateResult result = commentService.create(request.toInput(), currentAccount.getAccount());
         return new ResponseEntity<>(CommentCreateResponse.of(result), HttpStatus.CREATED);
     }
 
@@ -36,16 +36,16 @@ public class CommentApiController {
     @PutMapping("/comments/{id}")
     public ResponseEntity<ApiResponse> updateProject(@PathVariable("id") long id,
                                                      @RequestBody CommentUpdateRequest request,
-                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = commentService.update(id, request.toInput(), currentUser.getUser());
+                                                     @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        ApiResponse apiResponse = commentService.update(id, request.toInput(), currentAccount.getAccount());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @Operation(summary = "댓글 삭제")
     @DeleteMapping("/comments/{id}")
     public ResponseEntity<ApiResponse> deleteTask(@PathVariable("id") Long id,
-                                                  @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = commentService.deleteComment(id, currentUser.getUser());
+                                                  @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        ApiResponse apiResponse = commentService.deleteComment(id, currentAccount.getAccount());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
@@ -53,8 +53,8 @@ public class CommentApiController {
     @GetMapping("/posts/{postId}/parent-comments")
     public ResponseEntity<PagedResponse<CommentInfoResponse>> readCommentListByPost(@PathVariable("postId") long postId,
                                                                                     @ModelAttribute CustomPageRequest pageRequest,
-                                                                                    @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        final PagedResponse<CommentInfoResponse> response = commentService.readCommentListByPostId(postId, pageRequest.toPageRequest(), currentUser.getUser());
+                                                                                    @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        final PagedResponse<CommentInfoResponse> response = commentService.readCommentListByPostId(postId, pageRequest.toPageRequest(), currentAccount.getAccount());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -62,20 +62,20 @@ public class CommentApiController {
     @GetMapping("/comments/{commentId}/child-comments")
     public ResponseEntity<PagedResponse<CommentInfoResponse>> getChildComments(@PathVariable("commentId") long commentId,
                                                                                @ModelAttribute CustomPageRequest pageRequest,
-                                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        PagedResponse<CommentInfoResponse> response = commentService.readChildCommentList(commentId, pageRequest.toPageRequest(), currentUser.getUser());
+                                                                               @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        PagedResponse<CommentInfoResponse> response = commentService.readChildCommentList(commentId, pageRequest.toPageRequest(), currentAccount.getAccount());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "개인 작성 이력 조회 (댓글)")
     @GetMapping("/accounts/comments")
-    public ResponseEntity<List<CommentInfoResponse>> getCommentsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+    public ResponseEntity<List<CommentInfoResponse>> getCommentsByAccount(@Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
         List<CommentInfoResponse> response = null;
 
-        if (currentUser == null) {
+        if (currentAccount == null) {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         } else {
-            response = commentService.getCommentByUser(currentUser.getUser());
+            response = commentService.getCommentByAccount(currentAccount.getAccount());
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
     }

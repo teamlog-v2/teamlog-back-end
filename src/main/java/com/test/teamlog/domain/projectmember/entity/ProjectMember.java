@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.projectmember.entity;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.project.entity.Project;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Builder
-@Setter @Getter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "project_member",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"project_id", "user_id"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"project_id", "account_id"}))
 public class ProjectMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,8 +27,8 @@ public class ProjectMember {
     private Project project;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
-    private User user;
+    @JoinColumn(name = "account_id",nullable = false)
+    private Account account;
 
     @CreatedDate
     @Column(name = "join_time",nullable = false)
@@ -42,10 +42,10 @@ public class ProjectMember {
         project.getProjectMembers().add(this);
     }
 
-    public static ProjectMember create(Project project, User user) {
+    public static ProjectMember create(Project project, Account account) {
         final ProjectMember projectMember = ProjectMember.builder()
                 .project(project)
-                .user(user)
+                .account(account)
                 .build();
 
         project.getProjectMembers().add(projectMember);

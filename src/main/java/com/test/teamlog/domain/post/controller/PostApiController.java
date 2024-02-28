@@ -3,7 +3,7 @@ package com.test.teamlog.domain.post.controller;
 import com.test.teamlog.domain.post.dto.*;
 import com.test.teamlog.domain.post.service.PostService;
 import com.test.teamlog.global.dto.CustomPageRequest;
-import com.test.teamlog.global.security.UserAdapter;
+import com.test.teamlog.global.security.AccountAdapter;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.dto.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,9 +32,9 @@ public class PostApiController {
     public ResponseEntity<Long> create(@RequestPart(value = "key") PostCreateRequest request,
                                                @RequestPart(value = "media", required = false) MultipartFile[] media,
                                                @RequestPart(value = "files", required = false) MultipartFile[] files,
-                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+                                               @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
         try {
-            Long postId = postService.create(request.toInput(), media, files, currentUser.getUser());
+            Long postId = postService.create(request.toInput(), media, files, currentAccount.getAccount());
             return new ResponseEntity<>(postId, HttpStatus.CREATED);
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -50,10 +50,10 @@ public class PostApiController {
                                                ) @RequestPart(value = "key") PostUpdateRequest request,
                                                @RequestPart(value = "media", required = false) MultipartFile[] media,
                                                @RequestPart(value = "files", required = false) MultipartFile[] files,
-                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+                                               @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
         try {
-            Long postId = postService.update(id, request.toInput(), media, files, currentUser.getUser());
-            PostResult result = postService.readOne(postId, currentUser.getUser());
+            Long postId = postService.update(id, request.toInput(), media, files, currentAccount.getAccount());
+            PostResult result = postService.readOne(postId, currentAccount.getAccount());
             return new ResponseEntity<>(PostResponse.from(result), HttpStatus.OK);
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -63,8 +63,8 @@ public class PostApiController {
     @Operation(summary = "게시물 삭제")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse> delete(@PathVariable("id") Long id,
-                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = postService.delete(id, currentUser.getUser());
+                                              @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        ApiResponse apiResponse = postService.delete(id, currentAccount.getAccount());
 
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -72,8 +72,8 @@ public class PostApiController {
     @Operation(summary = "게시물 조회")
     @GetMapping("/{id}")
     public ResponseEntity<PostResponse> readOne(@PathVariable("id") long id,
-                                                @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        PostResult result = postService.readOne(id, currentUser.getUser());
+                                                @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        PostResult result = postService.readOne(id, currentAccount.getAccount());
 
         return new ResponseEntity<>(PostResponse.from(result), HttpStatus.OK);
     }
@@ -83,8 +83,8 @@ public class PostApiController {
     @Operation(summary = "모든 게시물 조회")
     @GetMapping
     public ResponseEntity<PagedResponse<PostResponse>> readAll(@ModelAttribute CustomPageRequest pageRequest,
-                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        PagedResponse<PostResult> result = postService.readAll(pageRequest.toPageRequest(), currentUser.getUser());
+                                                               @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        PagedResponse<PostResult> result = postService.readAll(pageRequest.toPageRequest(), currentAccount.getAccount());
         final List<PostResponse> responseList = result.getContent().stream().map(PostResponse::from).collect(Collectors.toList());
         final PagedResponse<PostResponse> response
                 = new PagedResponse<>(responseList, result.getPage(), result.getSize(), result.getTotalElements(), result.getTotalPages(), result.isLast());
@@ -94,8 +94,8 @@ public class PostApiController {
 
     @Operation(summary = "위치정보가 있는 프로젝트 게시물 조회")
     @GetMapping("/with-location")
-    public ResponseEntity<List<PostResponse>> readAllWithLocation(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostResult> result = postService.readAllWithLocation(currentUser.getUser());
+    public ResponseEntity<List<PostResponse>> readAllWithLocation(@Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        List<PostResult> result = postService.readAllWithLocation(currentAccount.getAccount());
         List<PostResponse> response = result.stream().map(PostResponse::from).collect(Collectors.toList());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -105,8 +105,8 @@ public class PostApiController {
     @GetMapping("/project/{projectId}")
     public ResponseEntity<PagedResponse<PostResponse>> search(@PathVariable("projectId") long projectId,
                                                               @ModelAttribute PostReadByProjectRequest request,
-                                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        final PagedResponse<PostResult> result = postService.search(projectId, request.toInput(), currentUser.getUser());
+                                                              @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        final PagedResponse<PostResult> result = postService.search(projectId, request.toInput(), currentAccount.getAccount());
 
         final List<PostResponse> responseList = result.getContent().stream().map(PostResponse::from).collect(Collectors.toList());
         final PagedResponse<PostResponse> response
@@ -116,9 +116,9 @@ public class PostApiController {
     }
 
     @Operation(summary = "팔로우 중인 사람들의 게시물 조회")
-    @GetMapping("/following-users")
-    public ResponseEntity<List<PostResponse>> readAllByFollowingUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostResult> result = postService.readAllByFollowingUser(currentUser.getUser());
+    @GetMapping("/following-accounts")
+    public ResponseEntity<List<PostResponse>> readAllByFollowingAccount(@Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        List<PostResult> result = postService.readAllByFollowingAccount(currentAccount.getAccount());
         List<PostResponse> response = result.stream().map(PostResponse::from).collect(Collectors.toList());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -126,12 +126,12 @@ public class PostApiController {
 
     @Operation(summary = "개인 작성 이력 조회 (게시물)")
     @GetMapping("/accounts/posts")
-    public ResponseEntity<List<PostResponse>> getPostsByUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+    public ResponseEntity<List<PostResponse>> getPostsByAccount(@Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
         List<PostResponse> response = null;
-        if (currentUser == null) {
+        if (currentAccount == null) {
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         } else {
-            final List<PostResult> resultList = postService.getPostsByUser(currentUser.getUser());
+            final List<PostResult> resultList = postService.getPostsByAccount(currentAccount.getAccount());
             response = resultList.stream().map(PostResponse::from).collect(Collectors.toList());
 
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -141,8 +141,8 @@ public class PostApiController {
     @Operation(summary = "위치정보가 있는 프로젝트 게시물 조회")
     @GetMapping("/projects/{projectId}/posts/with-location")
     public ResponseEntity<List<PostResponse>> getLocationPosts(@PathVariable("projectId") long projectId,
-                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        List<PostResult> resultList = postService.readAllWithLocation(projectId, currentUser.getUser());
+                                                               @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        List<PostResult> resultList = postService.readAllWithLocation(projectId, currentAccount.getAccount());
         final List<PostResponse> response = resultList.stream().map(PostResponse::from).collect(Collectors.toList());
 
         return new ResponseEntity<>(response, HttpStatus.OK);

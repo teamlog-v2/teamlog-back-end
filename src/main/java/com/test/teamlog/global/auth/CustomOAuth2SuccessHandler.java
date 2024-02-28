@@ -1,7 +1,7 @@
 package com.test.teamlog.global.auth;
 
 import com.test.teamlog.global.security.JwtTokenProvider;
-import com.test.teamlog.global.security.UserAdapter;
+import com.test.teamlog.global.security.AccountAdapter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
             return;
         }
 
-        final UserAdapter principal = (UserAdapter) authentication.getPrincipal();
+        final AccountAdapter principal = (AccountAdapter) authentication.getPrincipal();
 
         // 여기서 authentication 설정하고
         // 이 서버 전용 accessToken 설정하기

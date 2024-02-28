@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.comment.dto;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.comment.entity.Comment;
 import lombok.Data;
 
@@ -14,7 +14,7 @@ public class CommentCreateResult {
     private Long id;
     private String contents;
     private Integer childCommentCount;
-    private UserSimpleInfoResult writer;
+    private AccountSimpleInfoResult writer;
     private List<String> commentMentions;
     private LocalDateTime writeTime;
 
@@ -24,29 +24,29 @@ public class CommentCreateResult {
         result.setId(comment.getId());
         result.setContents(comment.getContents());
         result.setChildCommentCount(comment.getChildComments().size());
-        result.setWriter(UserSimpleInfoResult.from(comment.getWriter()));
-        result.setCommentMentions(comment.getCommentMentions().stream().map(c -> c.getTargetUser().getIdentification()).collect(Collectors.toList()));
+        result.setWriter(AccountSimpleInfoResult.from(comment.getWriter()));
+        result.setCommentMentions(comment.getCommentMentions().stream().map(c -> c.getTargetAccount().getIdentification()).collect(Collectors.toList()));
         result.setWriteTime(comment.getCreateTime());
 
         return result;
     }
 
     @Data
-    static class UserSimpleInfoResult {
+    static class AccountSimpleInfoResult {
         private String id;
         private String name;
         private String profileImgPath;
 
-        public static UserSimpleInfoResult from(User user) {
-            UserSimpleInfoResult userFollowInfo = new UserSimpleInfoResult();
-            userFollowInfo.setId(user.getIdentification());
-            userFollowInfo.setName(user.getName());
+        public static AccountSimpleInfoResult from(Account account) {
+            AccountSimpleInfoResult accountInfo = new AccountSimpleInfoResult();
+            accountInfo.setId(account.getIdentification());
+            accountInfo.setName(account.getName());
 
-            if (user.getProfileImage() != null) {
-                userFollowInfo.setProfileImgPath(user.getProfileImage().getStoredFilePath());
+            if (account.getProfileImage() != null) {
+                accountInfo.setProfileImgPath(account.getProfileImage().getStoredFilePath());
             }
 
-            return userFollowInfo;
+            return accountInfo;
         }
     }
 }

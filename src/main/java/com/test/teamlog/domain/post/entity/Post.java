@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.post.entity;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.comment.entity.Comment;
 import com.test.teamlog.domain.postlike.entity.PostLike;
 import com.test.teamlog.domain.postmedia.entity.PostMedia;
@@ -21,7 +21,6 @@ import java.util.List;
 
 @Entity
 @Builder
-@Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,8 +34,8 @@ public class Post extends BaseTimeEntity {
     private String contents;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_user_id", nullable = false)
-    private User writer;
+    @JoinColumn(name = "writer_account_id", nullable = false)
+    private Account writer;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "access_modifier", nullable = false, columnDefinition = "smallint")
@@ -62,7 +61,7 @@ public class Post extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<PostTag> hashtags = new ArrayList<>();
+    private List<PostTag> hashtagList = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -77,22 +76,22 @@ public class Post extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 10)
-    private List<PostUpdateHistory> postUpdateHistories = new ArrayList<>();
+    private List<PostUpdateHistory> postUpdateHistoryList = new ArrayList<>();
 
     public void addHashTags(List<PostTag> tags) {
         if (CollectionUtils.isEmpty(tags)) return;
-        this.hashtags.addAll(tags);
+        this.hashtagList.addAll(tags);
     }
 
     public void removeHashTags(List<PostTag> tags) {
         if (CollectionUtils.isEmpty(tags)) return;
-        this.hashtags.removeAll(tags);
+        this.hashtagList.removeAll(tags);
     }
 
     public void addPostUpdateHistory(PostUpdateHistory postUpdateHistory) {
         if (postUpdateHistory == null) return;
 
-        this.postUpdateHistories.add(postUpdateHistory);
+        this.postUpdateHistoryList.add(postUpdateHistory);
     }
 
     public void addAllPostMedia(List<PostMedia> postMediaList) {

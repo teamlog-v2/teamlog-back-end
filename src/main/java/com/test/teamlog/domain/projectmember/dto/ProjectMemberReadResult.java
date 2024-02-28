@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.projectmember.dto;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.projectmember.entity.ProjectMember;
 import lombok.Data;
@@ -12,13 +12,13 @@ public class ProjectMemberReadResult {
     private String profileImgPath;
 
     public static ProjectMemberReadResult of(ProjectMember projectMember) {
-        final User user = projectMember.getUser();
+        final Account account = projectMember.getAccount();
 
         ProjectMemberReadResult result = new ProjectMemberReadResult();
-        result.setId(user.getIdentification());
-        result.setName(user.getName());
+        result.setId(account.getIdentification());
+        result.setName(account.getName());
 
-        final FileInfo profileImage = user.getProfileImage();
+        final FileInfo profileImage = account.getProfileImage();
         if (profileImage != null) result.setProfileImgPath(profileImage.getStoredFilePath());
 
         return result;

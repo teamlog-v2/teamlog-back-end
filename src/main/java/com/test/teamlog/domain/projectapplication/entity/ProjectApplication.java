@@ -1,7 +1,7 @@
 package com.test.teamlog.domain.projectapplication.entity;
 
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.project.entity.Project;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,7 +25,7 @@ public class ProjectApplication {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "applicant_idx", nullable = false)
-    private User applicant;
+    private Account applicant;
 
     @CreatedDate
     @Column(name = "create_time")

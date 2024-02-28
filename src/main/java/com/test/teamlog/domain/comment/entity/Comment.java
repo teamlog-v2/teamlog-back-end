@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.comment.entity;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Setter
 @Getter
 @Builder
 @NoArgsConstructor
@@ -36,8 +35,8 @@ public class Comment extends BaseTimeEntity {
     private String contents;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_user_id", nullable = false)
-    private User writer;
+    @JoinColumn(name = "writer_account_id", nullable = false)
+    private Account writer;
 
     @Builder.Default
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,12 +1,13 @@
 package com.test.teamlog.domain.account.service;
 
 import com.test.teamlog.domain.account.dto.*;
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.file.management.service.FileManagementService;
 import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.domain.token.service.TokenService;
-import com.test.teamlog.domain.userfollow.service.query.UserFollowQueryService;
+import com.test.teamlog.domain.accountfollow.service.query.AccountFollowQueryService;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.global.exception.ResourceNotFoundException;
@@ -26,32 +27,32 @@ public class AccountService {
     private final AccountRepository accountRepository;
 
     private final TokenService tokenService;
-    private final UserFollowQueryService userFollowQueryService;
+    private final AccountFollowQueryService accountFollowQueryService;
     private final FileManagementService fileManagementService;
 
-    public List<UserSearchResult> search(String id, String name) {
-        List<User> userList = accountRepository.searchUserByIdentificationAndName(id, name);
+    public List<AccountSearchResult> search(String id, String name) {
+        List<Account> accountList = accountRepository.searchAccountByIdentificationAndName(id, name);
 
-        return userList.stream().map(UserSearchResult::from).toList();
+        return accountList.stream().map(AccountSearchResult::from).toList();
     }
 
-    public UserValidateResult validate(Long userId) {
-        final User currentUser = accountRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", userId));
+    public AccountValidateResult validate(Long accountId) {
+        final Account currentAccount = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "id", accountId));
 
-        return UserValidateResult.from(currentUser);
+        return AccountValidateResult.from(currentAccount);
     }
 
     @Transactional(readOnly = true)
-    public UserReadDetailResult readDetail(String identification, User currentUser) {
-        User user = accountRepository.findByIdentification(identification)
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", identification));
+    public AccountReadDetailResult readDetail(String identification, Account currentAccount) {
+        Account account = accountRepository.findByIdentification(identification)
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "id", identification));
 
-        UserReadDetailResult result = UserReadDetailResult.from(user);
+        AccountReadDetailResult result = AccountReadDetailResult.from(account);
 
-        if (currentUser == null || !identification.equals(currentUser.getIdentification())) {
-            result.setIsMe(currentUser != null ? Boolean.FALSE : null);
-            result.setIsFollow(currentUser != null ? userFollowQueryService.isFollow(currentUser, user) : null);
+        if (currentAccount == null || !identification.equals(currentAccount.getIdentification())) {
+            result.setIsMe(currentAccount != null ? Boolean.FALSE : null);
+            result.setIsFollow(currentAccount != null ? accountFollowQueryService.isFollow(currentAccount, account) : null);
         } else {
             result.setIsMe(Boolean.TRUE);
             result.setIsFollow(Boolean.FALSE);
@@ -63,11 +64,11 @@ public class AccountService {
     @Transactional
     public SignInResult signIn(SignInInput input) {
         final String identification = input.getIdentification();
-        User user = accountRepository.findByIdentification(identification).orElse(null);
+        Account account = accountRepository.findByIdentification(identification).orElse(null);
 
         // FIXME: 추후 Exception 바꿀 예정. 프론트와 같이 바꿔야 한다.
-        if (user == null || !PasswordUtil.matches(input.getPassword(), user.getPassword())) {
-            throw new ResourceNotFoundException("USER", "IDENTIFICATION", identification);
+        if (account == null || !PasswordUtil.matches(input.getPassword(), account.getPassword())) {
+            throw new ResourceNotFoundException("ACCOUNT", "IDENTIFICATION", identification);
         }
 
         final CreateTokenResult createTokenResult = tokenService.createToken(identification);
@@ -79,58 +80,54 @@ public class AccountService {
     public SignUpResult signUp(SignUpInput input) {
         checkIdDuplication(input.getIdentification());
 
-        final User user = input.toUser();
-        accountRepository.save(user);
+        final Account account = input.toAccount();
+        accountRepository.save(account);
 
-        return SignUpResult.from(user);
+        return SignUpResult.from(account);
     }
 
     @Transactional
-    public ApiResponse updateUser(UserUpdateRequest request, MultipartFile image, User currentUser) throws IOException {
-        if (request.getDefaultImage()) {
-            if (currentUser.getProfileImage() != null) {
-                currentUser.setProfileImage(null);
-            }
-        } else {
-            if (image != null) {
-                currentUser.updateProfileImage(fileManagementService.uploadFile(image));
-            }
-        }
-        currentUser.setName(request.getName());
-        currentUser.setIntroduction(request.getIntroduction());
-        accountRepository.save(currentUser);
+    public ApiResponse updateAccount(AccountUpdateRequest request, MultipartFile image, Account currentAccount) throws IOException {
+        // FIXME: LazyInitializationException 이슈로 잠시 추가한 것으로 개선 필요
+        final Account account = accountRepository.findByIdentification(currentAccount.getIdentification())
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "id", currentAccount.getIdentification()));
+
+        final FileInfo profileImage = image != null ? fileManagementService.uploadFile(image) : null;
+
+        account.update(request.getName(), request.getIntroduction(), profileImage);
+
         return new ApiResponse(Boolean.TRUE, "사용자 정보 수정 성공");
     }
 
     @Transactional
-    public ApiResponse updateUserProfileImage(MultipartFile image, User currentUser) throws IOException {
-        currentUser.updateProfileImage(fileManagementService.uploadFile(image));
+    public ApiResponse updateProfileImage(MultipartFile image, Account currentAccount) throws IOException {
+        currentAccount.updateProfileImage(fileManagementService.uploadFile(image));
 
-        accountRepository.save(currentUser);
+        accountRepository.save(currentAccount);
         return new ApiResponse(Boolean.TRUE, "프로필 이미지 수정 성공");
     }
 
     @Transactional
-    public ApiResponse deleteUserProfileImage(User currentUser) {
-        currentUser.setProfileImage(null);
+    public ApiResponse deleteProfileImage(Account currentAccount) {
+        currentAccount.updateProfileImage(null);
 
-        accountRepository.save(currentUser);
+        accountRepository.save(currentAccount);
         return new ApiResponse(Boolean.TRUE, "프로필 이미지 삭제 성공");
     }
 
     //회원 탈퇴
     @Transactional
-    public ApiResponse deleteUser(User currentUser) {
-        accountRepository.delete(currentUser);
+    public ApiResponse deleteAccount(Account currentAccount) {
+        accountRepository.delete(currentAccount);
         return new ApiResponse(Boolean.TRUE, "회원 탈퇴 성공");
     }
 
-    public User readByIdentification(String identification) {
+    public Account readByIdentification(String identification) {
         return accountRepository.findByIdentification(identification)
-                .orElseThrow(() -> new ResourceNotFoundException("USER", "id", identification));
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "id", identification));
     }
 
-    public List<User> readAllByIdentificationIn(List<String> identificationList) {
+    public List<Account> readAllByIdentificationIn(List<String> identificationList) {
         return accountRepository.findAllByIdentificationIn(identificationList);
     }
 

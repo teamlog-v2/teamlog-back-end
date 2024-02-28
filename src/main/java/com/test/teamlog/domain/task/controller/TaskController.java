@@ -2,7 +2,7 @@ package com.test.teamlog.domain.task.controller;
 
 import com.test.teamlog.domain.task.dto.*;
 import com.test.teamlog.domain.task.service.TaskService;
-import com.test.teamlog.global.security.UserAdapter;
+import com.test.teamlog.global.security.AccountAdapter;
 import com.test.teamlog.global.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,9 +27,9 @@ public class TaskController {
     @PostMapping("/projects/{projectId}/tasks")
     public ResponseEntity<TaskCreateResponse> create(@PathVariable("projectId") Long projectId,
                                                      @Valid @RequestBody TaskCreateRequest request,
-                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
+                                                     @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
 
-        final TaskCreateResult result = taskService.create(projectId, request.toInput(), currentUser.getUser());
+        final TaskCreateResult result = taskService.create(projectId, request.toInput(), currentAccount.getAccount());
         return new ResponseEntity<>(TaskCreateResponse.from(result), HttpStatus.CREATED);
     }
 
@@ -37,8 +37,8 @@ public class TaskController {
     @PutMapping("/tasks/{id}")
     public ResponseEntity<TaskUpdateResponse> update(@PathVariable("id") Long id,
                                                      @Valid @RequestBody TaskUpdateRequest request,
-                                                     @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        final TaskUpdateResult result = taskService.update(id, request.toInput(), currentUser.getUser());
+                                                     @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        final TaskUpdateResult result = taskService.update(id, request.toInput(), currentAccount.getAccount());
         return new ResponseEntity<>(TaskUpdateResponse.from(result), HttpStatus.OK);
     }
 
@@ -52,8 +52,8 @@ public class TaskController {
     @Operation(summary = "태스크 삭제")
     @DeleteMapping("/tasks/{id}")
     public ResponseEntity<ApiResponse> delete(@PathVariable("id") Long id,
-                                              @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        ApiResponse apiResponse = taskService.delete(id, currentUser.getUser());
+                                              @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        ApiResponse apiResponse = taskService.delete(id, currentAccount.getAccount());
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
@@ -62,8 +62,8 @@ public class TaskController {
     @PutMapping("/tasks/{id}/location")
     public ResponseEntity<TaskReadDetailResponse> updateStatus(@PathVariable("id") Long id,
                                                                @Valid @RequestBody TaskUpdateStatusRequest request,
-                                                               @Parameter(hidden = true) @AuthenticationPrincipal UserAdapter currentUser) {
-        taskService.updateTaskStatus(id, request, currentUser.getUser());
+                                                               @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
+        taskService.updateTaskStatus(id, request, currentAccount.getAccount());
         final TaskReadDetailResult result = taskService.readDetail(id);
         return new ResponseEntity<>(TaskReadDetailResponse.from(result), HttpStatus.OK);
     }

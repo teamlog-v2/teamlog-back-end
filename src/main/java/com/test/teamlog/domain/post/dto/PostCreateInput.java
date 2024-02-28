@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.post.dto;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.global.entity.AccessModifier;
 import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.project.entity.Project;
@@ -22,14 +22,14 @@ public class PostCreateInput {
     private List<String> hashtags;
 
 
-    public Post toPost(Project project, User currentUser) {
+    public Post toPost(Project project, Account currentAccount) {
         return Post.builder()
                 .contents(this.contents)
                 .accessModifier(this.accessModifier)
                 .commentModifier(this.commentModifier)
                 .address(this.address)
                 .location(this.location)
-                .writer(currentUser)
+                .writer(currentAccount)
                 .project(project)
                 .build();
     }

@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class ProjectJoinInviteInput {
     private Long projectId;
-    private List<String> userIdentificationList;
+    private List<String> accountIdentificationList;
 }

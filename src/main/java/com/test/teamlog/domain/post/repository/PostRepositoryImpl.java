@@ -28,7 +28,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public boolean existsPostLikeByPostAndUser(Long postIdx, Long userIdx) {
+    public boolean existsPostLikeByPostAndAccount(Long postIdx, Long accountIdx) {
         return jpaQueryFactory
                 .select(post.id)
                 .from(post)
@@ -36,7 +36,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .on(postLike.post.eq(post))
                 .where(
                         post.id.eq(postIdx),
-                        postLike.user.idx.eq(userIdx)
+                        postLike.account.idx.eq(accountIdx)
                 )
                 .fetchFirst() != null;
     }

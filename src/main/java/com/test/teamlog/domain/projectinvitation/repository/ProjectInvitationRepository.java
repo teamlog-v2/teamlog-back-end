@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.projectinvitation.repository;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.projectinvitation.entity.ProjectInvitation;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,9 +12,9 @@ import java.util.Optional;
 
 @Repository
 public interface ProjectInvitationRepository extends JpaRepository<ProjectInvitation, Long>, ProjectInvitationCustom {
-    List<ProjectInvitation> findAllByInvitee(User invitee);
+    List<ProjectInvitation> findAllByInvitee(Account invitee);
 
-    List<ProjectInvitation> findAllByProjectAndInviter(Project project, User inviter);
+    List<ProjectInvitation> findAllByProjectAndInviter(Project project, Account inviter);
 
-    Optional<ProjectInvitation> findByProjectAndInvitee(Project project, User invitee);
+    Optional<ProjectInvitation> findByProjectAndInvitee(Project project, Account invitee);
 }

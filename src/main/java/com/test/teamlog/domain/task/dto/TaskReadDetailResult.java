@@ -1,6 +1,6 @@
 package com.test.teamlog.domain.task.dto;
 
-import com.test.teamlog.domain.account.model.User;
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.task.entity.Task;
 import com.test.teamlog.domain.task.entity.TaskPerformer;
@@ -45,12 +45,12 @@ public class TaskReadDetailResult {
         private String profileImgPath;
 
         public static TaskPerformerResult from(TaskPerformer performer) {
-            final User user = performer.getUser();
+            final Account account = performer.getAccount();
             final TaskPerformerResult result = new TaskPerformerResult();
-            result.setId(user.getIdentification());
-            result.setName(user.getName());
+            result.setId(account.getIdentification());
+            result.setName(account.getName());
 
-            final FileInfo profileImage = user.getProfileImage();
+            final FileInfo profileImage = account.getProfileImage();
             if (profileImage != null) result.setProfileImgPath(profileImage.getStoredFilePath());
 
             return result;

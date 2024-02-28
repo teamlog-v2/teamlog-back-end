@@ -1,11 +1,11 @@
 package com.test.teamlog.global.auth;
 
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.account.model.AuthType;
-import com.test.teamlog.domain.account.model.User;
 import com.test.teamlog.domain.account.service.command.AccountCommandService;
 import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.file.info.entity.FileInfo;
-import com.test.teamlog.global.security.UserAdapter;
+import com.test.teamlog.global.security.AccountAdapter;
 import com.test.teamlog.global.utility.PasswordUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -31,9 +31,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 = CompactOAuthUserMapper.convert(oAuth2User, userRequest.getClientRegistration().getRegistrationId());
 
         final String identification = compactOAuth2User.getIdentification();
-        final Optional<User> user = accountQueryService.findByIdentification(identification);
-        if (user.isPresent()) {
-            return new UserAdapter(user.get(), oAuth2User.getAttributes());
+        final Optional<Account> account = accountQueryService.findByIdentification(identification);
+        if (account.isPresent()) {
+            return new AccountAdapter(account.get(), oAuth2User.getAttributes());
         }
 
         FileInfo profileImage = null;
@@ -41,8 +41,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             profileImage = FileInfo.builder().storedFilePath(compactOAuth2User.getProfileImgUrl()).build();
         }
 
-        return new UserAdapter(
-                accountCommandService.save(User.builder()
+        return new AccountAdapter(
+                accountCommandService.save(Account.builder()
                         .identification(identification)
                         .password(PasswordUtil.encode(UUID.randomUUID().toString()))
                         .name(identification)
