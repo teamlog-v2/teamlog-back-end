@@ -1,11 +1,9 @@
 package com.test.teamlog.domain.accountfollow.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class AccountFollowerReadResponse {
-    @JsonProperty("id")
     private String identification;
     private String name;
     private String profileImgPath;
