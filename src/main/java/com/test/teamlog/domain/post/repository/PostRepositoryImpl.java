@@ -84,7 +84,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private BooleanExpression hashtagIn(List<String> hashtagList) {
-        return hashtagList == null ? null : post.hashtags.any().name.in(hashtagList);
+        return hashtagList == null ? null : post.hashtagList.any().name.in(hashtagList);
     }
 
     private BooleanExpression keywordLike(String keyword) {
