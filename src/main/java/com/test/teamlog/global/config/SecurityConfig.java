@@ -2,6 +2,7 @@ package com.test.teamlog.global.config;
 
 import com.test.teamlog.global.auth.CustomOAuth2SuccessHandler;
 import com.test.teamlog.global.auth.CustomOAuth2UserService;
+import com.test.teamlog.global.filter.ExceptionHandlerFilter;
 import com.test.teamlog.global.security.JwtAuthenticationEntryPoint;
 import com.test.teamlog.global.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig implements WebMvcConfigurer {
-
+    private final ExceptionHandlerFilter exceptionHandlerFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
@@ -45,7 +46,8 @@ public class SecurityConfig implements WebMvcConfigurer {
                             .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
                             .anyRequest().authenticated();
                 })
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(exceptionHandlerFilter, JwtAuthenticationFilter.class);
 
         http
                 .oauth2Login(
