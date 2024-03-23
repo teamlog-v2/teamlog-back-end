@@ -2,10 +2,7 @@ package com.test.teamlog.global.security;
 
 import com.test.teamlog.domain.token.entity.Token;
 import com.test.teamlog.domain.token.repository.TokenRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -119,5 +116,12 @@ public class JwtTokenProvider {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(accountId);
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+    }
+
+    public String parseToken(String token) {
+        String prefix = "Bearer ";
+        if (!token.startsWith(prefix)) throw new UnsupportedJwtException("올바르지 않은 형식의 token입니다. token: " + token);
+
+        return token.substring(prefix.length());
     }
 }
