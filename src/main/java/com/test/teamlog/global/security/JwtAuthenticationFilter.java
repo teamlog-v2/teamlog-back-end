@@ -28,11 +28,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws IOException, ServletException {
-        // TODO: 프론트 파악 후 리팩토링
-        String jwtToken = request.getHeader("Authorization");
+        String authorization = request.getHeader("Authorization");
 
-        final Authentication authentication = jwtTokenProvider.authenticate(jwtToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 로그인 여부와 관계 없이 동작하되 권한에 따라 다르게 동작하는 경우가 있다.
+        if (authorization != null) {
+            final String jwtToken = jwtTokenProvider.parseToken(authorization);
+            final Authentication authentication = jwtTokenProvider.authenticate(jwtToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
 
         filterChain.doFilter(request, response);
     }
