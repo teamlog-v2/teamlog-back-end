@@ -13,7 +13,7 @@ import java.util.List;
 
 @Data
 public class TaskUpdateResult {
-    private Long id;
+    private Long taskId;
     private String taskName;
     private int status;
     private LocalDateTime deadline;
@@ -23,12 +23,11 @@ public class TaskUpdateResult {
 
     public static TaskUpdateResult from(Task task) {
         TaskUpdateResult response = new TaskUpdateResult();
-        response.setId(task.getId());
+        response.setTaskId(task.getId());
         response.setTaskName(task.getTaskName());
-        response.setStatus(task.getStatus().getValue());
+        if (task.getStatus() != null) response.setStatus(task.getStatus().getValue());
         response.setDeadline(task.getDeadline());
         response.setUpdateTime(task.getUpdateTime());
-        response.setUpdateTimeStr(task.getUpdateTime().toString());
         response.setPerformers(
                 !CollectionUtils.isEmpty(task.getTaskPerformers()) ?
                         task.getTaskPerformers().stream().map(TaskPerformerResult::from).toList() :
@@ -39,7 +38,7 @@ public class TaskUpdateResult {
     }
 
     @Data
-    static class TaskPerformerResult {
+    public static class TaskPerformerResult {
         private String id;
         private String name;
         private String profileImgPath;

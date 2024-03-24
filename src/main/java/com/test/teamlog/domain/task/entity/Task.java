@@ -1,5 +1,6 @@
 package com.test.teamlog.domain.task.entity;
 
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -36,6 +37,10 @@ public class Task extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "project_id",nullable = false)
     private Project project;
+
+    @ManyToOne
+    @JoinColumn(name = "creator_id", nullable = false)
+    private Account creator;
 
     @Builder.Default
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)

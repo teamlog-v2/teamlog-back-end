@@ -18,7 +18,7 @@ public class TaskReadDetailResult {
     private int status;
     private LocalDateTime deadline;
     private LocalDateTime updateTime;
-    private String updateTimeStr;
+    private String updateTimeStr; // ???
     private List<TaskPerformerResult> performers;
 
     public static TaskReadDetailResult from(Task task) {
@@ -28,7 +28,11 @@ public class TaskReadDetailResult {
         result.setStatus(task.getStatus().getValue());
         result.setDeadline(task.getDeadline());
         result.setUpdateTime(task.getUpdateTime());
-        result.setUpdateTimeStr(task.getUpdateTime().toString());
+
+        if (task.getUpdateTime() != null) {
+            result.setUpdateTimeStr(task.getUpdateTime().toString());
+        }
+
         result.setPerformers(
                 !CollectionUtils.isEmpty(task.getTaskPerformers()) ?
                         task.getTaskPerformers().stream().map(TaskPerformerResult::from).toList() :
