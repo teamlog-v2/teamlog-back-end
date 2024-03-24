@@ -19,7 +19,7 @@ public class TaskUpdateResponse {
 
     public static TaskUpdateResponse from(TaskUpdateResult result) {
         TaskUpdateResponse response = new TaskUpdateResponse();
-        response.setId(result.getId());
+        response.setId(result.getTaskId());
         response.setTaskName(result.getTaskName());
         response.setStatus(result.getStatus());
         response.setDeadline(result.getDeadline());

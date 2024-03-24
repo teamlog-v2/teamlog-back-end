@@ -29,7 +29,7 @@ public class TaskController {
                                                      @Valid @RequestBody TaskCreateRequest request,
                                                      @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
 
-        final TaskCreateResult result = taskService.create(projectId, request.toInput(), currentAccount.getAccount());
+        final TaskCreateResult result = taskService.create(projectId, request.toInput(projectId), currentAccount.getAccount());
         return new ResponseEntity<>(TaskCreateResponse.from(result), HttpStatus.CREATED);
     }
 

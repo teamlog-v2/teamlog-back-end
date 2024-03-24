@@ -10,8 +10,8 @@ import com.test.teamlog.domain.task.entity.Task;
 import com.test.teamlog.domain.task.entity.TaskPerformer;
 import com.test.teamlog.domain.task.entity.TaskStatus;
 import com.test.teamlog.domain.task.repository.TaskRepository;
-import com.test.teamlog.global.exception.ResourceNotFoundException;
 import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.global.exception.ResourceNotFoundException;
 import jakarta.persistence.LockModeType;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +48,13 @@ public class TaskService {
         return TaskReadDetailResult.from(task);
     }
 
+    /**
+     * 정책 변경으로 사용 X
+     * @param projectId
+     * @return
+     */
     // 프로젝트의 태스크들 조회
+    @Deprecated(since = "2023-03-24", forRemoval = true)
     @Transactional
     public List<TaskReadByProjectResult> readAllByProject(Long projectId) {
         final Project project = projectQueryService.findById(projectId)
@@ -140,12 +145,7 @@ public class TaskService {
         // 멤버만 가능
         projectMemberQueryService.validateProjectMember(task.getProject(), currentAccount);
 
-        LocalDateTime deadline
-                = input.getDeadline() != null ?
-                input.getDeadline().withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime() :
-                null;
-
-        task.update(input.getTaskName(), deadline);
+        task.update(input.getTaskName(), input.getDeadline());
 
         final List<TaskPerformer> originalTaskPerformerList = task.getTaskPerformers();
         final List<String> newTaskPerformerIdList = input.getPerformerIdList();

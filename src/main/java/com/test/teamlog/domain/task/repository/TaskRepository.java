@@ -43,4 +43,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Transactional
     @Query("update Task t set t.priority = t.priority+1 where t.project = :project and t.status = :status and t.priority >= :target")
     void reorderInNewStatus(@Param("project") Project project, @Param("status") TaskStatus status, @Param("target") int target);
+
+    List<Task> findAllByProject(Project project);
 }
