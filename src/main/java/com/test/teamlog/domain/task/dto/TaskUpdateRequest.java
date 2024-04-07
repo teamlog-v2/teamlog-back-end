@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -14,11 +14,12 @@ public class TaskUpdateRequest {
     @Size(min=1,max=30, message = "태스크 이름을 1자에서 30자 사이로 입력해주세요.")
     private String taskName;
     private TaskStatus status;
-    private ZonedDateTime deadline;
+    private LocalDateTime deadline;
     private List<String> performersId;
 
-    public TaskUpdateInput toInput() {
+    public TaskUpdateInput toInput(Long id) {
         TaskUpdateInput input = new TaskUpdateInput();
+        input.setTaskId(id);
         input.setTaskName(this.taskName);
         input.setStatus(this.status);
         input.setDeadline(this.deadline);

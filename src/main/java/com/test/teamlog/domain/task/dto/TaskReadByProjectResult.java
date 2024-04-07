@@ -28,7 +28,6 @@ public class TaskReadByProjectResult {
         result.setStatus(task.getStatus().getValue());
         result.setDeadline(task.getDeadline());
         result.setUpdateTime(task.getUpdateTime());
-        result.setUpdateTimeStr(task.getUpdateTime().toString());
         result.setPerformers(
                 !CollectionUtils.isEmpty(task.getTaskPerformers()) ?
                         task.getTaskPerformers().stream().map(TaskReadByProjectResult.TaskPerformerResult::from).toList() :

@@ -6,6 +6,10 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ApiResponse {
-    private Boolean success;
+    private boolean success;
     private String message;
+
+    public ApiResponse(boolean success) {
+        this.success = success;
+    }
 }

@@ -1,9 +1,13 @@
 package com.test.teamlog.domain.task.entity;
 
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
 import org.springframework.util.CollectionUtils;
 
@@ -24,9 +28,6 @@ public class Task extends BaseTimeEntity {
     @Column(name = "task_name", nullable = false)
     private String taskName;
 
-    @Column(nullable = false)
-    private int priority;
-
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false, columnDefinition = "smallint")
     private TaskStatus status;
@@ -36,6 +37,10 @@ public class Task extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "project_id",nullable = false)
     private Project project;
+
+    @ManyToOne
+    @JoinColumn(name = "creator_id", nullable = false)
+    private Account creator;
 
     @Builder.Default
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -64,11 +69,6 @@ public class Task extends BaseTimeEntity {
     public void update(String taskName, LocalDateTime deadline) {
         this.taskName = taskName;
         this.deadline = deadline;
-    }
-
-    // TODO: 구현 방향 검토
-    public void setPriority(int priority) {
-        this.priority = priority;
     }
 
     public void setStatus(TaskStatus status) {
