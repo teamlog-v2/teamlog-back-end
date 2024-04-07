@@ -29,7 +29,7 @@ import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-class TaskServiceV2Test {
+class TaskServiceTest {
     @Mock
     private TaskRepository taskRepository;
 
@@ -43,7 +43,7 @@ class TaskServiceV2Test {
     private AccountQueryService accountQueryService;
 
     @InjectMocks
-    private TaskServiceV2 sut;
+    private TaskService sut;
 
     @Nested
     @DisplayName("태스크 상세 조회")

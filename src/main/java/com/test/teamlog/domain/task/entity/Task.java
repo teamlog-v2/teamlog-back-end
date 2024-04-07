@@ -28,9 +28,6 @@ public class Task extends BaseTimeEntity {
     @Column(name = "task_name", nullable = false)
     private String taskName;
 
-    @Column(nullable = false)
-    private int priority;
-
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false, columnDefinition = "smallint")
     private TaskStatus status;
@@ -72,11 +69,6 @@ public class Task extends BaseTimeEntity {
     public void update(String taskName, LocalDateTime deadline) {
         this.taskName = taskName;
         this.deadline = deadline;
-    }
-
-    // TODO: 구현 방향 검토
-    public void setPriority(int priority) {
-        this.priority = priority;
     }
 
     public void setStatus(TaskStatus status) {
