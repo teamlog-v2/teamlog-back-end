@@ -42,7 +42,7 @@ public class TaskService {
     private final ProjectMemberQueryService projectMemberQueryService;
 
     // 태스크 상세 조회
-    public TaskReadDetailResult readDetail(Long id) {
+    public TaskReadDetailResult readOne(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
         return TaskReadDetailResult.from(task);
@@ -189,7 +189,7 @@ public class TaskService {
     // 태스크 상태 업데이트
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Transactional
-    public void updateTaskStatus(Long id, @Valid TaskUpdateStatusRequest request, Account currentAccount) {
+    public void updateStatus(Long id, @Valid TaskUpdateStatusRequest request, Account currentAccount) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TASK", "ID", id));
 

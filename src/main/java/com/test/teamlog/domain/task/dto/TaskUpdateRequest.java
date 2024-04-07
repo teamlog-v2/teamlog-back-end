@@ -17,8 +17,9 @@ public class TaskUpdateRequest {
     private LocalDateTime deadline;
     private List<String> performersId;
 
-    public TaskUpdateInput toInput() {
+    public TaskUpdateInput toInput(Long id) {
         TaskUpdateInput input = new TaskUpdateInput();
+        input.setTaskId(id);
         input.setTaskName(this.taskName);
         input.setStatus(this.status);
         input.setDeadline(this.deadline);

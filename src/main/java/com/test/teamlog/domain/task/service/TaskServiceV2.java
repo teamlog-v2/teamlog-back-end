@@ -35,7 +35,7 @@ public class TaskServiceV2 {
 
     private final AccountQueryService accountQueryService;
 
-    public TaskReadDetailResult readDetail(Long idx) {
+    public TaskReadDetailResult readOne(Long idx) {
         Task task = taskRepository.findById(idx)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", idx));
 
@@ -48,9 +48,7 @@ public class TaskServiceV2 {
         final Project project = projectQueryService.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
 
-        if (!projectMemberQueryService.isProjectMember(project, account)) {
-            throw new ResourceNotFoundException("ProjectMember", "account", account);
-        }
+        checkProjectMember(account, project);
 
         final Task task = input.toTask(project);
         task.addTaskPerformerList(makeTaskPerformers(input.getPerformerIdList()));
@@ -92,10 +90,7 @@ public class TaskServiceV2 {
         final Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
 
-        final Project project = task.getProject();
-        if (!projectMemberQueryService.isProjectMember(project, account)) {
-            throw new ResourceNotFoundException("ProjectMember", "account", account);
-        }
+        checkProjectMember(account, task.getProject());
 
         final List<TaskPerformer> newTaskPerformers = makeTaskPerformers(input.getPerformerIdList());
 
@@ -115,9 +110,11 @@ public class TaskServiceV2 {
         return taskList.stream().map(TaskReadByProjectResult::from).collect(Collectors.toList());
     }
 
-    public boolean updateStatus(Long taskId, TaskStatus status) {
+    public boolean updateStatus(Long taskId, Account account, TaskStatus status) {
         final Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
+
+        checkProjectMember(account, task.getProject());
 
         if (task.getStatus() == status) {
             log.info("Task status is already {}", status);
@@ -125,6 +122,7 @@ public class TaskServiceV2 {
         }
 
         task.setStatus(status);
+
         return true;
     }
 
@@ -132,12 +130,15 @@ public class TaskServiceV2 {
         final Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
 
-        final Project project = task.getProject();
-        if (!projectMemberQueryService.isProjectMember(project, account)) {
-            throw new ResourceNotFoundException("ProjectMember", "account", account);
-        }
+        checkProjectMember(account, task.getProject());
 
         taskRepository.delete(task);
         return true;
+    }
+
+    private void checkProjectMember(Account account, Project project) {
+        if (!projectMemberQueryService.isProjectMember(project, account)) {
+            throw new ResourceNotFoundException("ProjectMember", "account", account);
+        }
     }
 }

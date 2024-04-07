@@ -57,7 +57,7 @@ class TaskServiceV2Test {
             given(taskRepository.findById(anyLong())).willReturn(Optional.of(task));
 
             // when
-            final TaskReadDetailResult actual = sut.readDetail(idx);
+            final TaskReadDetailResult actual = sut.readOne(idx);
 
             // then
             assertEquals(actual.getId(), idx);
@@ -72,7 +72,7 @@ class TaskServiceV2Test {
 
             // when
             // then
-            assertThrows(ResourceNotFoundException.class, () -> sut.readDetail(idx));
+            assertThrows(ResourceNotFoundException.class, () -> sut.readOne(idx));
         }
     }
 
