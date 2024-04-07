@@ -229,6 +229,7 @@ class TaskServiceTest {
         void test02() {
             // given
             final TaskUpdateInput input = makeUpdateInput(1L, "테스트 코드 작성하기", List.of("duck"));
+
             given(taskRepository.findById(anyLong())).willThrow(ResourceNotFoundException.class);
 
             // when
@@ -242,6 +243,7 @@ class TaskServiceTest {
             // given
             final Account account = Account.builder().idx(1L).build();
             final TaskUpdateInput input = makeUpdateInput(1L, "테스트 코드 작성하기", List.of("duck"));
+
             given(taskRepository.findById(anyLong())).willReturn(Optional.of(Task.builder().project(Project.builder().build()).build()));
             given(projectMemberQueryService.isProjectMember(any(Project.class), any(Account.class))).willReturn(false);
 
@@ -287,6 +289,7 @@ class TaskServiceTest {
             // given
             Long projectId = 1L;
             List<Task> taskList = List.of(Task.builder().status(TaskStatus.NOT_STARTED).build());
+
             given(projectQueryService.findById(anyLong())).willReturn(Optional.of(mock(Project.class)));
             given(taskRepository.findAllByProject(any(Project.class))).willReturn(taskList);
 
@@ -320,11 +323,14 @@ class TaskServiceTest {
             // given
             Long taskId = 1L;
             TaskStatus status = TaskStatus.IN_PROGRESS;
-            final Task task = Task.builder().status(TaskStatus.NOT_STARTED).build();
+            final Account account = makeAccount(1L);
+            final Task task = makeProject(TaskStatus.NOT_STARTED);
+            
             given(taskRepository.findById(anyLong())).willReturn(Optional.of(task));
+            given(projectMemberQueryService.isProjectMember(any(Project.class), any(Account.class))).willReturn(true);
 
             // when
-            final boolean actual = sut.updateStatus(taskId, status);
+            final boolean actual = sut.updateStatus(taskId, account, status);
 
             // then
             assertTrue(actual);
@@ -336,11 +342,13 @@ class TaskServiceTest {
             // given
             Long taskId = 1L;
             TaskStatus status = TaskStatus.IN_PROGRESS;
+            final Account account = makeAccount(1L);
+            
             given(taskRepository.findById(anyLong())).willThrow(ResourceNotFoundException.class);
 
             // when
             // then
-            assertThrows(ResourceNotFoundException.class, () -> sut.updateStatus(taskId, status));
+            assertThrows(ResourceNotFoundException.class, () -> sut.updateStatus(taskId, account, status));
         }
 
         @Test
@@ -349,14 +357,25 @@ class TaskServiceTest {
             // given
             Long taskId = 1L;
             TaskStatus status = TaskStatus.IN_PROGRESS;
-            final Task task = Task.builder().status(TaskStatus.IN_PROGRESS).build();
+            final Account account = makeAccount(1L);
+            final Task task = makeProject(TaskStatus.IN_PROGRESS);
+
             given(taskRepository.findById(anyLong())).willReturn(Optional.of(task));
+            given(projectMemberQueryService.isProjectMember(any(Project.class), any(Account.class))).willReturn(true);
 
             // when
-            final boolean actual = sut.updateStatus(taskId, status);
+            final boolean actual = sut.updateStatus(taskId, account, status);
 
             // then
             assertFalse(actual);
+        }
+
+        private Task makeProject(TaskStatus inProgress) {
+            return Task.builder().project(Project.builder().build()).status(inProgress).build();
+        }
+
+        private Account makeAccount(Long idx) {
+            return Account.builder().idx(idx).build();
         }
     }
 
@@ -371,6 +390,7 @@ class TaskServiceTest {
             final Project expectedProject = Project.builder().build();
             final Task expectedTask = Task.builder().id(taskId).project(expectedProject).build();
             final Account account = Account.builder().build();
+
             given(taskRepository.findById(anyLong())).willReturn(Optional.of(expectedTask));
             given(projectMemberQueryService.isProjectMember(any(Project.class), any(Account.class))).willReturn(true);
 
@@ -388,6 +408,7 @@ class TaskServiceTest {
             // given
             Long taskId = 1L;
             final Account account = Account.builder().build();
+
             given(taskRepository.findById(anyLong())).willThrow(ResourceNotFoundException.class);
 
             // when

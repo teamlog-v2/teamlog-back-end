@@ -50,15 +50,15 @@ public class TaskService {
 
         checkProjectMember(account, project);
 
-        final Task task = input.toTask(project);
-        task.addTaskPerformerList(makeTaskPerformers(input.getPerformerIdList()));
+        final Task task = input.toTask(project, account);
+        task.addTaskPerformerList(makeTaskPerformers(task, input.getPerformerIdList()));
 
         final Task savedTask = taskRepository.save(task);
         return TaskCreateResult.from(savedTask);
     }
 
 
-    private List<TaskPerformer> makeTaskPerformers(List<String> performerIdentificationList) {
+    private List<TaskPerformer> makeTaskPerformers(Task task, List<String> performerIdentificationList) {
         Map<String, Account> identificationToAccountMap
                 = accountQueryService.findAllByIdentificationIn(performerIdentificationList).stream()
                 .collect(Collectors.toMap(Account::getIdentification, Function.identity()));
@@ -74,7 +74,7 @@ public class TaskService {
                 continue;
             }
 
-            performerList.add(TaskPerformer.builder().account(performerAccount).build());
+            performerList.add(TaskPerformer.builder().task(task).account(performerAccount).build());
         }
 
         if (!CollectionUtils.isEmpty(notfoundIdentificationList)) {
@@ -92,7 +92,7 @@ public class TaskService {
 
         checkProjectMember(account, task.getProject());
 
-        final List<TaskPerformer> newTaskPerformers = makeTaskPerformers(input.getPerformerIdList());
+        final List<TaskPerformer> newTaskPerformers = makeTaskPerformers(task, input.getPerformerIdList());
 
         task.update(input.getTaskName(), input.getDeadline());
         task.getTaskPerformers().clear();

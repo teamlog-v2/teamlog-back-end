@@ -1,5 +1,6 @@
 package com.test.teamlog.domain.task.dto;
 
+import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.task.entity.Task;
 import com.test.teamlog.domain.task.entity.TaskStatus;
@@ -20,21 +21,13 @@ public class TaskCreateInput {
     private LocalDateTime deadline;
     private List<String> performerIdList;
 
-    public Task toTask() {
-        return Task.builder()
-                .taskName(taskName)
-                .status(status)
-                .deadline(deadline)
-                .build();
-    }
-
-    public Task toTask(Project project) {
+    public Task toTask(Project project, Account account) {
         return Task.builder()
                 .taskName(taskName)
                 .project(project)
                 .status(status)
                 .deadline(deadline)
-                .project(project)
+                .creator(account)
                 .build();
     }
 }
