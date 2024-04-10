@@ -78,3 +78,13 @@ sourceSets {
 clean {
 	delete file(generated)
 }
+
+bootJar {
+	archivesBaseName = 'teamlog-v2'
+	archiveFileName = 'teamlog-v2.jar'
+	archiveVersion = "0.0.1"
+}
+
+jar {
+	enabled = false
+}
