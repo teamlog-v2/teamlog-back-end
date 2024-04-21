@@ -1,42 +1,37 @@
 package com.test.teamlog.global.config;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
-import lombok.RequiredArgsConstructor;
-import org.springdoc.core.GroupedOpenApi;
-import org.springdoc.core.customizers.OpenApiCustomiser;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@OpenAPIDefinition(
-        info = @Info(title = "TEAMLOG",
-                description = "TeamLog API 명세",
-                version = "v3"))
-@RequiredArgsConstructor
 @Configuration
 public class SwaggerConfig {
 
     @Bean
-    public GroupedOpenApi groupedOpenApi() {
-        String[] paths = {"/**"};
-
-        return GroupedOpenApi.builder()
-                .group("jinius")
-                .pathsToMatch(paths)
-                .addOpenApiCustomiser(buildSecurityOpenApi())
-                .build();
+    public OpenAPI openAPI() {
+        return new OpenAPI()
+                .components(new Components())
+                .info(apiInfo());
     }
 
-    public OpenApiCustomiser buildSecurityOpenApi() {
-        return OpenApi -> OpenApi.addSecurityItem(new SecurityRequirement().addList("jwt token"))
-                .getComponents()
-                .addSecuritySchemes("jwt token", new SecurityScheme()
-                        .name("Authorization")
-                        .type(SecurityScheme.Type.HTTP)
-                        .in(SecurityScheme.In.HEADER)
-                        .bearerFormat("JWT")
-                        .scheme("Bearer"));
+    private Info apiInfo() {
+        return new Info()
+                .title("TeamLog API 명세")
+                .version("v0.0.1")
+                .description("TeamLog API 명세");
+
     }
+
+//    private OpenApiCustomiser buildSecurityOpenApi() {
+//        return OpenApi -> OpenApi.addSecurityItem(new SecurityRequirement().addList("jwt token"))
+//                .getComponents()
+//                .addSecuritySchemes("jwt token", new SecurityScheme()
+//                        .name("Authorization")
+//                        .type(SecurityScheme.Type.HTTP)
+//                        .in(SecurityScheme.In.HEADER)
+//                        .bearerFormat("JWT")
+//                        .scheme("Bearer"));
+//    }
 }

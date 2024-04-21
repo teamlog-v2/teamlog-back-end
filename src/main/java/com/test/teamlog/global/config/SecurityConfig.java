@@ -32,7 +32,6 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-//                .cors(Customizer.withDefaults()) 얘 살리면 아예 403 뜨고 아니면 302 실패로 뜸
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(t -> t.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(t -> t.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
