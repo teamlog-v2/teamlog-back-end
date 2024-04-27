@@ -75,7 +75,7 @@ public class PostService {
     // 단일 포스트 조회
     public PostResult readOne(Long id, Account currentAccount) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Post"));
 
         // 비공개일 경우 프로젝트 멤버 권한 체크
         if (post.getAccessModifier() == AccessModifier.PRIVATE) {
@@ -203,7 +203,7 @@ public class PostService {
                        MultipartFile[] media,
                        MultipartFile[] files, Account currentAccount) throws IOException {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Post"));
         projectMemberQueryService.isProjectMember(post.getProject(), currentAccount);
 
         post.update(input.getContents(), input.getAccessModifier(), input.getCommentModifier(), makeLocation(input.getLatitude(), input.getLongitude()), input.getAddress());
@@ -262,7 +262,7 @@ public class PostService {
     @Transactional
     public ApiResponse delete(Long id, Account currentAccount) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Post"));
         projectMemberQueryService.isProjectMember(post.getProject(), currentAccount);
 
         postRepository.delete(post);
@@ -316,6 +316,6 @@ public class PostService {
     }
 
     private Project findProjectById(Long projectId) {
-        return projectQueryService.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+        return projectQueryService.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project"));
     }
 }

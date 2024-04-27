@@ -34,7 +34,7 @@ public class ProjectMemberService {
     public ApiResponse create(Long projectId, Account currentAccount) {
         final Project project = findProjectById(projectId);
         ProjectJoin projectJoin = projectJoinQueryService.findByProjectAndAccount(project, currentAccount)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation", "ID", currentAccount.getIdentification()));
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation"));
 
         // TODO: project_join과 함께 다시 생각해보기
         if (!projectJoin.getIsInvited() || projectJoin.getIsAccepted()) throw new BadRequestException("잘못된 요청입니다.");
@@ -54,7 +54,7 @@ public class ProjectMemberService {
         }
 
         ProjectMember projectMember = projectMemberRepository.findByProjectAndAccount(project, currentAccount)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "accountId", currentAccount.getIdentification()));
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber"));
         projectMemberRepository.delete(projectMember);
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 탈퇴 완료");
@@ -65,14 +65,14 @@ public class ProjectMemberService {
     public ApiResponse expelMember(Long projectId, String accountId, Account currentAccount) {
         final Project project = findProjectById(projectId);
         Account account = accountQueryService.findByIdentification(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "id", accountId));
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
 
         if (!project.isProjectMaster(account)) {
             throw new ResourceForbiddenException("프로젝트 마스터가 아닙니다.");
         }
 
         ProjectMember projectMember = projectMemberRepository.findByProjectAndAccount(project, account)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber", "accountId", accountId));
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber"));
 
         projectMemberRepository.delete(projectMember);
         return new ApiResponse(Boolean.TRUE, "멤버 삭제 완료");
@@ -88,6 +88,6 @@ public class ProjectMemberService {
     }
 
     private Project findProjectById(Long projectId) {
-        return projectQueryService.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+        return projectQueryService.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project"));
     }
 }

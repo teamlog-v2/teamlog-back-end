@@ -103,7 +103,7 @@ public class AccountFollowService {
     public ApiResponse unfollow(String targetAccountId, Account currentAccount) {
         Account targetAccount = readByIdentification(targetAccountId);
         AccountFollow accountFollow = accountFollowRepository.findByFromAccountAndToAccount(currentAccount, targetAccount)
-                .orElseThrow(() -> new ResourceNotFoundException("AccountFollow", "FromAccountId", currentAccount.getIdentification()));
+                .orElseThrow(() -> new ResourceNotFoundException("AccountFollow"));
 
         accountFollowRepository.delete(accountFollow);
         return new ApiResponse(Boolean.TRUE, "언팔로우 성공");
@@ -115,6 +115,6 @@ public class AccountFollowService {
 
     private Account readByIdentification(String identification) {
         return accountQueryService.findByIdentification(identification)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "identification", identification));
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
     }
 }

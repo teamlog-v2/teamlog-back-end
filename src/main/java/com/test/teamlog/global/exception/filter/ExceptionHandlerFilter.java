@@ -1,4 +1,4 @@
-package com.test.teamlog.global.filter;
+package com.test.teamlog.global.exception.filter;
 
 
 import io.jsonwebtoken.JwtException;

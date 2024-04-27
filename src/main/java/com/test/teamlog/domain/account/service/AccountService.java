@@ -38,7 +38,7 @@ public class AccountService {
 
     public AccountValidateResult validate(Long accountId) {
         final Account currentAccount = accountRepository.findById(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "id", accountId));
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
 
         return AccountValidateResult.from(currentAccount);
     }
@@ -46,7 +46,7 @@ public class AccountService {
     @Transactional(readOnly = true)
     public AccountReadDetailResult readDetail(String identification, Account currentAccount) {
         Account account = accountRepository.findByIdentification(identification)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "id", identification));
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
 
         AccountReadDetailResult result = AccountReadDetailResult.from(account);
 
@@ -68,7 +68,7 @@ public class AccountService {
 
         // FIXME: 추후 Exception 바꿀 예정. 프론트와 같이 바꿔야 한다.
         if (account == null || !PasswordUtil.matches(input.getPassword(), account.getPassword())) {
-            throw new ResourceNotFoundException("ACCOUNT", "IDENTIFICATION", identification);
+            throw new ResourceNotFoundException("ACCOUNT");
         }
 
         final CreateTokenResult createTokenResult = tokenService.createToken(identification);
@@ -90,7 +90,7 @@ public class AccountService {
     public ApiResponse updateAccount(AccountUpdateRequest request, MultipartFile image, Account currentAccount) throws IOException {
         // FIXME: LazyInitializationException 이슈로 잠시 추가한 것으로 개선 필요
         final Account account = accountRepository.findByIdentification(currentAccount.getIdentification())
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "id", currentAccount.getIdentification()));
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
 
         final FileInfo profileImage = image != null ? fileManagementService.uploadFile(image) : null;
 
@@ -124,7 +124,7 @@ public class AccountService {
 
     public Account readByIdentification(String identification) {
         return accountRepository.findByIdentification(identification)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "id", identification));
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
     }
 
     public List<Account> readAllByIdentificationIn(List<String> identificationList) {

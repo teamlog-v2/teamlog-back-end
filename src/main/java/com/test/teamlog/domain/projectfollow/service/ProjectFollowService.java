@@ -30,7 +30,7 @@ public class ProjectFollowService {
     // 유저가 팔로우하는 프로젝트 목록 조회
     public List<ProjectFollowerReadAccountFollowedResult> readAllByaccountIdentification(String accountIdentification) {
         Account account = accountQueryService.findByIdentification(accountIdentification)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "ID", accountIdentification));
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
         List<ProjectFollower> projectFollowerList = projectFollowerRepository.findAllByAccount(account);
 
         return projectFollowerList.stream().map(ProjectFollowerReadAccountFollowedResult::of).collect(Collectors.toList());
@@ -39,7 +39,7 @@ public class ProjectFollowService {
     // 해당 프로젝트를 팔로우하는 사용자 목록 조회
     public List<ProjectFollowerReadResult> readAll(Long projectId) {
         final Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project"));
 
         List<ProjectFollower> projectFollowerList = projectFollowerRepository.findAllByProject(project);
 
@@ -50,7 +50,7 @@ public class ProjectFollowService {
     @Transactional
     public ApiResponse followProject(Long projectId, Account currentAccount) {
         final Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project"));
 
         projectFollowerRepository.findByProjectAndAccount(project, currentAccount)
                 .ifPresent(projectFollower -> {
@@ -66,10 +66,10 @@ public class ProjectFollowService {
     @Transactional
     public ApiResponse unfollowProject(Long projectId, Account currentAccount) {
         final Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project"));
 
         ProjectFollower projectFollower = projectFollowerRepository.findByProjectAndAccount(project, currentAccount)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectFollwer", "accountId", currentAccount.getIdentification()));
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectFollwer"));
 
         projectFollowerRepository.delete(projectFollower);
         return new ApiResponse(Boolean.TRUE, "프로젝트 언팔로우 성공");

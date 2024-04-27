@@ -62,7 +62,7 @@ public class PostLikeService {
         final Post post = readPostById(postId);
 
         PostLike postLike = postLikeRepository.findByPostAndAccount(post, currentAccount)
-                .orElseThrow(() -> new ResourceNotFoundException("PostLiker", "accountId", currentAccount.getIdentification()));
+                .orElseThrow(() -> new ResourceNotFoundException("PostLiker"));
 
         postLikeRepository.delete(postLike);
         return new ApiResponse(Boolean.TRUE, "포스트 좋아요 취소 성공");
@@ -83,6 +83,6 @@ public class PostLikeService {
 
     private Post readPostById(Long postId) {
         return postQueryService.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+                .orElseThrow(() -> new ResourceNotFoundException("Post"));
     }
 }

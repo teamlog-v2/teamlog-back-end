@@ -44,7 +44,7 @@ public class CommentService {
     // 게시물의 부모 댓글 조회
     public PagedResponse<CommentInfoResponse> readCommentListByPostId(long postId, Pageable pageable, Account currentAccount) {
         Post post = postQueryService.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+                .orElseThrow(() -> new ResourceNotFoundException("Post"));
 
         Page<Comment> commentList = commentRepository.findParentCommentListByPost(post, pageable);
 
@@ -56,7 +56,7 @@ public class CommentService {
     // 대댓글 조회
     public PagedResponse<CommentInfoResponse> readChildCommentList(Long parentCommentId, Pageable pageable, Account currentAccount) {
         Comment comment = commentRepository.findById(parentCommentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", parentCommentId));
+                .orElseThrow(() -> new ResourceNotFoundException("Comment"));
 
         Page<Comment> childCommentList = commentRepository.findAllByParentComment(comment, pageable);
 
@@ -88,11 +88,11 @@ public class CommentService {
     @Transactional
     public CommentCreateResult create(CommentCreateInput input, Account currentAccount) {
         Post post = postQueryService.findById(input.getPostId())
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", input.getPostId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Post"));
 
         Comment parentComment = input.getParentCommentId() != null ?
                 commentRepository.findById(input.getParentCommentId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", input.getParentCommentId())) :
+                        .orElseThrow(() -> new ResourceNotFoundException("Comment")) :
                 null;
 
         Comment comment = input.toComment(currentAccount, post, parentComment);
@@ -126,7 +126,7 @@ public class CommentService {
         }
 
         if (!invalidaccountIdentificationList.isEmpty()) {
-            throw new ResourceNotFoundException("ACCOUNT", "identification", invalidaccountIdentificationList.toString());
+            throw new ResourceNotFoundException("ACCOUNT");
         }
 
         return commentMentions;
@@ -136,7 +136,7 @@ public class CommentService {
     @Transactional
     public ApiResponse update(Long id, CommentUpdateInput input, Account account) {
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Comment"));
         if (!comment.getWriter().getIdentification().equals(account.getIdentification())) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 댓글 작성자 아님 )");
         }
@@ -168,7 +168,7 @@ public class CommentService {
     @Transactional
     public ApiResponse deleteComment(Long id, Account account) {
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Comment"));
         if (!comment.getWriter().getIdentification().equals(account.getIdentification())) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 댓글 작성자 아님 )");
         }

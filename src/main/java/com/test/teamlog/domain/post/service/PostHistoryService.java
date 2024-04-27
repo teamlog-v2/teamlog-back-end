@@ -27,7 +27,7 @@ public class PostHistoryService {
     @Transactional
     public List<PostHistoryResponse> readPostUpdateHistory(Long postId, Account currentAccount) {
         Post post = postQueryService.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+                .orElseThrow(() -> new ResourceNotFoundException("Post"));
         projectMemberQueryService.validateProjectMember(post.getProject(), currentAccount);
 
         Sort sort = Sort.by(Sort.Direction.ASC, "id");

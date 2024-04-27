@@ -2,7 +2,7 @@ package com.test.teamlog.global.config;
 
 import com.test.teamlog.global.auth.CustomOAuth2SuccessHandler;
 import com.test.teamlog.global.auth.CustomOAuth2UserService;
-import com.test.teamlog.global.filter.ExceptionHandlerFilter;
+import com.test.teamlog.global.exception.filter.ExceptionHandlerFilter;
 import com.test.teamlog.global.security.JwtAuthenticationEntryPoint;
 import com.test.teamlog.global.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;

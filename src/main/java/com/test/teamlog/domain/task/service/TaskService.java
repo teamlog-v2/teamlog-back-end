@@ -37,7 +37,7 @@ public class TaskService {
 
     public TaskReadDetailResult readOne(Long idx) {
         Task task = taskRepository.findById(idx)
-                .orElseThrow(() -> new ResourceNotFoundException("Task", "id", idx));
+                .orElseThrow(() -> new ResourceNotFoundException("Task"));
 
         return TaskReadDetailResult.from(task);
     }
@@ -46,7 +46,7 @@ public class TaskService {
     public TaskCreateResult create(TaskCreateInput input, Account account) {
         final Long projectId = input.getProjectId();
         final Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project"));
 
         checkProjectMember(account, project);
 
@@ -78,7 +78,7 @@ public class TaskService {
         }
 
         if (!CollectionUtils.isEmpty(notfoundIdentificationList)) {
-            throw new ResourceNotFoundException("Account", "identification", notfoundIdentificationList);
+            throw new ResourceNotFoundException("Account");
         }
         return performerList;
     }
@@ -88,7 +88,7 @@ public class TaskService {
         final Long taskId = input.getTaskId();
 
         final Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Task"));
 
         checkProjectMember(account, task.getProject());
 
@@ -103,7 +103,7 @@ public class TaskService {
 
     public List<TaskReadByProjectResult> readAllByProject(Long projectId) {
         final Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project"));
 
         final List<Task> taskList = taskRepository.findAllByProject(project);
 
@@ -112,7 +112,7 @@ public class TaskService {
 
     public boolean updateStatus(Long taskId, Account account, TaskStatus status) {
         final Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Task"));
 
         checkProjectMember(account, task.getProject());
 
@@ -128,7 +128,7 @@ public class TaskService {
 
     public boolean delete(Long taskId, Account account) {
         final Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Task"));
 
         checkProjectMember(account, task.getProject());
 
@@ -138,7 +138,7 @@ public class TaskService {
 
     private void checkProjectMember(Account account, Project project) {
         if (!projectMemberQueryService.isProjectMember(project, account)) {
-            throw new ResourceNotFoundException("ProjectMember", "account", account);
+            throw new ResourceNotFoundException("ProjectMember");
         }
     }
 }

@@ -48,9 +48,9 @@ public class ProjectJoinService {
     @Transactional
     public ApiResponse inviteAccountForProject(Long projectId, String accountId) {
         Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project"));
         Account account = accountQueryService.findByIdentification(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "id", accountId));
+                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
 
         if (projectMemberQueryService.isProjectMember(project, account))
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
@@ -113,7 +113,7 @@ public class ProjectJoinService {
     @Transactional
     public ApiResponse applyForProjectV1(Long projectId, Account currentAccount) {
         Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project"));
 
         if (projectMemberQueryService.isProjectMember(project, currentAccount))
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
@@ -157,7 +157,7 @@ public class ProjectJoinService {
     @Transactional
     public ApiResponse deleteProjectJoin(Long projectJoinId) {
         ProjectJoin projectJoin = projectJoinRepository.findById(projectJoinId)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectJoin", "id", projectJoinId));
+                .orElseThrow(() -> new ResourceNotFoundException("ProjectJoin"));
 
         projectJoinRepository.delete(projectJoin);
 
@@ -167,7 +167,7 @@ public class ProjectJoinService {
     // 프로젝트 가입 신청자 목록 조회
     public List<ProjectJoinForProject> getProjectApplyListForProject(Long projectId) {
         Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project"));
 
         List<ProjectJoin> projectJoinList = projectJoinRepository.findAllByProjectAndIsAcceptedTrueAndIsInvitedFalse(project);
         return projectJoinList.stream().map(ProjectJoinForProject::from).toList();
@@ -176,7 +176,7 @@ public class ProjectJoinService {
     // 프로젝트 멤버로 초대한 사용자 목록 조회
     public List<ProjectJoinForProject> getProjectInvitationListForProject(Long projectId) {
         Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project"));
 
         List<ProjectJoin> projectJoinList = projectJoinRepository.findAllByProjectAndIsAcceptedFalseAndIsInvitedTrue(project);
         return projectJoinList.stream().map(ProjectJoinForProject::from).toList();
@@ -224,6 +224,6 @@ public class ProjectJoinService {
     }
 
     private Project findProjectById(Long projectId) {
-        return projectQueryService.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+        return projectQueryService.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project"));
     }
 }

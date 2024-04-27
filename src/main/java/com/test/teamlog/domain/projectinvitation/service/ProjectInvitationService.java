@@ -69,10 +69,10 @@ public class ProjectInvitationService {
                 = readAccountByIdx(inviteeIdx);
 
         final ProjectInvitation projectInvitation = projectInvitationRepository.findByProjectAndInvitee(project, invitee)
-                .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectIdx));
+                .orElseThrow(() -> new ResourceNotFoundException("PROJECT"));
 
         if (projectInvitation == null) {
-            throw new ResourceNotFoundException("ProjectInvitation", "ProjectIdx, InviteeIdx", projectIdx + ", " + inviteeIdx);
+            throw new ResourceNotFoundException("ProjectInvitation");
         }
 
         if (projectMemberQueryService.isProjectMember(project, invitee)) {
@@ -96,7 +96,7 @@ public class ProjectInvitationService {
                 = readAccountByIdx(inviteeIdx);
 
         final ProjectInvitation projectInvitation = projectInvitationRepository.findByProjectAndInvitee(project, invitee)
-                .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectIdx));
+                .orElseThrow(() -> new ResourceNotFoundException("PROJECT"));
 
         projectInvitationRepository.delete(projectInvitation);
 
@@ -117,7 +117,7 @@ public class ProjectInvitationService {
                 = readAccountByIdx(inviteeIdx);
 
         final ProjectInvitation projectInvitation = projectInvitationRepository.findByProjectAndInvitee(project, invitee)
-                .orElseThrow(() -> new ResourceNotFoundException("PROJECT", "id", projectIdx));
+                .orElseThrow(() -> new ResourceNotFoundException("PROJECT"));
 
         if (!projectMemberQueryService.isProjectMember(project, inviter)) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 프로젝트 멤버가 아님 )");
@@ -153,10 +153,10 @@ public class ProjectInvitationService {
     }
 
     private Account readAccountByIdx(Long inviteeIdx) {
-        return accountQueryService.findByIdx(inviteeIdx).orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "ID", inviteeIdx));
+        return accountQueryService.findByIdx(inviteeIdx).orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
     }
 
     private Project readProjectByIdx(Long projectIdx) {
-        return projectQueryService.findById(projectIdx).orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectIdx));
+        return projectQueryService.findById(projectIdx).orElseThrow(() -> new ResourceNotFoundException("Project"));
     }
 }
