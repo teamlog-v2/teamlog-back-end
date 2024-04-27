@@ -12,7 +12,6 @@ import com.test.teamlog.domain.projectmember.repository.ProjectMemberRepository;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.exception.ResourceForbiddenException;
-import com.test.teamlog.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,9 +31,8 @@ public class ProjectMemberService {
     // 프로젝트 멤버 추가
     @Transactional
     public ApiResponse create(Long projectId, Account currentAccount) {
-        final Project project = findProjectById(projectId);
-        ProjectJoin projectJoin = projectJoinQueryService.findByProjectAndAccount(project, currentAccount)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectInvitation"));
+        final Project project = prepareProject(projectId);
+        ProjectJoin projectJoin = prepareProjectJoin(project, currentAccount);
 
         // TODO: project_join과 함께 다시 생각해보기
         if (!projectJoin.getIsInvited() || projectJoin.getIsAccepted()) throw new BadRequestException("잘못된 요청입니다.");
@@ -47,14 +45,13 @@ public class ProjectMemberService {
     // 프로젝트 나가기
     @Transactional
     public ApiResponse leaveProject(Long projectId, Account currentAccount) {
-        final Project project = findProjectById(projectId);
+        final Project project = prepareProject(projectId);
 
         if (project.getMaster().getIdentification().equals(currentAccount.getIdentification())) {
             throw new ResourceForbiddenException("마스터는 탈퇴할 수 없습니다.\n위임하고 다시 시도하세요.");
         }
 
-        ProjectMember projectMember = projectMemberRepository.findByProjectAndAccount(project, currentAccount)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber"));
+        ProjectMember projectMember = prepareProjectMember(project, currentAccount);
         projectMemberRepository.delete(projectMember);
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 탈퇴 완료");
@@ -62,17 +59,15 @@ public class ProjectMemberService {
 
     // 마스터 - 프로젝트 멤버 삭제
     @Transactional
-    public ApiResponse expelMember(Long projectId, String accountId, Account currentAccount) {
-        final Project project = findProjectById(projectId);
-        Account account = accountQueryService.findByIdentification(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
+    public ApiResponse expelMember(Long projectId, String accountId) {
+        final Project project = prepareProject(projectId);
+        Account account = prepareAcocunt(accountId);
 
         if (!project.isProjectMaster(account)) {
-            throw new ResourceForbiddenException("프로젝트 마스터가 아닙니다.");
+            throw new BadRequestException("프로젝트 마스터가 아닙니다.");
         }
 
-        ProjectMember projectMember = projectMemberRepository.findByProjectAndAccount(project, account)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectMemeber"));
+        ProjectMember projectMember = prepareProjectMember(project, account);
 
         projectMemberRepository.delete(projectMember);
         return new ApiResponse(Boolean.TRUE, "멤버 삭제 완료");
@@ -81,13 +76,27 @@ public class ProjectMemberService {
 
     // 프로젝트 멤버 조회
     public List<ProjectMemberReadResult> readAll(Long projectId) {
-        final Project project = findProjectById(projectId);
+        final Project project = prepareProject(projectId);
         List<ProjectMember> projectMemberList = projectMemberRepository.findByProject(project);
 
         return projectMemberList.stream().map(ProjectMemberReadResult::of).toList();
     }
 
-    private Project findProjectById(Long projectId) {
-        return projectQueryService.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project"));
+    private ProjectJoin prepareProjectJoin(Project project, Account currentAccount) {
+        return projectJoinQueryService.findByProjectAndAccount(project, currentAccount)
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 프로젝트 초대입니다. projectId: " + project.getId()+ ", identification: " + currentAccount.getIdentification()));
+    }
+
+    private Account prepareAcocunt(String identification) {
+        return accountQueryService.findByIdentification(identification).orElseThrow(() -> new BadRequestException("존재하지 않는 계정입니다. identification: " + identification));
+    }
+
+    private Project prepareProject(Long projectId) {
+        return projectQueryService.findById(projectId).orElseThrow(() -> new BadRequestException("존재하지 않는 프로젝트입니다. idx: " + projectId));
+    }
+
+    private ProjectMember prepareProjectMember(Project project, Account account) {
+        return projectMemberRepository.findByProjectAndAccount(project, account)
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 프로젝트 멤버입니다. project: " + project.getId() + ", account: " + account.getIdentification()));
     }
 }

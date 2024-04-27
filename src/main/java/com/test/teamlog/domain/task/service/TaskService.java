@@ -10,6 +10,7 @@ import com.test.teamlog.domain.task.entity.Task;
 import com.test.teamlog.domain.task.entity.TaskPerformer;
 import com.test.teamlog.domain.task.entity.TaskStatus;
 import com.test.teamlog.domain.task.repository.TaskRepository;
+import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,16 +38,14 @@ public class TaskService {
 
     public TaskReadDetailResult readOne(Long idx) {
         Task task = taskRepository.findById(idx)
-                .orElseThrow(() -> new ResourceNotFoundException("Task"));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 Task입니다. id: "+ idx));
 
         return TaskReadDetailResult.from(task);
     }
 
     @Transactional
     public TaskCreateResult create(TaskCreateInput input, Account account) {
-        final Long projectId = input.getProjectId();
-        final Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+        final Project project = prepareProject(input.getProjectId());
 
         checkProjectMember(account, project);
 
@@ -87,8 +86,7 @@ public class TaskService {
     public TaskUpdateResult update(TaskUpdateInput input, Account account) {
         final Long taskId = input.getTaskId();
 
-        final Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Task"));
+        final Task task = prepareTask(taskId);
 
         checkProjectMember(account, task.getProject());
 
@@ -102,8 +100,7 @@ public class TaskService {
     }
 
     public List<TaskReadByProjectResult> readAllByProject(Long projectId) {
-        final Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+        final Project project = prepareProject(projectId);
 
         final List<Task> taskList = taskRepository.findAllByProject(project);
 
@@ -111,8 +108,7 @@ public class TaskService {
     }
 
     public boolean updateStatus(Long taskId, Account account, TaskStatus status) {
-        final Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Task"));
+        final Task task = prepareTask(taskId);
 
         checkProjectMember(account, task.getProject());
 
@@ -127,8 +123,7 @@ public class TaskService {
     }
 
     public boolean delete(Long taskId, Account account) {
-        final Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new ResourceNotFoundException("Task"));
+        final Task task = prepareTask(taskId);
 
         checkProjectMember(account, task.getProject());
 
@@ -137,8 +132,16 @@ public class TaskService {
     }
 
     private void checkProjectMember(Account account, Project project) {
-        if (!projectMemberQueryService.isProjectMember(project, account)) {
-            throw new ResourceNotFoundException("ProjectMember");
-        }
+        if (!projectMemberQueryService.isProjectMember(project, account)) throw new BadRequestException("프로젝트 멤버가 아닙니다.");
+    }
+    
+    private Project prepareProject(Long projectId) {
+        return projectQueryService.findById(projectId)
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 프로젝트입니다. id: "+ projectId));
+    }
+
+    private Task prepareTask(Long taskId) {
+        return taskRepository.findById(taskId)
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 Task입니다. id: "+ taskId));
     }
 }

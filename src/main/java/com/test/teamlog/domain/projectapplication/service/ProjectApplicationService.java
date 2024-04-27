@@ -16,7 +16,6 @@ import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQuerySer
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.exception.ResourceAlreadyExistsException;
-import com.test.teamlog.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,11 +37,8 @@ public class ProjectApplicationService {
         final Long projectIdx = input.getProjectIdx();
         final Long applicantIdx = input.getApplicantIdx();
 
-        final Project project = projectQueryService.findById(projectIdx)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
-
-        final Account applicant = accountQueryService.findByIdx(applicantIdx)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
+        final Project project = prepareProject(projectIdx);
+        final Account applicant = prepareAccount(applicantIdx);
 
         // 프로젝트 멤버 여부 확인
         if (projectMemberQueryService.isProjectMember(project, applicant)) {
@@ -62,14 +58,10 @@ public class ProjectApplicationService {
 
     @Transactional
     public ApiResponse accept(ProjectApplicationAcceptInput input) {
-        final ProjectApplication projectApplication
-                = projectApplicationRepository.findById(input.getApplicationIdx()).orElseThrow(() -> new ResourceNotFoundException("ProjectApplication"));
+        final ProjectApplication projectApplication = prepareProjectApplication(input.getApplicationIdx());
 
         final Project project = projectApplication.getProject();
-
-        final Long accountIdx = input.getAccountIdx();
-        final Account account = accountQueryService.findByIdx(accountIdx)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
+        final Account account = prepareAccount(input.getAccountIdx());
 
         final Account applicant = projectApplication.getApplicant();
 
@@ -77,9 +69,10 @@ public class ProjectApplicationService {
         projectMemberQueryService.findByProjectAndUAccount(project, account).orElseThrow(() -> new BadRequestException("프로젝트 멤버가 아닙니다."));
 
         // 요청자가 이미 프로젝트 멤버인지 확인
-        projectMemberQueryService.findByProjectAndUAccount(project, applicant).ifPresent(projectMember -> {
-            throw new BadRequestException("이미 프로젝트 멤버입니다.");
-        });
+        projectMemberQueryService.findByProjectAndUAccount(project, applicant)
+                .ifPresent(projectMember -> {
+                    throw new BadRequestException("이미 프로젝트 멤버입니다.");
+                });
 
         projectMemberCommandService.save(ProjectMember.create(project, account));
         projectApplicationRepository.delete(projectApplication);
@@ -89,13 +82,10 @@ public class ProjectApplicationService {
 
     @Transactional
     public ApiResponse reject(Long projectApplicationIdx, Long accountIdx) {
-        final ProjectApplication projectApplication
-                = projectApplicationRepository.findById(projectApplicationIdx).orElseThrow(() -> new ResourceNotFoundException("ProjectApplication"));
+        final ProjectApplication projectApplication = prepareProjectApplication(projectApplicationIdx);
 
         final Project project = projectApplication.getProject();
-
-        final Account account = accountQueryService.findByIdx(accountIdx)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
+        final Account account = prepareAccount(accountIdx);
 
         projectMemberQueryService.findByProjectAndUAccount(project, account).orElseThrow(() -> new BadRequestException("프로젝트 멤버가 아닙니다."));
         projectApplicationRepository.delete(projectApplication);
@@ -105,10 +95,9 @@ public class ProjectApplicationService {
 
     @Transactional
     public ApiResponse cancel(Long projectApplicationIdx, Long accountIdx) {
-        final ProjectApplication projectApplication
-                = projectApplicationRepository.findById(projectApplicationIdx).orElseThrow(() -> new ResourceNotFoundException("ProjectApplication"));
+        final ProjectApplication projectApplication = prepareProjectApplication(projectApplicationIdx);
 
-        if (projectApplication.getApplicant().getIdx() != accountIdx) throw new BadRequestException("권한이 없습니다.");
+        if (!accountIdx.equals(projectApplication.getApplicant().getIdx())) throw new BadRequestException("권한이 없습니다.");
 
         projectApplicationRepository.delete(projectApplication);
 
@@ -117,19 +106,32 @@ public class ProjectApplicationService {
 
     @Transactional(readOnly = true)
     public List<ProjectApplicationReadApplicantsResult> readAllApplicants(Long projectIdx, Long accountIdx) {
-        final Project project = projectQueryService.findById(projectIdx).orElseThrow(() -> new ResourceNotFoundException("Project"));
-        final Account account = accountQueryService.findByIdx(accountIdx).orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
+        final Project project = prepareProject(projectIdx);
+        final Account account = prepareAccount(accountIdx);
 
-        if (!projectMemberQueryService.isProjectMember(project, account)) throw new BadRequestException("프로젝트 멤버가 아닙니다.");
+        if (!projectMemberQueryService.isProjectMember(project, account))
+            throw new BadRequestException("프로젝트 멤버가 아닙니다.");
 
         final List<ProjectApplication> projectApplicationList = projectApplicationRepository.findAllByProject(project);
         return projectApplicationList.stream().map(ProjectApplicationReadApplicantsResult::from).toList();
     }
 
     public List<ProjectApplicationReadPendingResult> readAllPending(Long accountIdx) {
-        final Account account = accountQueryService.findByIdx(accountIdx).orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
+        final Account account = prepareAccount(accountIdx);
 
         final List<ProjectApplication> projectApplicationList = projectApplicationRepository.findAllByApplicant(account);
         return projectApplicationList.stream().map(ProjectApplicationReadPendingResult::from).toList();
+    }
+
+    private ProjectApplication prepareProjectApplication(Long projectApplicationIdx) {
+        return projectApplicationRepository.findById(projectApplicationIdx).orElseThrow(() -> new BadRequestException("ProjectApplication"));
+    }
+
+    private Project prepareProject(Long projectIdx) {
+        return projectQueryService.findById(projectIdx).orElseThrow(() -> new BadRequestException("Project"));
+    }
+
+    private Account prepareAccount(Long accountIdx) {
+        return accountQueryService.findByIdx(accountIdx).orElseThrow(() -> new BadRequestException("Account"));
     }
 }

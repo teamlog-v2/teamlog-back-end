@@ -3,12 +3,13 @@ package com.test.teamlog.domain.account.service;
 import com.test.teamlog.domain.account.dto.*;
 import com.test.teamlog.domain.account.model.Account;
 import com.test.teamlog.domain.account.repository.AccountRepository;
+import com.test.teamlog.domain.accountfollow.service.query.AccountFollowQueryService;
 import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.file.management.service.FileManagementService;
 import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.domain.token.service.TokenService;
-import com.test.teamlog.domain.accountfollow.service.query.AccountFollowQueryService;
 import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.exception.ResourceAlreadyExistsException;
 import com.test.teamlog.global.exception.ResourceNotFoundException;
 import com.test.teamlog.global.utility.PasswordUtil;
@@ -37,8 +38,7 @@ public class AccountService {
     }
 
     public AccountValidateResult validate(Long accountId) {
-        final Account currentAccount = accountRepository.findById(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
+        final Account currentAccount = prepareAccount(accountId);
 
         return AccountValidateResult.from(currentAccount);
     }
@@ -46,7 +46,7 @@ public class AccountService {
     @Transactional(readOnly = true)
     public AccountReadDetailResult readDetail(String identification, Account currentAccount) {
         Account account = accountRepository.findByIdentification(identification)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 회원입니다. identification: " + identification));
 
         AccountReadDetailResult result = AccountReadDetailResult.from(account);
 
@@ -68,7 +68,7 @@ public class AccountService {
 
         // FIXME: 추후 Exception 바꿀 예정. 프론트와 같이 바꿔야 한다.
         if (account == null || !PasswordUtil.matches(input.getPassword(), account.getPassword())) {
-            throw new ResourceNotFoundException("ACCOUNT");
+            throw new BadRequestException("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
 
         final CreateTokenResult createTokenResult = tokenService.createToken(identification);
@@ -89,9 +89,7 @@ public class AccountService {
     @Transactional
     public ApiResponse updateAccount(AccountUpdateRequest request, MultipartFile image, Account currentAccount) throws IOException {
         // FIXME: LazyInitializationException 이슈로 잠시 추가한 것으로 개선 필요
-        final Account account = accountRepository.findByIdentification(currentAccount.getIdentification())
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
-
+        final Account account = prepareAccount(currentAccount.getIdx());
         final FileInfo profileImage = image != null ? fileManagementService.uploadFile(image) : null;
 
         account.update(request.getName(), request.getIntroduction(), profileImage);
@@ -122,16 +120,15 @@ public class AccountService {
         return new ApiResponse(Boolean.TRUE, "회원 탈퇴 성공");
     }
 
-    public Account readByIdentification(String identification) {
-        return accountRepository.findByIdentification(identification)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
+    private Account prepareAccount(Long accountId) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 회원입니다. id: " + accountId));
     }
 
-    public List<Account> readAllByIdentificationIn(List<String> identificationList) {
-        return accountRepository.findAllByIdentificationIn(identificationList);
-    }
-
-    // identification 중복 체크
+    /**
+     * 아이디 중복 체크
+     * @param identification
+     */
     private void checkIdDuplication(String identification) {
         if (accountRepository.findByIdentification(identification).isPresent()) {
             throw new ResourceAlreadyExistsException("이미 존재하는 회원입니다.");

@@ -74,7 +74,7 @@ public class ProjectApiController {
                                                        @RequestPart(value = "thumbnail") MultipartFile image,
                                                        @Parameter(hidden = true) @AuthenticationPrincipal AccountAdapter currentAccount) {
         try {
-            ApiResponse apiResponse = projectService.updateThumbnail(projectId, image, currentAccount.getAccount());
+            ApiResponse apiResponse = projectService.updateThumbnail(projectId, image);
             return new ResponseEntity<>(apiResponse, HttpStatus.OK);
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

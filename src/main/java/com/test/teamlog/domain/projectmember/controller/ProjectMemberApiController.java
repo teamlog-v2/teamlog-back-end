@@ -43,7 +43,7 @@ public class ProjectMemberApiController {
         if (accountId == null) {
             apiResponse = projectMemberService.leaveProject(projectId, currentAccount.getAccount());
         } else {
-            apiResponse = projectMemberService.expelMember(projectId, accountId, currentAccount.getAccount());
+            apiResponse = projectMemberService.expelMember(projectId, accountId);
         }
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

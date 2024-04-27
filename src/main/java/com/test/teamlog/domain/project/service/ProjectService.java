@@ -42,9 +42,8 @@ public class ProjectService {
     private final ProjectFollowQueryService projectFollowQueryService;
 
     @Transactional
-    public ApiResponse updateThumbnail(Long projectId, MultipartFile image, Account currentAccount) throws IOException {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+    public ApiResponse updateThumbnail(Long projectId, MultipartFile image) throws IOException {
+        Project project = prepareProject(projectId);
 
         final FileInfo fileInfo = fileManagementService.uploadFile(image);
         project.updateThumbnail(fileInfo);
@@ -54,8 +53,7 @@ public class ProjectService {
 
     @Transactional
     public ApiResponse deleteThumbnail(Long projectId, Account currentAccount) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+        Project project = prepareProject(projectId);
 
         if (project.isProjectMaster(currentAccount)) {
             throw new BadRequestException("프로젝트 멤버가 아닙니다.");
@@ -71,10 +69,10 @@ public class ProjectService {
 
         boolean isMyProjectList = false;
         if (currentAccount == null) {
-            account = readByIdentification(identification);
+            account = prepareAccount(identification);
         } else {
             isMyProjectList = currentAccount.getIdentification().equals(identification);
-            account = isMyProjectList ? currentAccount : readByIdentification(identification);
+            account = isMyProjectList ? currentAccount : prepareAccount(identification);
         }
 
         List<ProjectFollower> accountFollowingProjectList = projectFollowQueryService.findAllByAccount(account);
@@ -124,7 +122,7 @@ public class ProjectService {
     // 단일 프로젝트 조회
     public ProjectReadResult readOne(Long id, Account currentAccount) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 프로젝트입니다. id: " + id));
 
         // Private 시 검증
         if (project.getAccessModifier() == AccessModifier.PRIVATE) {
@@ -143,10 +141,10 @@ public class ProjectService {
 
         boolean isMyProjectList = false;
         if (currentAccount == null) {
-            account = readByIdentification(identification);
+            account = prepareAccount(identification);
         } else {
             isMyProjectList = currentAccount.getIdentification().equals(identification);
-            account = isMyProjectList ? currentAccount : readByIdentification(identification);
+            account = isMyProjectList ? currentAccount : prepareAccount(identification);
         }
 
         List<Project> projectList = projectRepository.findProjectByAccount(account);
@@ -194,8 +192,7 @@ public class ProjectService {
      */
     @Transactional
     public ProjectUpdateResult update(Long id, ProjectUpdateInput input, Account currentAccount) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+        Project project = prepareProject(id);
         validateMasterAccount(project, currentAccount);
 
         project.update(input.getName(), input.getIntroduction(), input.getAccessModifier());
@@ -206,11 +203,10 @@ public class ProjectService {
     // 프로젝트 마스터 위임
     @Transactional
     public ApiResponse delegateMaster(Long id, String newMasterIdentification, Account currentAccount) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+        Project project = prepareProject(id);
         validateMasterAccount(project, currentAccount);
 
-        final Account newMaster = readByIdentification(newMasterIdentification); // 존재하는지 검증
+        final Account newMaster = prepareAccount(newMasterIdentification); // 존재하는지 검증
         project.delegateMaster(newMaster);
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 마스터 위임 성공");
@@ -219,8 +215,7 @@ public class ProjectService {
     // 프로젝트 삭제
     @Transactional
     public ApiResponse delete(Long id, Account currentAccount) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+        Project project = prepareProject(id);
         validateMasterAccount(project, currentAccount);
 
         projectRepository.delete(project);
@@ -237,16 +232,17 @@ public class ProjectService {
     // 프로젝트의 해시태그들 조회
     public List<String> readHashTagsInProjectPosts(Long projectId) {
         final List<PostTag> hashTagList = projectRepository.findAllPostTagByProjectId(projectId);
+
         return hashTagList.stream().map(PostTag::getName).collect(Collectors.toList());
     }
 
-    public Project findOne(Long projectId) {
-        return projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+    private Account prepareAccount(String identification) {
+        return accountQueryService.findByIdentification(identification)
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 회원입니다. id: " + identification));
     }
 
-    private Account readByIdentification(String identification) {
-        return accountQueryService.findByIdentification(identification)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
+    private Project prepareProject(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 프로젝트입니다. id: "+ projectId));
     }
 }

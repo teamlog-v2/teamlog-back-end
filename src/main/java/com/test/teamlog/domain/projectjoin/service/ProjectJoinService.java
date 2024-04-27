@@ -5,15 +5,15 @@ import com.test.teamlog.domain.account.service.query.AccountQueryService;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.query.ProjectQueryService;
 import com.test.teamlog.domain.projectjoin.dto.ProjectJoinApplyInput;
-import com.test.teamlog.domain.projectjoin.dto.ProjectJoinForProject;
 import com.test.teamlog.domain.projectjoin.dto.ProjectJoinForAccount;
+import com.test.teamlog.domain.projectjoin.dto.ProjectJoinForProject;
 import com.test.teamlog.domain.projectjoin.dto.ProjectJoinInviteInput;
 import com.test.teamlog.domain.projectjoin.entity.ProjectJoin;
 import com.test.teamlog.domain.projectjoin.repository.ProjectJoinRepository;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
 import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.exception.ResourceAlreadyExistsException;
-import com.test.teamlog.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,16 +47,13 @@ public class ProjectJoinService {
     @Deprecated
     @Transactional
     public ApiResponse inviteAccountForProject(Long projectId, String accountId) {
-        Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
-        Account account = accountQueryService.findByIdentification(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT"));
+        Project project = prepareProject(projectId);
+        Account account = prepareAccount(accountId);
 
         if (projectMemberQueryService.isProjectMember(project, account))
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
 
-        if (isJoinAlreadyExist(project, account))
-            throw new ResourceAlreadyExistsException("해당 프로젝트의 멤버 신청 혹은 초대가 존재합니다.");
+        checkProjectJoinExistence(project, account);
 
         ProjectJoin projectJoin = ProjectJoin.builder()
                 .project(project)
@@ -71,7 +68,7 @@ public class ProjectJoinService {
 
     @Transactional
     public ApiResponse invite(ProjectJoinInviteInput input, Account account) {
-        final Project project = findProjectById(input.getProjectId());
+        final Project project = prepareProject(input.getProjectId());
 
         if (!projectMemberQueryService.isProjectMember(project, account))
             throw new ResourceAlreadyExistsException("프로젝트 멤버 초대 권한이 없습니다.");
@@ -112,14 +109,12 @@ public class ProjectJoinService {
     @Deprecated
     @Transactional
     public ApiResponse applyForProjectV1(Long projectId, Account currentAccount) {
-        Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+        Project project = prepareProject(projectId);
 
         if (projectMemberQueryService.isProjectMember(project, currentAccount))
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
 
-        if (isJoinAlreadyExist(project, currentAccount))
-            throw new ResourceAlreadyExistsException("이미 해당 프로젝트에 멤버 신청 혹은 초대가 존재합니다.");
+        checkProjectJoinExistence(project, currentAccount);
 
         ProjectJoin projectJoin = ProjectJoin.builder()
                 .project(project)
@@ -127,13 +122,14 @@ public class ProjectJoinService {
                 .isAccepted(Boolean.TRUE)
                 .isInvited(Boolean.FALSE)
                 .build();
+
         projectJoinRepository.save(projectJoin);
 
         return new ApiResponse(Boolean.TRUE, "프로젝트 멤버 초대 완료");
     }
 
     public ApiResponse apply(ProjectJoinApplyInput input, Account currentAccount) {
-        final Project project = findProjectById(input.getProjectId());
+        final Project project = prepareProject(input.getProjectId());
 
         if (projectMemberQueryService.isProjectMember(project, currentAccount)) {
             throw new ResourceAlreadyExistsException("이미 해당 프로젝트의 멤버입니다.");
@@ -146,7 +142,7 @@ public class ProjectJoinService {
         }
 
         if (projectJoin.getIsAccepted()) {
-            log.warn("이미 수락되었지만 프로젝트에 존재하지 않습니다. projectId: ({}), accountIdentification: ({})", input.getProjectId(), currentAccount.getIdentification());
+            log.warn("이미 수락되었지만 프로젝트에 존재하지 않습니다. projectId: ({}), identification: ({})", input.getProjectId(), currentAccount.getIdentification());
         }
 
         projectJoin.update(projectJoin.getIsInvited(), true);
@@ -156,8 +152,7 @@ public class ProjectJoinService {
     // 프로젝트 멤버 신청 삭제
     @Transactional
     public ApiResponse deleteProjectJoin(Long projectJoinId) {
-        ProjectJoin projectJoin = projectJoinRepository.findById(projectJoinId)
-                .orElseThrow(() -> new ResourceNotFoundException("ProjectJoin"));
+        ProjectJoin projectJoin = prepareProjectJoin(projectJoinId);
 
         projectJoinRepository.delete(projectJoin);
 
@@ -166,8 +161,7 @@ public class ProjectJoinService {
 
     // 프로젝트 가입 신청자 목록 조회
     public List<ProjectJoinForProject> getProjectApplyListForProject(Long projectId) {
-        Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+        Project project = prepareProject(projectId);
 
         List<ProjectJoin> projectJoinList = projectJoinRepository.findAllByProjectAndIsAcceptedTrueAndIsInvitedFalse(project);
         return projectJoinList.stream().map(ProjectJoinForProject::from).toList();
@@ -175,8 +169,7 @@ public class ProjectJoinService {
 
     // 프로젝트 멤버로 초대한 사용자 목록 조회
     public List<ProjectJoinForProject> getProjectInvitationListForProject(Long projectId) {
-        Project project = projectQueryService.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Project"));
+        Project project = prepareProject(projectId);
 
         List<ProjectJoin> projectJoinList = projectJoinRepository.findAllByProjectAndIsAcceptedFalseAndIsInvitedTrue(project);
         return projectJoinList.stream().map(ProjectJoinForProject::from).toList();
@@ -219,11 +212,21 @@ public class ProjectJoinService {
     }
 
     // 이미 ProjectJoin 있을 경우
-    public Boolean isJoinAlreadyExist(Project project, Account currentAccount) {
-        return projectJoinRepository.findByProjectAndAccount(project, currentAccount).isPresent();
+    public void checkProjectJoinExistence(Project project, Account currentAccount) {
+        if (projectJoinRepository.findByProjectAndAccount(project, currentAccount).isPresent()) {
+            throw new ResourceAlreadyExistsException("이미 해당 프로젝트에 멤버 신청 혹은 초대가 존재합니다.");
+        }
     }
 
-    private Project findProjectById(Long projectId) {
-        return projectQueryService.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project"));
+    private Project prepareProject(Long projectId) {
+        return projectQueryService.findById(projectId).orElseThrow(() -> new BadRequestException("존재하지 않는 프로젝트입니다. id: " + projectId));
+    }
+
+    private Account prepareAccount(String accountId) {
+        return accountQueryService.findByIdentification(accountId).orElseThrow(() -> new BadRequestException("존재하지 않는 회원입니다. id: " + accountId));
+    }
+
+    private ProjectJoin prepareProjectJoin(Long projectJoinId) {
+        return projectJoinRepository.findById(projectJoinId).orElseThrow(() -> new BadRequestException("존재하지 않는 프로젝트 가입 신청입니다. id: " + projectJoinId));
     }
 }

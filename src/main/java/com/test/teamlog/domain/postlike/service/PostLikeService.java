@@ -6,9 +6,8 @@ import com.test.teamlog.domain.post.service.query.PostQueryService;
 import com.test.teamlog.domain.postlike.dto.PostLikerResult;
 import com.test.teamlog.domain.postlike.entity.PostLike;
 import com.test.teamlog.domain.postlike.repository.PostLikeRepository;
-import com.test.teamlog.global.exception.ResourceAlreadyExistsException;
-import com.test.teamlog.global.exception.ResourceNotFoundException;
 import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,10 +34,10 @@ public class PostLikeService {
      */
     @Transactional
     public ApiResponse create(Long postId, Account currentAccount) {
-        Post post = readPostById(postId);
+        Post post = preparePost(postId);
 
         if (postLikeRepository.findByPostAndAccount(post, currentAccount).isPresent()) {
-            throw new ResourceAlreadyExistsException("이미 좋아요를 누른 게시물입니다.");
+            throw new BadRequestException("이미 좋아요를 누른 게시물입니다.");
         }
 
         final PostLike postLike = PostLike.builder()
@@ -59,10 +58,10 @@ public class PostLikeService {
      */
     @Transactional
     public ApiResponse delete(Long postId, Account currentAccount) {
-        final Post post = readPostById(postId);
+        final Post post = preparePost(postId);
 
         PostLike postLike = postLikeRepository.findByPostAndAccount(post, currentAccount)
-                .orElseThrow(() -> new ResourceNotFoundException("PostLiker"));
+                .orElseThrow(() -> new BadRequestException("좋아요를 누르지 않은 게시물입니다."));
 
         postLikeRepository.delete(postLike);
         return new ApiResponse(Boolean.TRUE, "포스트 좋아요 취소 성공");
@@ -75,14 +74,14 @@ public class PostLikeService {
      */
     @Transactional(readOnly = true)
     public List<PostLikerResult> readPostLikerList(Long postId) {
-        Post post = readPostById(postId);
+        Post post = preparePost(postId);
 
         final List<PostLike> postLikeList = postLikeRepository.findAllByPost(post);
         return postLikeList.stream().map(PostLikerResult::from).collect(Collectors.toList());
     }
 
-    private Post readPostById(Long postId) {
+    private Post preparePost(Long postId) {
         return postQueryService.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post"));
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 게시물입니다. postId: " + postId));
     }
 }

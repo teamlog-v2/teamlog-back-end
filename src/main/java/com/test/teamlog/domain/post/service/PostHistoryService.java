@@ -7,7 +7,7 @@ import com.test.teamlog.domain.post.service.query.PostQueryService;
 import com.test.teamlog.domain.postupdatehistory.entity.PostUpdateHistory;
 import com.test.teamlog.domain.postupdatehistory.repository.PostUpdateHistoryRepository;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
-import com.test.teamlog.global.exception.ResourceNotFoundException;
+import com.test.teamlog.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -26,13 +26,17 @@ public class PostHistoryService {
 
     @Transactional
     public List<PostHistoryResponse> readPostUpdateHistory(Long postId, Account currentAccount) {
-        Post post = postQueryService.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post"));
+        Post post = preparePost(postId);
         projectMemberQueryService.validateProjectMember(post.getProject(), currentAccount);
 
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
         List<PostUpdateHistory> historyList = postUpdateHistoryRepository.findAllByPost(post, sort);
 
         return historyList.stream().map(PostHistoryResponse::from).collect(Collectors.toList());
+    }
+
+    private Post preparePost(Long postId) {
+        return postQueryService.findById(postId)
+                .orElseThrow(() -> new BadRequestException("Post" + postId + "가 존재하지 않습니다."));
     }
 }
