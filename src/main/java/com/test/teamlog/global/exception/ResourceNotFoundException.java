@@ -1,37 +1,14 @@
 package com.test.teamlog.global.exception;
 
-import com.test.teamlog.global.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+/**
+ * 리소스가 존재하지 않을 때 발생하는 예외
+ */
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
 public class ResourceNotFoundException extends RuntimeException {
-
-    private ApiResponse apiResponse;
-
-    private String resourceName;
-    private String fieldName;
-    private Object fieldValue;
-
     public ResourceNotFoundException(String message) {
-        super();
-        setApiResponse(message);
-    }
-
-    public ResourceNotFoundException(String resourceName, String fieldName, Object fieldValue) {
-        super();
-        this.resourceName = resourceName;
-        this.fieldName = fieldName;
-        this.fieldValue = fieldValue;
-
-        setApiResponse(String.format("%s가 '%s' 인 %s 를 찾을 수 없습니다.", fieldName, fieldValue, resourceName));
-    }
-
-    public ApiResponse getApiResponse() {
-        return apiResponse;
-    }
-
-    private void setApiResponse(String message) {
-        apiResponse = new ApiResponse(Boolean.FALSE, message);
+        super(message);
     }
 }

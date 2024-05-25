@@ -54,7 +54,7 @@ public class ProjectFollowApiController {
     @Operation(summary = "유저가 팔로우하는 프로젝트 조회")
     @GetMapping("/accounts/{accountId}/project-follow")
     public ResponseEntity<List<ProjectFollowerReadAccountFollowedResponse>> readAllAccountFollowed(@PathVariable("accountId") String accountId) {
-        final List<ProjectFollowerReadAccountFollowedResult> resultList = projectFollowService.readAllByaccountIdentification(accountId);
+        final List<ProjectFollowerReadAccountFollowedResult> resultList = projectFollowService.readAllByAccountIdentification(accountId);
         final List<ProjectFollowerReadAccountFollowedResponse> responseList = resultList.stream().map(ProjectFollowerReadAccountFollowedResponse::of).collect(Collectors.toList());
 
         return new ResponseEntity<>(responseList, HttpStatus.OK);

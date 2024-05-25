@@ -6,8 +6,8 @@ import com.test.teamlog.domain.accountfollow.dto.AccountFollowerReadResult;
 import com.test.teamlog.domain.accountfollow.dto.AccountFollowingReadResult;
 import com.test.teamlog.domain.accountfollow.entity.AccountFollow;
 import com.test.teamlog.domain.accountfollow.repository.AccountFollowRepository;
-import com.test.teamlog.global.exception.ResourceNotFoundException;
 import com.test.teamlog.global.dto.ApiResponse;
+import com.test.teamlog.global.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +25,7 @@ public class AccountFollowService {
 
     // 팔로워 리스트 조회
     public List<AccountFollowerReadResult> readAllFollower(String accountId, Account currentAccount) {
-        final Account account = readByIdentification(accountId);
+        final Account account = prepareAccount(accountId);
 
         List<AccountFollow> followingList = accountFollowRepository.findAllByFromAccount(currentAccount); // 유저가 팔로우하는 사람들 (내가 from)
         List<AccountFollow> followerList = accountFollowRepository.findAllByToAccount(account); // 유저를 팔로우하는 사람들 (내가 to)
@@ -57,7 +57,7 @@ public class AccountFollowService {
 
     // 팔로잉 리스트 조회
     public List<AccountFollowingReadResult> readAllFollowing(String accountId, Account currentAccount) {
-        Account account = readByIdentification(accountId);
+        Account account = prepareAccount(accountId);
 
         List<AccountFollow> currentAccountFollowingList = accountFollowRepository.findAllByFromAccount(currentAccount); // 로그인한 사람의 팔로잉 목록
         List<AccountFollow> followingList = account.getFollowings(); // 특정 유저의 팔로잉 목록
@@ -92,7 +92,7 @@ public class AccountFollowService {
     // 팔로우
     @Transactional
     public ApiResponse follow(Account currentAccount, String targetAccountId) {
-        Account targetAccount = readByIdentification(targetAccountId);
+        Account targetAccount = prepareAccount(targetAccountId);
 
         accountFollowRepository.save(AccountFollow.create(currentAccount, targetAccount));
         return new ApiResponse(Boolean.TRUE, "팔로우 성공");
@@ -101,11 +101,11 @@ public class AccountFollowService {
     // 언팔로우
     @Transactional
     public ApiResponse unfollow(String targetAccountId, Account currentAccount) {
-        Account targetAccount = readByIdentification(targetAccountId);
-        AccountFollow accountFollow = accountFollowRepository.findByFromAccountAndToAccount(currentAccount, targetAccount)
-                .orElseThrow(() -> new ResourceNotFoundException("AccountFollow", "FromAccountId", currentAccount.getIdentification()));
+        Account targetAccount = prepareAccount(targetAccountId);
+        AccountFollow accountFollow = prepareAccountFollow(currentAccount, targetAccount);
 
         accountFollowRepository.delete(accountFollow);
+
         return new ApiResponse(Boolean.TRUE, "언팔로우 성공");
     }
 
@@ -113,8 +113,13 @@ public class AccountFollowService {
         return accountFollowRepository.findByFromAccountAndToAccount(fromAccount, targetAccount).isPresent();
     }
 
-    private Account readByIdentification(String identification) {
+    private AccountFollow prepareAccountFollow(Account fromAccount, Account toAccount) {
+        return accountFollowRepository.findByFromAccountAndToAccount(fromAccount, toAccount)
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 팔로우입니다. fromAccount: " + fromAccount.getIdentification() + ", toAccount: " + toAccount.getIdentification()));
+    }
+
+    private Account prepareAccount(String identification) {
         return accountQueryService.findByIdentification(identification)
-                .orElseThrow(() -> new ResourceNotFoundException("ACCOUNT", "identification", identification));
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 계정입니다. identification: " + identification));
     }
 }

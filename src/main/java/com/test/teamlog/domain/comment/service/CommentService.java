@@ -13,8 +13,8 @@ import com.test.teamlog.domain.post.entity.Post;
 import com.test.teamlog.domain.post.service.query.PostQueryService;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.dto.PagedResponse;
+import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.exception.ResourceForbiddenException;
-import com.test.teamlog.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,8 +43,7 @@ public class CommentService {
 
     // 게시물의 부모 댓글 조회
     public PagedResponse<CommentInfoResponse> readCommentListByPostId(long postId, Pageable pageable, Account currentAccount) {
-        Post post = postQueryService.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+        Post post = preparePost(postId);
 
         Page<Comment> commentList = commentRepository.findParentCommentListByPost(post, pageable);
 
@@ -55,8 +54,7 @@ public class CommentService {
 
     // 대댓글 조회
     public PagedResponse<CommentInfoResponse> readChildCommentList(Long parentCommentId, Pageable pageable, Account currentAccount) {
-        Comment comment = commentRepository.findById(parentCommentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", parentCommentId));
+        Comment comment = prepareComment(parentCommentId);
 
         Page<Comment> childCommentList = commentRepository.findAllByParentComment(comment, pageable);
 
@@ -87,13 +85,8 @@ public class CommentService {
     // 댓글 생성
     @Transactional
     public CommentCreateResult create(CommentCreateInput input, Account currentAccount) {
-        Post post = postQueryService.findById(input.getPostId())
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", input.getPostId()));
-
-        Comment parentComment = input.getParentCommentId() != null ?
-                commentRepository.findById(input.getParentCommentId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", input.getParentCommentId())) :
-                null;
+        Post post = preparePost(input.getPostId());
+        Comment parentComment = input.getParentCommentId() != null ? prepareComment(input.getParentCommentId()) : null;
 
         Comment comment = input.toComment(currentAccount, post, parentComment);
         comment.addCommentMentions(makeCommentMentionList(input.getCommentMentions(), comment));
@@ -126,7 +119,7 @@ public class CommentService {
         }
 
         if (!invalidaccountIdentificationList.isEmpty()) {
-            throw new ResourceNotFoundException("ACCOUNT", "identification", invalidaccountIdentificationList.toString());
+            throw new BadRequestException("존재하지 않는 사용자가 포함되어 있습니다.. identificationList: " + invalidaccountIdentificationList);
         }
 
         return commentMentions;
@@ -135,8 +128,7 @@ public class CommentService {
     // 댓글 수정
     @Transactional
     public ApiResponse update(Long id, CommentUpdateInput input, Account account) {
-        Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
+        Comment comment = prepareComment(id);
         if (!comment.getWriter().getIdentification().equals(account.getIdentification())) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 댓글 작성자 아님 )");
         }
@@ -167,13 +159,23 @@ public class CommentService {
     // 댓글 삭제
     @Transactional
     public ApiResponse deleteComment(Long id, Account account) {
-        Comment comment = commentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment", "id", id));
+        Comment comment = prepareComment(id);
+
         if (!comment.getWriter().getIdentification().equals(account.getIdentification())) {
             throw new ResourceForbiddenException("권한이 없습니다.\n( 댓글 작성자 아님 )");
         }
 
         commentRepository.delete(comment);
         return new ApiResponse(Boolean.TRUE, "댓글 삭제 성공");
+    }
+
+    private Post preparePost(Long postId) {
+        return postQueryService.findById(postId)
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 Post입니다. id: " + postId));
+    }
+
+    private Comment prepareComment(Long commentId) {
+        return commentRepository.findById(commentId)
+                .orElseThrow(() -> new BadRequestException("존재하지 않는 Comment입니다. id: " + commentId));
     }
 }

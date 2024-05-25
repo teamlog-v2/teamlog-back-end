@@ -2,7 +2,7 @@ package com.test.teamlog.domain.token.service;
 
 import com.test.teamlog.domain.token.dto.CreateTokenResult;
 import com.test.teamlog.domain.token.dto.ReIssueResult;
-import com.test.teamlog.global.exception.ResourceNotFoundException;
+import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ public class TokenService {
     public ReIssueResult reissue(String token) {
         try {
             if (token == null || jwtTokenProvider.isTokenExpired(token)) {
-                throw new ResourceNotFoundException("유효하지 않은 토큰입니다.");
+                throw new BadRequestException("유효하지 않은 토큰입니다.");
             }
 
             final String accountId = jwtTokenProvider.getAccountId(token);
@@ -35,7 +35,7 @@ public class TokenService {
 
             if (!token.equals(savedRefreshToken)) {
                 jwtTokenProvider.invalidateToken(token);
-                throw new ResourceNotFoundException("토큰이 유효하지 않습니다");
+                throw new BadRequestException("토큰이 유효하지 않습니다");
             }
 
             final String accessToken = createAccessToken(accountId);

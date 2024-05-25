@@ -1,6 +1,8 @@
 package com.test.teamlog.domain.post.service;
 
 import com.test.teamlog.domain.account.model.Account;
+import com.test.teamlog.domain.accountfollow.entity.AccountFollow;
+import com.test.teamlog.domain.accountfollow.service.query.AccountFollowQueryService;
 import com.test.teamlog.domain.file.info.entity.FileInfo;
 import com.test.teamlog.domain.file.management.service.FileManagementService;
 import com.test.teamlog.domain.post.dto.PostCreateInput;
@@ -16,11 +18,10 @@ import com.test.teamlog.domain.postupdatehistory.entity.PostUpdateHistory;
 import com.test.teamlog.domain.project.entity.Project;
 import com.test.teamlog.domain.project.service.query.ProjectQueryService;
 import com.test.teamlog.domain.projectmember.service.query.ProjectMemberQueryService;
-import com.test.teamlog.domain.accountfollow.entity.AccountFollow;
-import com.test.teamlog.domain.accountfollow.service.query.AccountFollowQueryService;
 import com.test.teamlog.global.dto.ApiResponse;
 import com.test.teamlog.global.dto.PagedResponse;
 import com.test.teamlog.global.entity.AccessModifier;
+import com.test.teamlog.global.exception.BadRequestException;
 import com.test.teamlog.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
@@ -33,7 +34,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -74,13 +74,10 @@ public class PostService {
 
     // 단일 포스트 조회
     public PostResult readOne(Long id, Account currentAccount) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+        Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 포스트입니다. id: " + id));
 
         // 비공개일 경우 프로젝트 멤버 권한 체크
-        if (post.getAccessModifier() == AccessModifier.PRIVATE) {
-            projectMemberQueryService.isProjectMember(post.getProject(), currentAccount);
-        }
+        if (post.getAccessModifier() == AccessModifier.PRIVATE) checkProjectMember(post.getProject(), currentAccount);
 
         return convertToPostResult(post, currentAccount);
     }
@@ -101,13 +98,13 @@ public class PostService {
                                             Account currentAccount) {
         input.convertPagingInfo();
 
-        Project project = findProjectById(projectId);
+        Project project = prepareProject(projectId);
         input.setProjectId(projectId);
 
-        boolean isAccountMemberOfProject = projectMemberQueryService.isProjectMember(project, currentAccount);
         Pageable pageable = PageRequest.of(0, input.getSize(), input.getSort(), "id");
 
-        input.setAccessModifier(!isAccountMemberOfProject ? AccessModifier.PUBLIC : null);
+        input.setAccessModifier(!projectMemberQueryService.isProjectMember(project, currentAccount) ? AccessModifier.PUBLIC : null);
+
         final Page<Post> page = postRepository.search(input, pageable);
         final List<Post> postList = page.getContent();
 
@@ -125,21 +122,16 @@ public class PostService {
 
     // 위치정보가 있는 프로젝트의 포스트들 조회
     public List<PostResult> readAllWithLocation(Long projectId, Account currentAccount) {
-        Project project = findProjectById(projectId);
-        Boolean isAccountMemberOfProject = projectMemberQueryService.isProjectMember(project, currentAccount);
+        Project project = prepareProject(projectId);
 
-        List<Post> posts = null;
-        if (isAccountMemberOfProject)
+        List<Post> posts;
+        if (projectMemberQueryService.isProjectMember(project, currentAccount)) {
             posts = postRepository.findAllByProjectAndLocationIsNotNull(project);
-        else
+        } else {
             posts = postRepository.findAllByProjectAndAccessModifierAndLocationIsNotNull(project, AccessModifier.PUBLIC);
-
-        List<PostResult> resultList = new ArrayList<>();
-        for (Post post : posts) {
-            resultList.add(convertToPostResult(post, currentAccount));
         }
 
-        return resultList;
+        return posts.stream().map(post -> convertToPostResult(post, currentAccount)).collect(Collectors.toList());
     }
 
     // 포스트 생성
@@ -148,10 +140,12 @@ public class PostService {
                        MultipartFile[] media,
                        MultipartFile[] files,
                        Account currentAccount) throws IOException {
-        Project project = findProjectById(input.getProjectId());
-        projectMemberQueryService.isProjectMember(project, currentAccount);
+        Project project = prepareProject(input.getProjectId());
+
+        checkProjectMember(project, currentAccount);
 
         input.setLocation(makeLocation(input.getLatitude(), input.getLongitude()));
+
         Post post = input.toPost(project, currentAccount);
 
         if (!CollectionUtils.isEmpty(input.getHashtags())) {
@@ -202,9 +196,8 @@ public class PostService {
                        PostUpdateInput input,
                        MultipartFile[] media,
                        MultipartFile[] files, Account currentAccount) throws IOException {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-        projectMemberQueryService.isProjectMember(post.getProject(), currentAccount);
+        Post post = preparePost(id);
+        checkProjectMember(post.getProject(), currentAccount);
 
         post.update(input.getContents(), input.getAccessModifier(), input.getCommentModifier(), makeLocation(input.getLatitude(), input.getLongitude()), input.getAddress());
 
@@ -261,9 +254,9 @@ public class PostService {
     // 포스트 삭제
     @Transactional
     public ApiResponse delete(Long id, Account currentAccount) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
-        projectMemberQueryService.isProjectMember(post.getProject(), currentAccount);
+        Post post = preparePost(id);
+
+        checkProjectMember(post.getProject(), currentAccount);
 
         postRepository.delete(post);
         return new ApiResponse(Boolean.TRUE, "포스트 삭제 성공");
@@ -308,14 +301,17 @@ public class PostService {
         return result;
     }
 
-    private String makeFileDownloadUri(PostMedia postMedia, String path) {
-        return ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path(path)
-                .path(postMedia.getFileInfo().getStoredFileName())
-                .toUriString();
+    private void checkProjectMember(Project project, Account account) {
+        if (!projectMemberQueryService.isProjectMember(project, account)) {
+            throw new BadRequestException("권한이 없습니다.\n( 프로젝트 멤버가 아님 )");
+        }
     }
 
-    private Project findProjectById(Long projectId) {
-        return projectQueryService.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project", "ID", projectId));
+    private Project prepareProject(Long projectId) {
+        return projectQueryService.findById(projectId).orElseThrow(() -> new BadRequestException("존재하지 않는 프로젝트입니다. id: " + projectId));
+    }
+
+    private Post preparePost(Long postId) {
+        return postRepository.findById(postId).orElseThrow(() -> new BadRequestException("존재하지 않는 포스트입니다. id: " + postId));
     }
 }
