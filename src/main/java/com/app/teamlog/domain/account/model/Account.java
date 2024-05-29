@@ -39,7 +39,7 @@ public class Account {
     private String introduction;
 
     @JoinColumn(name = "profile_image_idx")
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private FileInfo profileImage;
 
     @Builder.Default
