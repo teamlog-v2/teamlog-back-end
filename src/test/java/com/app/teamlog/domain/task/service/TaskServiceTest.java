@@ -9,6 +9,7 @@ import com.app.teamlog.domain.task.dto.*;
 import com.app.teamlog.domain.task.entity.Task;
 import com.app.teamlog.domain.task.entity.TaskStatus;
 import com.app.teamlog.domain.task.repository.TaskRepository;
+import com.app.teamlog.global.exception.BadRequestException;
 import com.app.teamlog.global.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -152,7 +153,7 @@ class TaskServiceTest {
 
             // when
             // then
-            assertThrows(ResourceNotFoundException.class, () -> sut.create(input, account));
+            assertThrows(BadRequestException.class, () -> sut.create(input, account));
         }
 
         @Test
@@ -249,7 +250,7 @@ class TaskServiceTest {
 
             // when
             // then
-            assertThrows(ResourceNotFoundException.class, () -> sut.update(input, account));
+            assertThrows(BadRequestException.class, () -> sut.update(input, account));
         }
 
         @Test
@@ -430,7 +431,7 @@ class TaskServiceTest {
 
             // when
             // then
-            assertThrows(ResourceNotFoundException.class, () -> sut.delete(taskId, account));
+            assertThrows(BadRequestException.class, () -> sut.delete(taskId, account));
         }
     }
 }
