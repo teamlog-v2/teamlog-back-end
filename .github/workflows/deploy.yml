@@ -53,7 +53,7 @@ jobs:
     # 배포 **
     deploy:
         needs: build
-        if: github.ref == 'refs/heads/main'
+#        if: github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
 
         # 위의 빌드작업한 JAR 파일 = 아티팩트를 다운로드
@@ -71,8 +71,8 @@ jobs:
             ## NLP 적용하면 IP -> 도메인으로 수정 + EC2 늘리면 run 추가
             - name: Deploy to EC2
               run: |
-                  echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+                  echo "${{ secrets.ORACLE_SSH_KEY }}" > private_key.pem
                   chmod 600 private_key.pem
-                  scp -i private_key.pem -o StrictHostKeyChecking=no build/libs/teamlog-v2.jar ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/teamlog-v2.jar
-                  ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "pgrep java | xargs kill -9; nohup java -jar /home/${{ secrets.EC2_USERNAME }}/teamlog-v2.jar --spring.config.location=classpath:/application.yaml,/home/${{ secrets.EC2_USERNAME }}/${{ secrets.OAUTH_SECRET }} —Dspring.profiles.active=production > app.log 2>&1 &"
+                  scp -i private_key.pem -o StrictHostKeyChecking=no build/libs/teamlog-v2.jar ${{ secrets.ORACLE_USERNAME }}@${{ secrets.ORACLE_HOST }}:/home/${{ secrets.ORACLE_USERNAME }}/teamlog-v2.jar
+                  ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.ORACLE_USERNAME }}@${{ secrets.ORACLE_HOST }} "pgrep java | xargs kill -9; nohup java -jar /home/${{ secrets.ORACLE_USERNAME }}/teamlog-v2.jar --spring.config.location=classpath:/application.yaml,/home/${{ secrets.ORACLE_USERNAME }}/${{ secrets.OAUTH_SECRET }} —Dspring.profiles.active=production > app.log 2>&1 &"
                   rm -f private_key.pem
