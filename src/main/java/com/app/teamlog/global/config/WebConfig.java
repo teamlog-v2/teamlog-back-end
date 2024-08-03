@@ -10,14 +10,13 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+    private static final long MAX_AGE_SECS = 1800;
 
     @Override
     public void addCorsMappings(final CorsRegistry registry) {
-        final long MAX_AGE_SECS = 1800;
-
         registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedOriginPatterns("*")
+                .allowedMethods("*")
                 .allowedHeaders("*")
                 .maxAge(MAX_AGE_SECS);
     }

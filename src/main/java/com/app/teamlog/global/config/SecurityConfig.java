@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -42,6 +43,7 @@ public class SecurityConfig implements WebMvcConfigurer {
                             .requestMatchers(HttpMethod.GET, "/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/downloadFile/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/files/download/**").permitAll()
+                            .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                             .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
                             .anyRequest().authenticated();
                 })
